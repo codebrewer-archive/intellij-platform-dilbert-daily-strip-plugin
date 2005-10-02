@@ -1,0 +1,21 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin url="http://www.codebrewer.org/idea/dilbert/" version="2">
+  <name>Dilbert Daily Strip</name>
+  <id>Dilbert</id>
+  <description>Displays the cartoon strip of the day from the dilbert.com website.</description>
+  <version>##PLUGIN_VERSION##</version>
+  <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
+  <change-notes>
+    <![CDATA[Initial release.]]>
+  </change-notes>
+  <idea-version since-build="##IDEA_VERSION##" />
+  <extensions xmlns="com.intellij">
+    <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
+  </extensions>
+  <application-components>
+    <component>
+      <implementation-class>org.codebrewer.idea.dilbert.DilbertDailyStripPluginImpl</implementation-class>
+      <interface-class>org.codebrewer.idea.dilbert.DilbertDailyStripPlugin</interface-class>
+    </component>
+  </application-components><helpset file="DilbertDailyStripHelp.jar" path="/dilbert.hs" />
+</idea-plugin>
