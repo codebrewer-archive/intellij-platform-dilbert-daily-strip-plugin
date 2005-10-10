@@ -20,6 +20,7 @@ import org.codebrewer.idea.dilbert.util.ResourceBundleManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.*;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -40,11 +41,6 @@ import javax.swing.event.ChangeListener;
  */
 public final class SettingsPanel extends JPanel
 {
-  /**
-   * Holds the current state of the plugin's settings.
-   */
-  private final ApplicationSettings settings;
-
   /**
    * Used to acknowledge the plugin's disclaimer.
    */
@@ -81,7 +77,6 @@ public final class SettingsPanel extends JPanel
       throw new IllegalArgumentException("ApplicationSettings cannot be null");
     }
 
-    this.settings = settings;
     dependentControls = new ArrayList();
     build();
   }
@@ -94,10 +89,10 @@ public final class SettingsPanel extends JPanel
    */
   public ApplicationSettings getCurrentSettings()
   {
-    final ApplicationSettings currentSettings = new ApplicationSettings();
-    currentSettings.setDisclaimerAcknowledged(disclaimerCheckBox.isSelected());
-    currentSettings.setLoadStripOnStartup(loadStripOnStartupCheckBox.isSelected());
-    currentSettings.setRefreshAllOpenProjects(refreshAllOpenProjectsCheckBox.isSelected());
+    final ApplicationSettings currentSettings =
+        new ApplicationSettings(disclaimerCheckBox.isSelected(),
+            loadStripOnStartupCheckBox.isSelected(),
+            refreshAllOpenProjectsCheckBox.isSelected());
 
     return currentSettings;
   }
@@ -134,13 +129,8 @@ public final class SettingsPanel extends JPanel
     final boolean loadStripOnStartup = settings.isLoadStripOnStartup();
     final boolean refreshAllOpenProjects = settings.isRefreshAllOpenProjects();
 
-    this.settings.setDisclaimerAcknowledged(disclaimerAcknowledged);
     disclaimerCheckBox.setSelected(disclaimerAcknowledged);
-
-    this.settings.setLoadStripOnStartup(loadStripOnStartup);
     loadStripOnStartupCheckBox.setSelected(loadStripOnStartup);
-
-    this.settings.setRefreshAllOpenProjects(refreshAllOpenProjects);
     refreshAllOpenProjectsCheckBox.setSelected(refreshAllOpenProjects);
 
     setDependentsEnabled(disclaimerAcknowledged);
@@ -181,7 +171,7 @@ public final class SettingsPanel extends JPanel
   private void setDependentsEnabled(final boolean state)
   {
     for (int i = 0; i < dependentControls.size(); i++) {
-      ((JCheckBox) dependentControls.get(i)).setEnabled(state);
+      ((Component) dependentControls.get(i)).setEnabled(state);
     }
   }
 }
