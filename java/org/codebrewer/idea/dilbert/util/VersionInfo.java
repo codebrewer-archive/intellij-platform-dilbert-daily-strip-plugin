@@ -44,6 +44,8 @@ import java.util.Properties;
  */
 public final class VersionInfo
 {
+  private static final int VERSION_STRING_MAX_LENGTH = 16;
+
   private static final String BUILD_DATE_KEY = "build.date";
   private static final String BUILD_NUMBER_KEY = "build.number";
   private static final String BUILD_VERSION_MAJOR_KEY = "build.version.major";
@@ -136,26 +138,26 @@ public final class VersionInfo
   public static String getVersionString()
   {
     final char dot = '.';
-    final StringBuffer sb = new StringBuffer()
+    final String s = new StringBuffer(VERSION_STRING_MAX_LENGTH)
         .append(getVersionMajor())
         .append(dot)
         .append(getVersionMinor())
         .append(dot)
         .append(getVersionRevision())
         .append(dot)
-        .append(getBuildNumber());
-    return sb.toString();
+        .append(getBuildNumber()).toString();
+    return s;
   }
 
   private static void loadBuildInfo()
   {
-    final String defaultValue = "";
-    final Integer missingValue = new Integer(0);
     final InputStream is = VersionInfo.class.getResourceAsStream(BUILD_PROPERTIES_FILE);
 
     if (is != null) {
       try {
         BUILD_PROPERTIES.load(is);
+        final String defaultValue = "";
+        final Integer missingValue = new Integer(0);
 
         // Iterate over the 4 integers that comprise the version number.
         //

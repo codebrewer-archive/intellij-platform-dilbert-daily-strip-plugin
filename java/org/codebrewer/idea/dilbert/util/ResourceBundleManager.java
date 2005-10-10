@@ -31,6 +31,8 @@ import java.util.ResourceBundle;
  */
 public final class ResourceBundleManager
 {
+  private static final int RESOURCE_BUNDLE_NAME_MAX_LENGTH = 128;
+
   /**
    * Logs to IDEA's logfile.
    */
@@ -91,7 +93,7 @@ public final class ResourceBundleManager
       throw new IllegalArgumentException("Class object cannot be null");
     }
 
-    final String bundleName = new StringBuffer()
+    final String bundleName = new StringBuffer(RESOURCE_BUNDLE_NAME_MAX_LENGTH)
         .append(clazz.getName())
         .append("Resources")
         .toString();

@@ -69,6 +69,6 @@ final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
 
   public String toString()
   {
-    return getClass().getName() + "[isOpenSettings=" + isOpenSettings + "]";
+    return getClass().getName() + "[isOpenSettings=" + isOpenSettings + ']';
   }
 }

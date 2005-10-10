@@ -99,7 +99,7 @@ public final class DilbertDailyStrip
     return lastModified;
   }
 
-  /** @noinspection MethodWithMultipleReturnPoints*/
+  /* @noinspection MethodWithMultipleReturnPoints */
   public boolean equals(final Object o)
   {
     if (this == o) {
@@ -127,8 +127,7 @@ public final class DilbertDailyStrip
 
   public int hashCode()
   {
-    int result;
-    result = image != null ? image.hashCode() : 0;
+    int result = image != null ? image.hashCode() : 0;
     result = 29 * result + (uri != null ? uri.hashCode() : 0);
     result = 29 * result + (int) (lastModified ^ lastModified >>> 32);
     return result;

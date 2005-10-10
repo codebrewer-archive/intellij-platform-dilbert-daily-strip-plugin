@@ -22,6 +22,7 @@ import com.intellij.openapi.diagnostic.SubmittedReportInfo;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
@@ -69,6 +70,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   /**
    * Constant that can be used when an error report submission fails.
+   * @noinspection NonFinalStaticVariableUsedInClassInitialization
    */
   private static final SubmittedReportInfo FAILED_SUBMISSION_INFO =
       new SubmittedReportInfo(null,
@@ -77,6 +79,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   /**
    * Constant that can be used when an error report submission succeeds.
+   * @noinspection NonFinalStaticVariableUsedInClassInitialization
    */
   private static final SubmittedReportInfo SUCCEEDED_SUBMISSION_INFO =
       new SubmittedReportInfo(null,
@@ -87,6 +90,12 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
    * The email address of the user submitting the error report.
    */
   private static String userEmailAddress;
+
+  /**
+   * A guess at the upper bound for the length of this class's
+   * {@link #toString()} method.
+   */
+  private static final int TO_STRING_SIZE_ESTIMATE = 128;
 
   /**
    * Gets the email address, if any, entered by the user when dismissing the
@@ -104,10 +113,10 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
     return userEmailAddress;
   }
 
-  private static synchronized void setUserEmailAddress(final String userEmailAddress)
+  private static synchronized void setUserEmailAddress(final String newUserEmailAddress)
   {
-    assert userEmailAddress.matches(EMAIL_ADDRESS_PATTERN);
-    DilbertErrorReportSubmitter.userEmailAddress = userEmailAddress;
+    assert newUserEmailAddress.matches(EMAIL_ADDRESS_PATTERN);
+    DilbertErrorReportSubmitter.userEmailAddress = newUserEmailAddress;
   }
 
   public String getReportActionText()
@@ -118,12 +127,12 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
   public SubmittedReportInfo submit(final IdeaLoggingEvent[] events,
                                     final Component parentComponent)
   {
-    String userEmailAddress = getUserEmailAddress();
-    userEmailAddress = Messages.showInputDialog(parentComponent,
+    String newUserEmailAddress = getUserEmailAddress();
+    newUserEmailAddress = Messages.showInputDialog(parentComponent,
         ResourceBundleManager.getLocalizedString(DilbertErrorReportSubmitter.class, "error.submission_dialog.message"),
         ResourceBundleManager.getLocalizedString(DilbertErrorReportSubmitter.class, "error.submission_dialog.title"),
         null,
-        userEmailAddress,
+        newUserEmailAddress,
         new InputValidator()
         {
           // a reasonable check for a valid email address
@@ -141,33 +150,33 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
           // input is OK if it's zero-length or an email address
           public boolean checkInput(final String inputString)
           {
-            return inputString.equals("") || isEmailAddress(inputString);
+            return "".equals(inputString) || isEmailAddress(inputString);
           }
         });
 
     // store whatever was entered so that the same value can be used when the
     // dialog is next shown
     //
-    setUserEmailAddress(userEmailAddress);
+    setUserEmailAddress(newUserEmailAddress);
 
     // this method's return value, possibly set non-null below
     //
     SubmittedReportInfo info = null;
 
-    if (userEmailAddress != null) {
+    if (newUserEmailAddress != null) {
       // User didn't cancel the dialog (but the email address could be "",
       // indicating that the user doesn't wish to submit an email address)
       //
-      LOGGER.info("Submitting plug-in error report from <" + userEmailAddress + ">");
+      LOGGER.info("Submitting plug-in error report from <" + newUserEmailAddress + '>');
 
-      final HttpClient client = new HttpClient();
       final PostMethod method = new PostMethod(ERROR_SUBMISSION_URI);
-      method.addParameter("sender", userEmailAddress);
+      method.addParameter("sender", newUserEmailAddress);
       final IdeaLoggingEvent event = events[0];
       method.addParameter("message", event.getMessage());
       method.addParameter("error", event.getThrowableText());
 
       try {
+        final HttpClient client = new HttpClient();
         client.executeMethod(method);
         method.releaseConnection();
         final int statusCode = method.getStatusCode();
@@ -195,21 +204,29 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
             final Object[] messageArgs = new Object[]{
                 HttpStatus.getStatusText(statusCode),
                 new Integer(statusCode) };
-            final StringBuffer messageTemplate = new StringBuffer(
+            final String messageTemplate = new StringBuffer(
                 ResourceBundleManager.getLocalizedString(
                     DilbertErrorReportSubmitter.class, "error.error_dialog.message.1"))
                 .append("\n\n")
                 .append(ResourceBundleManager.getLocalizedString(
-                    DilbertErrorReportSubmitter.class, "error.error_dialog.message.2"));
+                    DilbertErrorReportSubmitter.class, "error.error_dialog.message.2")).toString();
             Messages.showErrorDialog(parentComponent,
-                MessageFormat.format(messageTemplate.toString(), messageArgs),
+                MessageFormat.format(messageTemplate, messageArgs),
                 ResourceBundleManager.getLocalizedString(
                     DilbertErrorReportSubmitter.class, "error.error_dialog.title"));
             info = FAILED_SUBMISSION_INFO;
         }
       }
+      catch (HttpException he){
+        LOGGER.debug("HttpException submitting error report: " + he.getMessage());
+
+        Messages.showErrorDialog(parentComponent,
+            ResourceBundleManager.getLocalizedString(DilbertErrorReportSubmitter.class, "error.error_dialog.message.1"),
+            ResourceBundleManager.getLocalizedString(DilbertErrorReportSubmitter.class, "error.error_dialog.title"));
+        info = FAILED_SUBMISSION_INFO;
+      }
       catch (IOException e) {
-        LOGGER.error(e);
+        LOGGER.debug("IOException submitting error report: " + e.getMessage());
 
         Messages.showErrorDialog(parentComponent,
             ResourceBundleManager.getLocalizedString(DilbertErrorReportSubmitter.class, "error.error_dialog.message.1"),
@@ -226,7 +243,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   public String toString()
   {
-    return new StringBuffer()
+    return new StringBuffer(TO_STRING_SIZE_ESTIMATE)
         .append(DilbertErrorReportSubmitter.class.getName())
         .append("[email=<")
         .append(getUserEmailAddress())
