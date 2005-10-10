@@ -15,6 +15,7 @@
  */
 package org.codebrewer.idea.dilbert;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
@@ -22,10 +23,14 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.util.net.HttpConfigurable;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
 import org.codebrewer.idea.dilbert.ui.DailyStripPanel;
@@ -99,6 +104,12 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
    * The time at the Unix epoch.
    */
   private static final int EPOCH = 0;
+
+  /**
+   * The time at the Unix epoch, in a format suitable for use in an HTTP
+   * If-Modified-Since header.
+   */
+  private static final String EPOCH_STRING = "Thu, 01 Jan 1970 00:00:00 GMT";
 
   /**
    * The latest daily strip fetched from www.dilbert.com.
@@ -183,11 +194,6 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   public void fetchDailyStrip(final DailyStripPresenter presenter, final long ifModifiedSince)
       throws IOException
   {
-    DilbertDailyStrip strip = null;
-    final Icon icon;
-    final HttpClient client = new HttpClient();
-    final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
-
     // Use JavaMail's MailDateFormat class to format a date suitable for use in
     // an HTTP If-Modified-Since header - the format isn't quite right at the
     // end (because it includes an offset from GHT in parentheses), but that
@@ -197,9 +203,38 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     mdf.getCalendar().setTimeZone(TimeZone.getTimeZone("GMT"));
     final String formattedIfModifiedSince = mdf.format(new Date(ifModifiedSince));
     LOGGER.info(formattedIfModifiedSince);
+    final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
     homepageURLMethod.addRequestHeader(new Header(HTTP_HEADER_IF_MODIFIED_SINCE, formattedIfModifiedSince));
+    DilbertDailyStrip strip = null;
 
     try {
+      final HttpClient client = new HttpClient();
+      final HttpConfigurable httpConfigurable =
+          (HttpConfigurable) ApplicationManager.getApplication().getComponent("HttpConfigurable");
+
+      // Use IDEA's HTTP proxy settings, if present (this isn't part of the
+      // OpenAPI so may break)
+      //
+      if (httpConfigurable != null && httpConfigurable.USE_HTTP_PROXY) {
+        final HostConfiguration hostConfiguration = client.getHostConfiguration();
+        hostConfiguration.setProxy(httpConfigurable.PROXY_HOST, httpConfigurable.PROXY_PORT);
+        client.setHostConfiguration(hostConfiguration);
+
+        if (httpConfigurable.PROXY_AUTHENTICATION) {
+          // Use IDEA's support for showing the proxy credentials dialog (if
+          // necessary), but note that <http://www.jetbrains.net/jira/browse/IDEABKL-1509>
+          // may bite
+          //
+          httpConfigurable.prepareURL(DilbertDailyStrip.DILBERT_DOT_COM_URL);
+          homepageURLMethod.setDoAuthentication(true);
+          client.getState().setProxyCredentials(AuthScope.ANY,
+              new UsernamePasswordCredentials(httpConfigurable.PROXY_LOGIN, httpConfigurable.getPlainProxyPassword()));
+        }
+        else {
+          homepageURLMethod.setDoAuthentication(false);
+        }
+      }
+
       int statusCode = client.executeMethod(homepageURLMethod);
 
       // If we get SC_OK (code 200) then we found the homepage OK and can
@@ -215,7 +250,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
           lastModifiedStr = responseHeader.getValue();
         }
         else {
-          lastModifiedStr = "Thu, 01 Jan 1970 00:00:00 GMT";
+          lastModifiedStr = EPOCH_STRING;
         }
 
         // Use JavaMail's MailDateFormat class again to parse the modification
@@ -228,49 +263,63 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
         // Now read the homepage body line by line, looking for a match on the
         // regex that identifies the daily strip image
         //
-        final BufferedReader br =
-            new BufferedReader(new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()));
-        final Pattern p = Pattern.compile(DilbertDailyStrip.IMAGE_URL_REGEX);
-        String line;
-        do {
-          line = br.readLine();
-          if (line != null) {
-            final Matcher m = p.matcher(line);
-            if (m.matches()) {
-              final String spec = m.group(1);
+        BufferedReader br = null;
+        try {
+          br = new BufferedReader(new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()));
+          final Pattern p = Pattern.compile(DilbertDailyStrip.IMAGE_URL_REGEX);
+          String line;
+          do {
+            line = br.readLine();
+            if (line != null) {
+              final Matcher m = p.matcher(line);
+              if (m.matches()) {
+                final String spec = m.group(1);
 
-              // Try to form the URL for the daily strip image from the homepage
-              // URL and the path to the daily strip image
-              //
-              final HttpURL stripURL = new HttpURL(new HttpURL(DilbertDailyStrip.DILBERT_DOT_COM_URL), spec);
-              LOGGER.debug(stripURL.toString());
-              final GetMethod stripURLMethod = new GetMethod(stripURL.getURI());
+                // Try to form the URL for the daily strip image from the homepage
+                // URL and the path to the daily strip image
+                //
+                final HttpURL stripURL = new HttpURL(new HttpURL(DilbertDailyStrip.DILBERT_DOT_COM_URL), spec);
+                LOGGER.debug(stripURL.toString());
+                final GetMethod stripURLMethod = new GetMethod(stripURL.getURI());
 
-              // Try to retrieve the daily strip image
-              //
-              try {
-                statusCode = client.executeMethod(stripURLMethod);
-                if (statusCode == HttpStatus.SC_OK) {
-                  final Header contentTypeHeader = stripURLMethod.getResponseHeader("Content-Type");
-                  if (isSupportedContentType(contentTypeHeader)) {
-                    final byte[] responseBody = stripURLMethod.getResponseBody();
-                    icon = new ImageIcon(responseBody);
-                    strip = new DilbertDailyStrip(icon, stripURL.getURI(), lastModified);
-                    latestDailyStrip = strip;
+                // Try to retrieve the daily strip image
+                //
+                try {
+                  // Use IDEA's HTTP proxy settings, if present (this isn't part of the
+                  // OpenAPI so may break)
+                  //
+                  if (httpConfigurable != null && httpConfigurable.USE_HTTP_PROXY) {
+                    stripURLMethod.setDoAuthentication(httpConfigurable.PROXY_AUTHENTICATION);
                   }
-                  else {
-                    throw new IOException("Unexpected content type for daily strip image: " + contentTypeHeader);
+
+                  statusCode = client.executeMethod(stripURLMethod);
+                  if (statusCode == HttpStatus.SC_OK) {
+                    final Header contentTypeHeader = stripURLMethod.getResponseHeader("Content-Type");
+                    if (isSupportedContentType(contentTypeHeader)) {
+                      final byte[] responseBody = stripURLMethod.getResponseBody();
+                      final Icon icon = new ImageIcon(responseBody);
+                      strip = new DilbertDailyStrip(icon, stripURL.getURI(), lastModified);
+                      latestDailyStrip = strip;
+                    }
+                    else {
+                      throw new IOException("Unexpected content type for daily strip image: " + contentTypeHeader);
+                    }
                   }
                 }
+                finally {
+                  stripURLMethod.releaseConnection();
+                }
+                break;
               }
-              finally {
-                stripURLMethod.releaseConnection();
-              }
-              break;
             }
           }
+          while (line != null);
         }
-        while (line != null);
+        finally {
+          if (br != null) {
+            br.close();
+          }
+        }
       }
     }
     finally {
@@ -280,34 +329,6 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     // Only update the presenter(s) if the strip is non-null (i.e. modified
     // since the last-modified time given
     //
-//    if (strip != null) {
-//      if (isRefreshAllOpenProjects()) {
-//        final Set mapEntries = PROJECT_TO_DAILY_STRIP_PRESENTER_MAP.entrySet();
-//        final Iterator iterator = mapEntries.iterator();
-//        while (iterator.hasNext()) {
-//          final Map.Entry entry = (Map.Entry) iterator.next();
-//          final DailyStripPresenter aPresenter = (DailyStripPresenter) entry.getValue();
-//          aPresenter.setDailyStrip(strip);
-//        }
-//      }
-//      else {
-//        presenter.setDailyStrip(strip);
-//      }
-//    }
-//    else if (latestDailyStrip != null &&  isRefreshAllOpenProjects()) {
-//      final Set mapEntries = PROJECT_TO_DAILY_STRIP_PRESENTER_MAP.entrySet();
-//      final Iterator iterator = mapEntries.iterator();
-//      while (iterator.hasNext()) {
-//        final Map.Entry entry = (Map.Entry) iterator.next();
-//        final DailyStripPresenter aPresenter = (DailyStripPresenter) entry.getValue();
-//        if (!aPresenter.equals(presenter)) {
-//          aPresenter.setDailyStrip(strip);
-//        }
-//      }
-//    }
-
-
-
     if (isRefreshAllOpenProjects()) {
       final Set mapEntries = PROJECT_TO_DAILY_STRIP_PRESENTER_MAP.entrySet();
       final Iterator iterator = mapEntries.iterator();
@@ -376,13 +397,13 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   public void readExternal(final Element element)
   {
-    LOGGER.debug("DilbertDailyStripApplicationImpl.readExternal(" + (element == null ? "null" : element.getName()) + ")");
+    LOGGER.debug("DilbertDailyStripApplicationImpl.readExternal(" + (element == null ? "null" : element.getName()) + ')');
     settings.readExternal(element);
   }
 
   public void writeExternal(final Element element)
   {
-    LOGGER.debug("DilbertDailyStripApplicationImpl.writeExternal(" + (element == null ? "null" : element.getName()) + ")");
+    LOGGER.debug("DilbertDailyStripApplicationImpl.writeExternal(" + (element == null ? "null" : element.getName()) + ')');
     settings.writeExternal(element);
   }
 
@@ -409,7 +430,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     // IDEA can open a null and default project that we should ignore
     //
     if (project != null && !project.isDefault()) {
-      LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(" + project.getName() + ")");
+      LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(" + project.getName() + ')');
 
       final DailyStripPanel dailyStripPanel = new DailyStripPanel(this);
       PROJECT_TO_DAILY_STRIP_PRESENTER_MAP.put(project, dailyStripPanel);
@@ -423,7 +444,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
             fetchDailyStrip(dailyStripPanel);
           }
           catch (IOException e) {
-            LOGGER.error("IOException fetching daily strip", e);
+            LOGGER.debug("IOException fetching daily strip: " + e.getMessage());
           }
         }
       }
@@ -439,7 +460,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   public boolean canCloseProject(final Project project)
   {
     if (project != null && !project.isDefault()) {
-      LOGGER.debug("DilbertDailyStripApplicationImpl.canCloseProject(" + project.getName() + ")");
+      LOGGER.debug("DilbertDailyStripApplicationImpl.canCloseProject(" + project.getName() + ')');
     }
     else {
       LOGGER.debug("DilbertDailyStripApplicationImpl.canCloseProject(null or default project)");
@@ -451,7 +472,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   public void projectClosed(final Project project)
   {
     if (project != null && !project.isDefault()) {
-      LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosed(" + project.getName() + ")");
+      LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosed(" + project.getName() + ')');
       PROJECT_TO_DAILY_STRIP_PRESENTER_MAP.remove(project);
       final ToolWindowManager manager = (ToolWindowManager) project2ToolWindowManagerMap.remove(project);
       if (manager != null) {
@@ -466,7 +487,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   public void projectClosing(final Project project)
   {
     if (project != null && !project.isDefault()) {
-      LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosing(" + project.getName() + ")");
+      LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosing(" + project.getName() + ')');
     }
     else {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosing(null or default project)");
