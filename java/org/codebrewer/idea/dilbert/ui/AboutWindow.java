@@ -22,15 +22,17 @@ import org.codebrewer.idea.dilbert.util.VersionInfo;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 
 /**
@@ -39,7 +41,7 @@ import javax.swing.SwingConstants;
  * @author Mark Scott
  * @version $Revision$ $Date$
  */
-final class AboutWindow extends JWindow
+final class AboutWindow extends JFrame
 {
   private static final Icon ICON_ABOUT = IconLoader.getIcon("/dilbert-splash.png");
 
@@ -56,6 +58,8 @@ final class AboutWindow extends JWindow
   private static final int RIGHT_BORDER = 0;
 
   private static final int TOP_BORDER = 10;
+
+  private static final int VERSION_STRING_LENGTH_GUESS = 128;
 
   /**
    * Returns the singleton instance of this class.
@@ -74,10 +78,10 @@ final class AboutWindow extends JWindow
 
   private void build()
   {
+    setUndecorated(true);
     setSize(WIDTH, HEIGHT);
 
     final JPanel contentPane = (JPanel) getContentPane();
-    final Font labelFont = new Font("Sans-Serif", Font.PLAIN, 10);
 
     // Decorate the window and give version information
     //
@@ -107,7 +111,7 @@ final class AboutWindow extends JWindow
 
     // A label that uses html to format the lines of info
     //
-    final StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = new StringBuffer(VERSION_STRING_LENGTH_GUESS);
     sb.append("<html><b>")
         .append(versionLine)
         .append("</b><br>")
@@ -118,6 +122,7 @@ final class AboutWindow extends JWindow
     final String versionString = sb.toString();
     final JLabel versionLabel = new JLabel(versionString, JLabel.LEADING);
     versionLabel.setBorder(BorderFactory.createEmptyBorder(TOP_BORDER, LEFT_BORDER, BOTTOM_BORDER, RIGHT_BORDER));
+    final Font labelFont = new Font("Sans-Serif", Font.PLAIN, 10);
     versionLabel.setFont(labelFont);
     contentPane.add(versionLabel, BorderLayout.CENTER);
 
@@ -155,5 +160,17 @@ final class AboutWindow extends JWindow
     });
     glassPanel.setVisible(true);
     setGlassPane(glassPanel);
+
+    // Typing Esc while while we have focus hides us
+    //
+    addKeyListener(new KeyAdapter()
+    {
+      public void keyPressed(KeyEvent keyEvent)
+      {
+        if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
+          setVisible(false);
+        }
+      }
+    });
   }
 }
