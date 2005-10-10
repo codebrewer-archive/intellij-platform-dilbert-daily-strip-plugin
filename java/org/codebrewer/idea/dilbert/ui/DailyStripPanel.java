@@ -107,7 +107,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     // Add a button to intentionally generate an exception (so that the error
     // handler can be tested)
     //
-    if (Boolean.getBoolean("org.codebrewer.idea.dilbert.ShowErrorGenerationButton")) {
+    if (Boolean.valueOf(System.getProperty("org.codebrewer.idea.dilbert.ShowErrorGenerationButton")).booleanValue()) {
       dag.add(new ErrorAction());
     }
 
@@ -281,8 +281,9 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
         }
       }
       catch (IOException ioe) {
-        LOGGER.error("Couldn't get Dilbert daily strip", ioe);
+        LOGGER.debug("Couldn't get Dilbert daily strip" + ioe.getMessage());
         dailyStrip = DilbertDailyStrip.MISSING_STRIP;
+        setDailyStrip(dailyStrip);
       }
     }
   }
@@ -294,25 +295,24 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     return dailyStrip;
   }
 
-  public void setDailyStrip(final DilbertDailyStrip dailyStrip)
+  public void setDailyStrip(final DilbertDailyStrip newDailyStrip)
   {
-    if (dailyStrip == null) {
+    if (newDailyStrip == null) {
       stripLabel.setIcon(null);
       stripLabel.setToolTipText(null);
     }
     else {
-      stripLabel.setIcon(dailyStrip.getIcon());
-      if (!dailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
-        final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        final long lastModified = dailyStrip.getLastModified();
-        stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
-      }
-      else {
-        stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
-            DailyStripPanel.class, "panel.icon-missing.tooltip"));
-      }
+      stripLabel.setIcon(newDailyStrip.getIcon());
+        if (newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
+            stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
+                    DailyStripPanel.class, "panel.icon-missing.tooltip"));
+        } else {
+            final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+            final long lastModified = newDailyStrip.getLastModified();
+            stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
+        }
     }
 
-    this.dailyStrip = dailyStrip;
+    dailyStrip = newDailyStrip;
   }
 }
