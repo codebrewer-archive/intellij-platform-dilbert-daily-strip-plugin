@@ -36,7 +36,7 @@ public interface DailyStripPresenter
   /**
    * Accepts a daily strip for presentation.
    *
-   * @param dailyStrip the daily strip to be presented.
+   * @param newDailyStrip the daily strip to be presented.
    */
-  void setDailyStrip(DilbertDailyStrip dailyStrip);
+  void setDailyStrip(DilbertDailyStrip newDailyStrip);
 }
