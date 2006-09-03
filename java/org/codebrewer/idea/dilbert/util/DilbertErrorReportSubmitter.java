@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2006 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
 import java.awt.Component;
 import java.io.IOException;
@@ -70,6 +71,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   /**
    * Constant that can be used when an error report submission fails.
+   *
    * @noinspection NonFinalStaticVariableUsedInClassInitialization
    */
   private static final SubmittedReportInfo FAILED_SUBMISSION_INFO =
@@ -79,6 +81,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   /**
    * Constant that can be used when an error report submission succeeds.
+   *
    * @noinspection NonFinalStaticVariableUsedInClassInitialization
    */
   private static final SubmittedReportInfo SUCCEEDED_SUBMISSION_INFO =
@@ -217,7 +220,7 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
             info = FAILED_SUBMISSION_INFO;
         }
       }
-      catch (HttpException he){
+      catch (HttpException he) {
         LOGGER.debug("HttpException submitting error report: " + he.getMessage());
 
         Messages.showErrorDialog(parentComponent,
