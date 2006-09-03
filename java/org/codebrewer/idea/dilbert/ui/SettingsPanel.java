@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2006 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package org.codebrewer.idea.dilbert.ui;
 
 import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
-import org.codebrewer.idea.dilbert.util.ResourceBundleManager;
+import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.*;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;

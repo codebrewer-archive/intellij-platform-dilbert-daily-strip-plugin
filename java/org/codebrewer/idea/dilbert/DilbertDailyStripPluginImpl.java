@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2006 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
 import org.codebrewer.idea.dilbert.ui.DailyStripPanel;
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.idea.dilbert.ui.SettingsPanel;
-import org.codebrewer.idea.dilbert.util.ResourceBundleManager;
 import org.codebrewer.idea.dilbert.util.VersionInfo;
+import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 import org.jdom.Element;
 
 import java.io.BufferedReader;

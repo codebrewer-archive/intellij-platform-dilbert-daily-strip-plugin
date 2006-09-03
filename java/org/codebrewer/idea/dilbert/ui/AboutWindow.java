@@ -16,8 +16,8 @@
 package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.util.IconLoader;
-import org.codebrewer.idea.dilbert.util.ResourceBundleManager;
 import org.codebrewer.idea.dilbert.util.VersionInfo;
+import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
