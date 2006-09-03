@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2006 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.codebrewer.idea.dilbert.util.VersionInfo;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -30,7 +32,7 @@ import java.text.MessageFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -41,7 +43,7 @@ import javax.swing.SwingConstants;
  * @author Mark Scott
  * @version $Revision$ $Date$
  */
-final class AboutWindow extends JFrame
+final class AboutWindow extends JDialog
 {
   private static final Icon ICON_ABOUT = IconLoader.getIcon("/dilbert-splash.png");
 
@@ -78,8 +80,9 @@ final class AboutWindow extends JFrame
 
   private void build()
   {
-    setUndecorated(true);
+    setModal(true);
     setSize(WIDTH, HEIGHT);
+    setUndecorated(true);
 
     final JPanel contentPane = (JPanel) getContentPane();
 
@@ -151,7 +154,7 @@ final class AboutWindow extends JFrame
         setVisible(false);
       }
 
-      // ...as does the mouse leaving it
+      // ...as does the mouse leaving it...
       //
       public void mouseExited(final MouseEvent mouseEvent)
       {
@@ -161,7 +164,17 @@ final class AboutWindow extends JFrame
     glassPanel.setVisible(true);
     setGlassPane(glassPanel);
 
-    // Typing Esc while while we have focus hides us
+    // ...or losing focus...
+    //
+    addFocusListener(new FocusAdapter()
+    {
+      public void focusLost(FocusEvent e)
+      {
+        setVisible(false);
+      }
+    });
+
+    // ...or typing Esc while while we have focus
     //
     addKeyListener(new KeyAdapter()
     {
