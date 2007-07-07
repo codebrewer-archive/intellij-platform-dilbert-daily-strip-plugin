@@ -42,14 +42,6 @@ import java.text.MessageFormat;
  */
 public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 {
-  static {
-    // Set the system property that the Jakarta Commons HttpClient uses for its
-    // user-agent string
-    //
-    System.getProperties().setProperty("httpclient.useragent",
-        ResourceBundleManager.getLocalizedString(DilbertDailyStripPlugin.class, "plugin.name"));
-  }
-
   /**
    * Regular expression pattern that makes a reasonable effort at matching an
    * email address.
