@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2006 Mark Scott
+ *  Copyright 2005, 2007 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -118,8 +118,8 @@ public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 
   private static synchronized void setUserEmailAddress(final String newUserEmailAddress)
   {
-    assert newUserEmailAddress.matches(EMAIL_ADDRESS_PATTERN);
-    DilbertErrorReportSubmitter.userEmailAddress = newUserEmailAddress;
+    assert newUserEmailAddress.matches(EMAIL_ADDRESS_PATTERN) || newUserEmailAddress.length() == 0;
+    userEmailAddress = newUserEmailAddress;
   }
 
   public String getReportActionText()
