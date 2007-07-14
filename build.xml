@@ -1,6 +1,6 @@
 <!--
 
-  Copyright 2005 Mark Scott
+  Copyright 2005, 2007 Mark Scott
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -135,8 +135,9 @@
   Version ${build.version.major}.${build.version.minor}.${build.version.revision}.${build.number}
   ${build.date}
 
-To compile using ANT, copy the commons-* and mail.jar libraries from ../lib to
-lib, edit as appropriate and copy idea.build.properties to $${user.home}.
+To compile using ANT, copy all jar libraries except DilbertDailyStrip.jar from
+../lib to lib, copy idea.build.properties to $${user.home} (and edit as
+appropriate).
 
 The 'build' target will create a zip archive suitable for extracting into
 IDEA's plug-ins directory.  The 'deploy' target will unzip the archive into an
