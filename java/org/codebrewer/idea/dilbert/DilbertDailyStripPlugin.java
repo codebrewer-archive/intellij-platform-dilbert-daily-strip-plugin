@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2007 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@ package org.codebrewer.idea.dilbert;
 
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.util.NamedJDOMExternalizable;
-
-import java.io.IOException;
-
+import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
 
 /**
@@ -37,8 +34,7 @@ import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
  * @author Mark Scott
  * @version $Revision$ $Date$
  */
-public interface DilbertDailyStripPlugin extends ApplicationComponent,
-    Configurable, NamedJDOMExternalizable, ProjectManagerListener
+public interface DilbertDailyStripPlugin extends ApplicationComponent, Configurable, NamedJDOMExternalizable
 {
   /**
    * The text that will be displayed on the button for the plugin's toolwindow.
@@ -46,24 +42,50 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent,
   String TOOL_WINDOW_ID = "Dilbert";
 
   /**
-   * Requests that the given presenter is refreshed with the current daily strip
-   * from the dilbert.com website.
+   * Adds the specified daily strip listener as a recipient of daily strip
+   * events.  If listener <code>listener</code> is <code>null</code> then no
+   * exception is thrown and no action is performed.
    *
-   * @param presenter the client requesting an update.
-   * @throws IOException if an error occurs fetching the strip.
+   * @param listener the listener to add.
    */
-  void fetchDailyStrip(DailyStripPresenter presenter) throws IOException;
+  void addDailyStripListener(DailyStripListener listener);
 
   /**
-   * Requests that the given presenter is refreshed with the current daily strip
-   * from the dilbert.com website if it was modified more recently than the
-   * given time.
-   *
-   * @param presenter the client requesting an update.
-   * @param ifModifiedSince a number of milliseconds since the epoch.
-   * @throws IOException if an error occurs fetching the strip.
+   * Requests that registered listeners are refreshed with the current daily
+   * strip from the dilbert.com website.
    */
-  void fetchDailyStrip(DailyStripPresenter presenter, long ifModifiedSince) throws IOException;
+  void fetchDailyStrip();
+
+  /**
+   * Requests that registered listeners are refreshed with the current daily
+   * strip from the dilbert.com website if it was modified more recently than
+   * the given time.
+   *
+   * @param ifModifiedSince a number of milliseconds since the epoch.
+   */
+  void fetchDailyStrip(long ifModifiedSince);
+
+  /**
+   * Gets the last downloaded strip, if any.  Implementations should return
+   * <code>null</code> if no cached strip is available and should
+   * <strong>not</strong> attempt to download the current strip.
+   *
+   * @return the last strip downloaded or <code>null</code> if none has been
+   *         downloaded.
+   */
+  DilbertDailyStrip getCachedDailyStrip();
+
+  /**
+   * Gets an array of <code>DailyStripProvider</code>s that should operate in
+   * the context of <code>presenter</code> (to provide it with daily strips
+   * according to the strategies they implement).
+   *
+   * @param presenter a client <code>DailyStripPresenter</code>.
+   *
+   * @return a non-<code>null</code> but possibly empty array of providers for
+   *         <code>presenter</code>.
+   */
+  DailyStripProvider[] getDailyStripProviders(DailyStripPresenter presenter);
 
   /**
    * Indicates whether or not the user has acknowledged the plugin's disclaimer.
@@ -73,4 +95,13 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent,
    */
   boolean isDisclaimerAcknowledged();
 
+  /**
+   * Removes the specified daily strip listener as a recipient of daily strip
+   * events.  If listener <code>listener</code> is <code>null</code> or was
+   * never added as a listener then no exception is thrown and no action is
+   * performed.
+   *
+   * @param listener the listener to remove.
+   */
+  void removeDailyStripListener(DailyStripListener listener);
 }

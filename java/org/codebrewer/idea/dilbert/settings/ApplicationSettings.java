@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2007 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,53 +24,70 @@ import org.jdom.Element;
 /**
  * <p>
  * Encapsulates the user-specified settings for the plugin and permits their
- * persistence by implementing {@link JDOMExternalizable JDOMExternalizable}.
- * The settings are applied to all open projects.
+ * persistence by implementing {@link JDOMExternalizable}.  The settings are
+ * applied to all open projects.
  * </p>
  *
  * @author Mark Scott
  * @version $Revision$ $Date$
- * @noinspection NonFinalFieldReferencedInHashCode,NonFinalFieldReferenceInEquals
  */
 public final class ApplicationSettings implements JDOMExternalizable
 {
+  public static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
+
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
   private static final String DISCLAIMER_ACKNOWLEDGED_KEY = "disclaimerAcknowledged";
-  private static final String LOAD_STRIP_ON_STARTUP_KEY = "loadStripOnStartup";
-  private static final String REFRESH_ALL_PROJECTS_KEY = "refreshAllOpenProjects";
-
-  private boolean disclaimerAcknowledged;
-  private boolean loadStripOnStartup;
-  private boolean refreshAllOpenProjects;
 
   /**
-   * Default constructor that creates an instance having configuration options
-   * (boolean properties) <code>false</code>.
+   * Has the plugin's disclaimer been acknowledged?
+   */
+  private boolean disclaimerAcknowledged;
+
+  /**
+   * Settings to control unattended downloading of strips.
+   */
+  private UnattendedDownloadSettings unattendedDownloadSettings;
+
+  /**
+   * The key used when persisting unattended download settings.
+   */
+  private static final String DOWNLOAD_SETTINGS_PROVIDER_KEY = "downloads";
+
+  /**
+   * Default constructor that creates an instance having the disclaimer
+   * acknowledgment configuration parameter <code>false</code> and no
+   * unattended downloads configured.
    */
   public ApplicationSettings()
   {
-    this(false, false, false);
-    LOGGER.debug("ApplicationSettings()");
+    this(DEFAULT_DISCLAIMER_ACKNOWLEDGED, UnattendedDownloadSettings.NO_DOWNLOAD_SETTINGS);
   }
 
   /**
-   * Creates an instance having configuration options (boolean properties) as
-   * specified.
+   * Creates an instance having the given disclaimer acknowledgment
+   * configuration parameter, persistence service settings and unattended
+   * download settings.
    *
    * @param disclaimerAcknowledged has the user acknowledged the plugin's
    * disclaimer?
-   * @param loadStripOnStartup should the strip be fetched automatically when a
-   * project is opened?
-   * @param refreshAllOpenProjects should all open projects be refreshed when
-   * the strip is fetched for a single projec?
+   * @param unattendedDownloadSettings settings that control unattended download
+   * of strips.
    */
-  public ApplicationSettings(boolean disclaimerAcknowledged,
-                             boolean loadStripOnStartup,
-                             boolean refreshAllOpenProjects)
+  public ApplicationSettings(
+      final boolean disclaimerAcknowledged, final UnattendedDownloadSettings unattendedDownloadSettings)
   {
     this.disclaimerAcknowledged = disclaimerAcknowledged;
-    this.loadStripOnStartup = loadStripOnStartup;
-    this.refreshAllOpenProjects = refreshAllOpenProjects;
+    this.unattendedDownloadSettings = unattendedDownloadSettings;
+  }
+
+  /**
+   * Gets the settings that control unattended downloading of strips.
+   *
+   * @return the settings that control unattended downloading of strips.
+   */
+  public UnattendedDownloadSettings getUnattendedDownloadSettings()
+  {
+    return unattendedDownloadSettings;
   }
 
   /**
@@ -84,60 +101,32 @@ public final class ApplicationSettings implements JDOMExternalizable
     return disclaimerAcknowledged;
   }
 
-  /**
-   * Indicates whether the plugin should automatically download the current
-   * daily strip when a project is opened or should only do so when the user
-   * explicitly requests it.
-   *
-   * @return <code>true</code> if the current daily strip should be fetched as
-   *         soon as a project is opened, <code>false</code> if not.
-   */
-  public boolean isLoadStripOnStartup()
-  {
-    return loadStripOnStartup;
-  }
-
-  /**
-   * Indicates whether refreshing the plugin's toolwindow in one project should
-   * cause all other open projects to be refreshed as well.
-   *
-   * @return <code>true</code> if updating one project should cause all other
-   *         projects to be updated, <code>false</code> if not.
-   */
-  public boolean isRefreshAllOpenProjects()
-  {
-    return refreshAllOpenProjects;
-  }
-
   public boolean equals(final Object o)
   {
-    if (o == null) {
-      return false;
-    }
     if (this == o) {
       return true;
     }
-    if (getClass() != o.getClass()) {
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
 
-    final ApplicationSettings settings = (ApplicationSettings) o;
+    final ApplicationSettings that = (ApplicationSettings) o;
 
-    if (disclaimerAcknowledged != settings.disclaimerAcknowledged) {
+    if (disclaimerAcknowledged != that.disclaimerAcknowledged) {
       return false;
     }
-    if (loadStripOnStartup != settings.loadStripOnStartup) {
+    //noinspection RedundantIfStatement
+    if (!unattendedDownloadSettings.equals(that.unattendedDownloadSettings)) {
       return false;
     }
 
-    return refreshAllOpenProjects == settings.refreshAllOpenProjects;
+    return true;
   }
 
   public int hashCode()
   {
     int result = disclaimerAcknowledged ? 1 : 0;
-    result = 29 * result + (loadStripOnStartup ? 1 : 0);
-    result = 29 * result + (refreshAllOpenProjects ? 1 : 0);
+    result = 31 * result + unattendedDownloadSettings.hashCode();
 
     return result;
   }
@@ -146,17 +135,24 @@ public final class ApplicationSettings implements JDOMExternalizable
 
   public void readExternal(final Element element)
   {
-    LOGGER.debug("reading application settings");
+    LOGGER.debug("reading application settings"); // NON-NLS
     disclaimerAcknowledged = JDOMExternalizer.readBoolean(element, DISCLAIMER_ACKNOWLEDGED_KEY);
-    loadStripOnStartup = JDOMExternalizer.readBoolean(element, LOAD_STRIP_ON_STARTUP_KEY);
-    refreshAllOpenProjects = JDOMExternalizer.readBoolean(element, REFRESH_ALL_PROJECTS_KEY);
+
+    final Element downloadsElement = element.getChild(DOWNLOAD_SETTINGS_PROVIDER_KEY);
+
+    if (downloadsElement != null) {
+      unattendedDownloadSettings.readExternal(downloadsElement);
+    }
   }
 
   public void writeExternal(final Element element)
   {
-    LOGGER.debug("writing application settings");
+    LOGGER.debug("writing application settings"); // NON-NLS
     JDOMExternalizer.write(element, DISCLAIMER_ACKNOWLEDGED_KEY, disclaimerAcknowledged);
-    JDOMExternalizer.write(element, LOAD_STRIP_ON_STARTUP_KEY, loadStripOnStartup);
-    JDOMExternalizer.write(element, REFRESH_ALL_PROJECTS_KEY, refreshAllOpenProjects);
+
+    final Element downloadsElement = new Element(DOWNLOAD_SETTINGS_PROVIDER_KEY);
+
+    unattendedDownloadSettings.writeExternal(downloadsElement);
+    element.addContent(downloadsElement);
   }
 }

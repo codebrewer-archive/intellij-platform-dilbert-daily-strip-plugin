@@ -1,24 +1,29 @@
 /*
- *  Copyright 2005, 2006 Mark Scott
+ * Copyright 2005, 2007 Mark Scott
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.codebrewer.idea.dilbert.ui;
 
 import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
+import org.codebrewer.idea.dilbert.settings.Modifiable;
+import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
 import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
-import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,16 +35,15 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
- * A panel that provides a UI for the user to configure the plugin's settings.
+ * A panel that provides a UI for the user to configure the plugin's
+ * application-level settings.
  *
  * @author Mark Scott
  * @version $Revision$ $Date$
  */
-public final class SettingsPanel extends JPanel
+public final class SettingsPanel extends JPanel//BasicSettingsPanel
 {
   /**
    * Used to acknowledge the plugin's disclaimer.
@@ -47,29 +51,23 @@ public final class SettingsPanel extends JPanel
   private JCheckBox disclaimerCheckBox;
 
   /**
-   * Indicates whether or not the latest strip be loaded when a project is
-   * opened.
-   */
-  private JCheckBox loadStripOnStartupCheckBox;
-
-  /**
-   * Indicates whether or not all open projects be refreshed when a new strip is
-   * downloaded.
-   */
-  private JCheckBox refreshAllOpenProjectsCheckBox;
-
-  /**
    * Contains those controls that should only be available if the plugin's
-   * disclaimer has been acknowledged.
+   * disclaimer has been acknowledged (so that their enabled state can be
+   * toggled with the disclaimer acknowledgment).
    */
   private final List dependentControls;
+
+  private final UnattendedDownloadSettings unattendedDownloadSettings;
+  private final UnattendedDownloadSettingsPanel unattendedDownloadSettingsPanel;
 
   /**
    * Constructs a settings panel that has its UI intialized from the given
    * <code>ApplicationSettings</code> object.
    *
    * @param settings the state from which to intialize the new panel.
-   * @throws IllegalArgumentException if settings is <code>null</code>.
+   *
+   * @throws IllegalArgumentException if <code>settings</code> is
+   * <code>null</code>.
    */
   public SettingsPanel(final ApplicationSettings settings)
   {
@@ -77,7 +75,15 @@ public final class SettingsPanel extends JPanel
       throw new IllegalArgumentException("ApplicationSettings cannot be null");
     }
 
-    dependentControls = new ArrayList();
+    unattendedDownloadSettings = settings.getUnattendedDownloadSettings();
+
+    if (unattendedDownloadSettings == null) {
+      throw new IllegalArgumentException("UnattendedDownloadSettings cannot be null");
+    }
+
+    unattendedDownloadSettingsPanel = (UnattendedDownloadSettingsPanel) unattendedDownloadSettings.createComponent();
+
+    dependentControls = new ArrayList(2);
     build();
   }
 
@@ -87,14 +93,14 @@ public final class SettingsPanel extends JPanel
    *
    * @return the user's current settings as reflected by the UI.
    */
-  public ApplicationSettings getCurrentSettings()
+  public ApplicationSettings getDisplayedSettings()
   {
-    final ApplicationSettings currentSettings =
-        new ApplicationSettings(disclaimerCheckBox.isSelected(),
-            loadStripOnStartupCheckBox.isSelected(),
-            refreshAllOpenProjectsCheckBox.isSelected());
+    final UnattendedDownloadSettings unattendedDownloadSettingsNow =
+        unattendedDownloadSettingsPanel.getDisplayedSettings();
+    final ApplicationSettings displayedSettings =
+        new ApplicationSettings(disclaimerCheckBox.isSelected(), unattendedDownloadSettingsNow);
 
-    return currentSettings;
+    return displayedSettings;
   }
 
   /**
@@ -102,76 +108,79 @@ public final class SettingsPanel extends JPanel
    * settings.  This method is called to see if the user has modified the saved
    * settings since the settings UI was displayed.
    *
-   * @param settings the settings with which the given settings should be
-   *                 compared.
-   * @return <code>true</code> if the given settings differ from the current
-   *         settings, otherwise <code>false</code>.
+   * @param settings the last settings saved by the user.
+   *
+   * @return <code>true</code> if the saved settings differ from the settings
+   *         represented by the current state of the configuration UI, otherwise
+   *         <code>false</code>.
    */
   public boolean isModified(final ApplicationSettings settings)
   {
-    return !getCurrentSettings().equals(settings);
+    final boolean result = !getDisplayedSettings().equals(settings);
+
+    return result;
   }
 
   /**
-   * Reinitializes the settings panel's UI from the given
+   * Re-initializes the settings panel's UI from the given
    * <code>ApplicationSettings</code> object.
    *
    * @param settings the state from which to reintialize the new panel.
-   * @throws IllegalArgumentException if settings is <code>null</code>.
+   *
+   * @throws IllegalArgumentException if <code>settings</code> is
+   * <code>null</code> or if the .
    */
   public void setSettings(final ApplicationSettings settings)
   {
     if (settings == null) {
-      throw new IllegalArgumentException("ApplicationSettings cannot be null");
+      throw new IllegalArgumentException("null settings");
     }
 
     final boolean disclaimerAcknowledged = settings.isDisclaimerAcknowledged();
-    final boolean loadStripOnStartup = settings.isLoadStripOnStartup();
-    final boolean refreshAllOpenProjects = settings.isRefreshAllOpenProjects();
-
     disclaimerCheckBox.setSelected(disclaimerAcknowledged);
-    loadStripOnStartupCheckBox.setSelected(loadStripOnStartup);
-    refreshAllOpenProjectsCheckBox.setSelected(refreshAllOpenProjects);
-
     setDependentsEnabled(disclaimerAcknowledged);
   }
 
   private void build()
   {
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-    final Border border = new CompoundBorder(
-        new EtchedBorder(EtchedBorder.LOWERED),
-        new EmptyBorder(3, 5, 3, 5));
-    setBorder(new TitledBorder(border, ResourceBundleManager.getLocalizedString(
-        SettingsPanel.class, "panel.title")));
+    final JPanel generalSettingsPanel = new JPanel(new BorderLayout());
+    final Border border = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(3, 5, 3, 5));
+    final String panelTitle =
+        ResourceBundleManager.getLocalizedString(SettingsPanel.class, BasicSettingsPanel.PANEL_TITLE_KEY);
+    generalSettingsPanel.setBorder(new TitledBorder(border, panelTitle));
 
     disclaimerCheckBox = new JCheckBox(ResourceBundleManager.getLocalizedString(
         SettingsPanel.class, "button.disclaimer.text"), false);
-    disclaimerCheckBox.addChangeListener(new ChangeListener()
+    final char disclaimerMnemonic = ResourceBundleManager.getLocalizedMnemonic(
+        SettingsPanel.class, "button.disclaimer.text.mnemonic");
+    disclaimerCheckBox.setMnemonic(disclaimerMnemonic);
+    disclaimerCheckBox.addItemListener(new ItemListener()
     {
-      public void stateChanged(final ChangeEvent changeEvent)
+      public void itemStateChanged(final ItemEvent itemEvent)
       {
         setDependentsEnabled(disclaimerCheckBox.isSelected());
       }
     });
-    add(disclaimerCheckBox);
+    generalSettingsPanel.add(disclaimerCheckBox, BorderLayout.WEST);
+    generalSettingsPanel.setMaximumSize(
+        new Dimension(Integer.MAX_VALUE, generalSettingsPanel.getPreferredSize().height));
+    add(generalSettingsPanel);
 
-    loadStripOnStartupCheckBox = new JCheckBox(ResourceBundleManager.getLocalizedString(
-        SettingsPanel.class, "button.loadstriponstartup.text"), false);
-    add(loadStripOnStartupCheckBox);
-    dependentControls.add(loadStripOnStartupCheckBox);
-
-    refreshAllOpenProjectsCheckBox = new JCheckBox(ResourceBundleManager.getLocalizedString(
-        SettingsPanel.class, "button.refreshallopenprojects.text"));
-    add(refreshAllOpenProjectsCheckBox);
-    dependentControls.add(refreshAllOpenProjectsCheckBox);
+    if (unattendedDownloadSettingsPanel != null) {
+      unattendedDownloadSettingsPanel.setMaximumSize(
+          new Dimension(Integer.MAX_VALUE, unattendedDownloadSettingsPanel.getPreferredSize().height));
+      add(unattendedDownloadSettingsPanel);
+      dependentControls.add(unattendedDownloadSettings);
+    }
   }
 
   private void setDependentsEnabled(final boolean state)
   {
     for (int i = 0; i < dependentControls.size(); i++) {
-      ((Component) dependentControls.get(i)).setEnabled(state);
+      final Modifiable dependentControl = (Modifiable) dependentControls.get(i);
+      dependentControl.setConfigurationUIEnabled(state);
     }
   }
 }

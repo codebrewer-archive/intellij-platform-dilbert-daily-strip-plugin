@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2006 Mark Scott
+ *  Copyright 2005, 2007 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -33,11 +33,11 @@ import javax.swing.JPanel;
  * @author Mark Scott
  * @version $Revision$ $Date$
  */
-final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
+public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
 {
   private final JCheckBox isOpenSettings;
 
-  DisclaimerNotAcknowledgedDialog()
+  public DisclaimerNotAcknowledgedDialog()
   {
     super(false);
     final String label = ResourceBundleManager.getLocalizedString(
@@ -50,7 +50,7 @@ final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
     init();
   }
 
-  boolean isOpenSettings()
+  public boolean isOpenSettings()
   {
     return isOpenSettings.isSelected();
   }
@@ -69,6 +69,7 @@ final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
 
   public String toString()
   {
+    //noinspection MagicCharacter,StringConcatenation
     return getClass().getName() + "[isOpenSettings=" + isOpenSettings + ']';
   }
 }

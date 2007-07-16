@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2007 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,6 +26,12 @@ import org.codebrewer.idea.dilbert.DilbertDailyStrip;
  */
 public interface DailyStripPresenter
 {
+  /**
+   * Called to request that this presenter disposes of any resources it may be
+   * holding.
+   */
+  void dispose();
+
   /**
    * Gets the possibly-null daily strip currently being presented.
    *

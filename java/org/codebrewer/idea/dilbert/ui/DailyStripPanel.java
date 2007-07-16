@@ -1,17 +1,17 @@
 /*
- *  Copyright 2005, 2006 Mark Scott
+ * Copyright 2005, 2007 Mark Scott
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.codebrewer.idea.dilbert.ui;
 
@@ -21,25 +21,27 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.help.HelpManager;
+import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ShowSettingsUtil;
-import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
 import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -61,61 +63,75 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   private static final Icon ABOUT_ICON = IconLoader.getIcon("/compiler/information.png");
   private static final Icon ERROR_ICON = IconLoader.getIcon("/general/toolWindowDebugger.png");
   private static final Icon HELP_ICON = IconLoader.getIcon("/actions/help.png");
-  private static final Icon REFRESH_ICON = IconLoader.getIcon("/vcs/refresh.png");
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+//  private static final Icon SETTINGS_ICON = IconLoader.getIcon("/general/ideOptions.png");
 
-  private final DilbertDailyStripPlugin dailyStripPlugin;
+  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
   private DilbertDailyStrip dailyStrip;
   private JLabel stripLabel;
+  private final DailyStripProvider dailyStripProvider;
 
   /**
    * Creates a panel that can be used by an IDEA ToolWindow to show a Dilbert
    * daily strip cartoon.
    *
-   * @param dilbertDailyStripPlugin a non-null {@link DilbertDailyStripPlugin}
-   *                                that gives this panel access to the plugin's
-   *                                settings and functionality.
    * @throws NullPointerException if <code>dilbertDailyStripPlugin</code> is
-   *                              <code>null</code>.
+   * <code>null</code>.
    */
-  public DailyStripPanel(final DilbertDailyStripPlugin dilbertDailyStripPlugin)
+  public DailyStripPanel()
   {
     LOGGER.debug("DailyStripPanel()");
 
-    if (dilbertDailyStripPlugin == null) {
-      LOGGER.error("null DilbertDailyStripPlugin passed to constructor");
-    }
+    final DilbertDailyStripPlugin dilbertPlugin =
+        (DilbertDailyStripPlugin) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
 
-    dailyStripPlugin = dilbertDailyStripPlugin;
-    setLayout(new BorderLayout());
+    dailyStrip = DilbertDailyStrip.MISSING_STRIP;
+    dailyStripProvider = dilbertPlugin.getDailyStripProviders(this)[0];
     build();
+    dailyStripProvider.start();
   }
 
   private void build()
   {
-    add(createToolbarView(), BorderLayout.WEST);
+    setLayout(new BorderLayout());
+    add(createToolbarView(), BorderLayout.NORTH);
     add(createStripView(), BorderLayout.CENTER);
   }
 
   private JComponent createToolbarView()
   {
-    final DefaultActionGroup dag = new DefaultActionGroup();
-    dag.add(new RefreshDailyStripAction());
-    dag.add(new HelpAction());
-    dag.add(new AboutAction());
+    final DefaultActionGroup dagLeft = new DefaultActionGroup();
+
+//    // Add a button to show the plug-in's settings dialog
+//    //
+//    dagLeft.add(new ShowSettingsAction());
 
     // Add a button to intentionally generate an exception (so that the error
     // handler can be tested)
     //
     if (Boolean.valueOf(System.getProperty("org.codebrewer.idea.dilbert.ShowErrorGenerationButton")).booleanValue()) {
-      dag.add(new ErrorAction());
+      dagLeft.add(new ErrorAction());
     }
 
     final ActionManager actionManager = ActionManager.getInstance();
-    final ActionToolbar actionToolbar =
-        actionManager.createActionToolbar("DilbertDailyStripToolbar", dag, false);
-    final JPanel actionsPanel = new JPanel(new BorderLayout());
-    actionsPanel.add(actionToolbar.getComponent(), BorderLayout.NORTH);
+    final ActionToolbar actionToolbarLeft =
+        actionManager.createActionToolbar("DilbertDailyStripToolbarLeft", dagLeft, true);
+    actionToolbarLeft.getComponent().setMaximumSize(actionToolbarLeft.getComponent().getPreferredSize());
+
+    final DefaultActionGroup dagRight = new DefaultActionGroup();
+    dagRight.add(new HelpAction());
+    dagRight.add(new AboutAction());
+
+    final ActionToolbar actionToolbarRight =
+        actionManager.createActionToolbar("DilbertDailyStripToolbarRight", dagRight, true);
+    actionToolbarRight.getComponent().setMaximumSize(actionToolbarRight.getComponent().getPreferredSize());
+
+    final JPanel actionsPanel = new JPanel();
+
+    actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.LINE_AXIS));
+    actionsPanel.add(actionToolbarRight.getComponent());
+    actionsPanel.add(actionToolbarLeft.getComponent());
+    actionsPanel.add(createControlPanelView());
+    actionsPanel.add(Box.createHorizontalGlue());
 
     return actionsPanel;
   }
@@ -133,7 +149,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     final JPanel stripPanel = new JPanel();
     stripPanel.setBackground(Color.WHITE);
     stripPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
-    stripPanel.setLayout(new BoxLayout(stripPanel, BoxLayout.X_AXIS));
+    stripPanel.setLayout(new BoxLayout(stripPanel, BoxLayout.LINE_AXIS));
     stripPanel.add(stripLabel);
 
     // Put the cartoon in a scrollpane so it can be viewed even when
@@ -144,6 +160,25 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     scroller.getVerticalScrollBar().setUnitIncrement(4);
 
     return scroller;
+  }
+
+  private JComponent createControlPanelView()
+  {
+    final DailyStripProvider currentDailyStripProvider = getCurrentDailyStripProvider();
+    final JPanel panel = new JPanel();
+    panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
+
+    final JComponent controlPanel = currentDailyStripProvider.getControlPanel();
+    if (controlPanel != null) {
+      panel.add(controlPanel);
+    }
+
+    return panel;
+  }
+
+  private DailyStripProvider getCurrentDailyStripProvider()
+  {
+    return dailyStripProvider;
   }
 
   /**
@@ -166,7 +201,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     public void actionPerformed(final AnActionEvent e)
     {
       final AboutWindow aboutWindow = AboutWindow.getInstance();
-      aboutWindow.setLocationRelativeTo(DailyStripPanel.this.getTopLevelAncestor());
+      aboutWindow.setLocationRelativeTo(getTopLevelAncestor());
       aboutWindow.setVisible(true);
       aboutWindow.requestFocus();
     }
@@ -174,7 +209,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 
   /**
    * An action that generates an uncaught exception, to test the plug-in's error
-   * report submitter.
+   * report submitter.  Its availability is controlled by a system property.
    */
   private final class ErrorAction extends AnAction
   {
@@ -192,7 +227,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 
     public void actionPerformed(final AnActionEvent e)
     {
-      throw new NullPointerException("Testing error reporting");
+      throw new IllegalArgumentException("Testing error reporting");
     }
   }
 
@@ -222,73 +257,37 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     }
   }
 
-  /**
-   * An action that refreshes the cartoon strip displayed.
-   */
-  private final class RefreshDailyStripAction extends AnAction
-  {
-    private RefreshDailyStripAction()
-    {
-      super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.refresh.tooltip"),
-          ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.refresh.statusbartext"),
-          REFRESH_ICON);
-      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-      final KeyStroke keyStroke =
-          KeyStroke.getKeyStroke(KeyEvent.VK_R, modifiers);
-      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
-    }
-
-    public void actionPerformed(final AnActionEvent e)
-    {
-      // The strip is only fetched if the user has acknowledged the plug-in's
-      // disclaimer
-      //
-      if (dailyStripPlugin.isDisclaimerAcknowledged()) {
-        fetchDailyStrip();
-      }
-      else {
-        // The user hasn't acknowledged the plug-in's disclaimer so notify them
-        // and ask if they'd like to open the plug-in settings dialog now
-        //
-        final DisclaimerNotAcknowledgedDialog dlg = new DisclaimerNotAcknowledgedDialog();
-        dlg.show();
-        if (dlg.getExitCode() == DialogWrapper.OK_EXIT_CODE && dlg.isOpenSettings()) {
-          ShowSettingsUtil.getInstance().editConfigurable(
-              DailyStripPanel.this.getTopLevelAncestor(), DailyStripPanel.this.dailyStripPlugin);
-
-          // If the disclaimer has now been acknowledged then fetch the strip
-          //
-          if (dailyStripPlugin.isDisclaimerAcknowledged()) {
-            fetchDailyStrip();
-          }
-        }
-      }
-    }
-
-    private void fetchDailyStrip()
-    {
-      // Request an update with the latest strip, taking account of the
-      // modification time of the currently displayed strip (if any)
-      //
-      try {
-        if (DailyStripPanel.this.dailyStrip != null) {
-          dailyStripPlugin.fetchDailyStrip(DailyStripPanel.this,
-              DailyStripPanel.this.dailyStrip.getLastModified());
-        }
-        else {
-          dailyStripPlugin.fetchDailyStrip(DailyStripPanel.this);
-        }
-      }
-      catch (IOException ioe) {
-        LOGGER.debug("Couldn't get Dilbert daily strip" + ioe.getMessage());
-        dailyStrip = DilbertDailyStrip.MISSING_STRIP;
-        setDailyStrip(dailyStrip);
-      }
-    }
-  }
+//  /**
+//   * An action that shows the settings dialog for the plug-in.
+//   */
+//  private final class ShowSettingsAction extends AnAction
+//  {
+//    private ShowSettingsAction()
+//    {
+//      super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.settings.tooltip"),
+//          ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.settings.statusbartext"),
+//          SETTINGS_ICON);
+//      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
+//      final KeyStroke keyStroke =
+//          KeyStroke.getKeyStroke(KeyEvent.VK_S, modifiers);
+//      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
+//      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
+//    }
+//
+//    public void actionPerformed(final AnActionEvent e)
+//    {
+//      ShowSettingsUtil.getInstance().editConfigurable(
+//          getTopLevelAncestor(),
+//          (Configurable) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class));
+//    }
+//  }
 
   // Implement DailyStripPresenter
+
+  public void dispose()
+  {
+    dailyStripProvider.stop();
+  }
 
   public DilbertDailyStrip getDilbertDailyStrip()
   {
@@ -299,18 +298,23 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   {
     if (newDailyStrip == null) {
       stripLabel.setIcon(null);
+      stripLabel.setText(null);
       stripLabel.setToolTipText(null);
     }
     else {
       stripLabel.setIcon(newDailyStrip.getIcon());
-        if (newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
-            stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
-                    DailyStripPanel.class, "panel.icon-missing.tooltip"));
-        } else {
-            final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-            final long lastModified = newDailyStrip.getLastModified();
-            stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
-        }
+      stripLabel.setText(null);
+
+      if (newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
+        stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
+            DailyStripPanel.class, "panel.icon-missing.tooltip"));
+      }
+      else {
+        final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        final long lastModified = newDailyStrip.getLastModified();
+
+        stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
+      }
     }
 
     dailyStrip = newDailyStrip;

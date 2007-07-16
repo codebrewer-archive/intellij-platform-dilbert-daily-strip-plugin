@@ -6,13 +6,23 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<ul>
+    <![CDATA[<b>Version 1.1.0</b>
+<ul>
+<li>Fix: If IDEA is configured to send authentication information to an HTTP proxy then the authentication information is sent pre-emptively, avoiding problems with proxy servers that fail to respond with HTTP status code 407.</li>
+<li>Fix: The strip is fetched asynchronously rather than synchronously in the AWT event dispatch thread.</li>
+<li>New: Strips may be scheduled for automatic daily download.</li>
+</ul>
+<b>Version 1.0.1</b>
+<ul>
 <li>Fix: Any anticipated exception caught when downloading the strip results in an 'error' image being displayed rather than the exception being reported to IDEA's log.</li>
 <li>Fix: Help system typos corrected.</li>
 <li>New: The 'About' window can now be dismissed with the Esc key, removing any dependency at all on the mouse.</li>
 <li>New: IDEA's HTTP proxy settings are honoured.</li>
 </ul>
-]]>
+<b>Version 1.0.0</b>
+<ul>
+<li>Initial release</li>
+</ul>]]>
   </change-notes>
   <idea-version since-build="##IDEA_VERSION##" />
   <extensions xmlns="com.intellij">
@@ -23,5 +33,12 @@
       <implementation-class>org.codebrewer.idea.dilbert.DilbertDailyStripPluginImpl</implementation-class>
       <interface-class>org.codebrewer.idea.dilbert.DilbertDailyStripPlugin</interface-class>
     </component>
-  </application-components><helpset file="DilbertDailyStripHelp.jar" path="/dilbert.hs" />
+  </application-components>
+  <project-components>
+    <component>
+      <implementation-class>org.codebrewer.idea.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
+      <option name="workspace" value="true" />
+    </component>
+  </project-components>
+  <helpset file="DilbertDailyStripHelp.jar" path="/dilbert.hs" />
 </idea-plugin>
