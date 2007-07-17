@@ -10,5 +10,6 @@
   <mapID target="settings" url="settings.html" />
   <mapID target="toolwindow" url="toolwindow.html" />
   <mapID target="changes" url="changes.html" />
+  <mapID target="issues" url="issues.html" />
   <mapID target="roadmap" url="roadmap.html" />
 </map>

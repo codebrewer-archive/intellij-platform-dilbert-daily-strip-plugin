@@ -8,6 +8,7 @@
     <tocitem text="Plug-in Settings" target="settings" image="none" />
     <tocitem text="Plug-in User Interface" target="toolwindow" image="none" />
     <tocitem text="Change History" target="changes" image="none" />
+    <tocitem text="Known Issues" target="issues" image="none" />
     <tocitem text="Planned Features" target="roadmap" image="none" />
   </tocitem>
 </toc>
