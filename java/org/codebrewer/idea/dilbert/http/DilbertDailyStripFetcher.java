@@ -58,7 +58,7 @@ public class DilbertDailyStripFetcher
    * The number of milliseconds to wait for establishment of a connection
    * to the dilbert.com website.
    */
-  private static final int CONNECTION_TIMEOUT = 10000;
+  private static final int CONNECTION_TIMEOUT = 20000;
 
   /**
    * The time at the Unix epoch.
@@ -96,7 +96,7 @@ public class DilbertDailyStripFetcher
    * The number of milliseconds to block waiting for data when reading
    * from TCP sockets.
    */
-  private static final int SO_TIMEOUT = 2000;
+  private static final int SO_TIMEOUT = 5000;
 
   /**
    * Configures an <code>HttpClient</code> with IDEA's HTTP proxy settings if

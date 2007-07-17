@@ -24,8 +24,6 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.help.HelpManager;
-import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
@@ -63,7 +61,6 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   private static final Icon ABOUT_ICON = IconLoader.getIcon("/compiler/information.png");
   private static final Icon ERROR_ICON = IconLoader.getIcon("/general/toolWindowDebugger.png");
   private static final Icon HELP_ICON = IconLoader.getIcon("/actions/help.png");
-//  private static final Icon SETTINGS_ICON = IconLoader.getIcon("/general/ideOptions.png");
 
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
   private DilbertDailyStrip dailyStrip;
@@ -99,37 +96,21 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 
   private JComponent createToolbarView()
   {
-    final DefaultActionGroup dagLeft = new DefaultActionGroup();
-
-//    // Add a button to show the plug-in's settings dialog
-//    //
-//    dagLeft.add(new ShowSettingsAction());
-
-    // Add a button to intentionally generate an exception (so that the error
-    // handler can be tested)
-    //
-    if (Boolean.valueOf(System.getProperty("org.codebrewer.idea.dilbert.ShowErrorGenerationButton")).booleanValue()) {
-      dagLeft.add(new ErrorAction());
-    }
-
     final ActionManager actionManager = ActionManager.getInstance();
-    final ActionToolbar actionToolbarLeft =
-        actionManager.createActionToolbar("DilbertDailyStripToolbarLeft", dagLeft, true);
-    actionToolbarLeft.getComponent().setMaximumSize(actionToolbarLeft.getComponent().getPreferredSize());
+    final DefaultActionGroup dag = new DefaultActionGroup();
+    dag.add(new HelpAction());
+    dag.add(new AboutAction());
 
-    final DefaultActionGroup dagRight = new DefaultActionGroup();
-    dagRight.add(new HelpAction());
-    dagRight.add(new AboutAction());
+    final ActionToolbar actionToolbar =
+        actionManager.createActionToolbar("DilbertDailyStripToolbar", dag, true);
 
-    final ActionToolbar actionToolbarRight =
-        actionManager.createActionToolbar("DilbertDailyStripToolbarRight", dagRight, true);
-    actionToolbarRight.getComponent().setMaximumSize(actionToolbarRight.getComponent().getPreferredSize());
+    final JComponent actionToolbarComponent = actionToolbar.getComponent();
+    actionToolbarComponent.setMaximumSize(actionToolbarComponent.getPreferredSize());
 
     final JPanel actionsPanel = new JPanel();
 
     actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.LINE_AXIS));
-    actionsPanel.add(actionToolbarRight.getComponent());
-    actionsPanel.add(actionToolbarLeft.getComponent());
+    actionsPanel.add(actionToolbarComponent);
     actionsPanel.add(createControlPanelView());
     actionsPanel.add(Box.createHorizontalGlue());
 
@@ -208,30 +189,6 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   }
 
   /**
-   * An action that generates an uncaught exception, to test the plug-in's error
-   * report submitter.  Its availability is controlled by a system property.
-   */
-  private final class ErrorAction extends AnAction
-  {
-    private ErrorAction()
-    {
-      super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.error.tooltip"),
-          ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.error.statusbartext"),
-          ERROR_ICON);
-      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-      final KeyStroke keyStroke =
-          KeyStroke.getKeyStroke(KeyEvent.VK_E, modifiers);
-      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
-    }
-
-    public void actionPerformed(final AnActionEvent e)
-    {
-      throw new IllegalArgumentException("Testing error reporting");
-    }
-  }
-
-  /**
    * An action that opens IDEA's help browser to display help information about
    * the plug-in.
    */
@@ -256,31 +213,6 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       HelpManager.getInstance().invokeHelp("main");
     }
   }
-
-//  /**
-//   * An action that shows the settings dialog for the plug-in.
-//   */
-//  private final class ShowSettingsAction extends AnAction
-//  {
-//    private ShowSettingsAction()
-//    {
-//      super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.settings.tooltip"),
-//          ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.settings.statusbartext"),
-//          SETTINGS_ICON);
-//      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-//      final KeyStroke keyStroke =
-//          KeyStroke.getKeyStroke(KeyEvent.VK_S, modifiers);
-//      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-//      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
-//    }
-//
-//    public void actionPerformed(final AnActionEvent e)
-//    {
-//      ShowSettingsUtil.getInstance().editConfigurable(
-//          getTopLevelAncestor(),
-//          (Configurable) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class));
-//    }
-//  }
 
   // Implement DailyStripPresenter
 
