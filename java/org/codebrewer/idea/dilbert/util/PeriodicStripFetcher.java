@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2008 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public final class PeriodicStripFetcher
           dilbertPlugin.fetchDailyStrip();
         }
         else {
-          dilbertPlugin.fetchDailyStrip(dilbertDailyStrip.getLastModified());
+          dilbertPlugin.fetchDailyStrip(dilbertDailyStrip.getImageChecksum());
         }
       }
       else {
@@ -218,7 +218,7 @@ public final class PeriodicStripFetcher
         if (newDailyStrip != null && !newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
           cancel();
           LOGGER.debug(MessageFormat.format("Got daily strip with last modified time of {0}", // NON-NLS
-              new Object[]{ new Long(newDailyStrip.getLastModified()) }));
+              new Object[]{ new Long(newDailyStrip.getRetrievalTime()) }));
           LOGGER.debug(MessageFormat.format("Cancelled fetches with TTL = {0}", // NON-NLS
               new Object[]{ new Integer(timeToLive) }));
         }

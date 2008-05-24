@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007 Mark Scott
+ *  Copyright 2005, 2007, 2008 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -127,15 +127,15 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   public void fetchDailyStrip()
   {
-    fetchDailyStrip(EPOCH);
+    fetchDailyStrip(DilbertDailyStrip.MISSING_STRIP.getImageChecksum());
   }
 
-  public void fetchDailyStrip(final long ifModifiedSince)
+  public void fetchDailyStrip(final String md5Hash)
   {
     if (isDisclaimerAcknowledged()) {
       LOGGER.info("disclaimer ack'd"); // NON-NLS
 
-      backgroundTaskExecutor.schedule(new FetchDailyStripTask(ifModifiedSince), 0);
+      backgroundTaskExecutor.schedule(new FetchDailyStripTask(md5Hash), 0);
     }
   }
 
@@ -273,11 +273,11 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   private class FetchDailyStripTask extends TimerTask
   {
-    private final long ifModifiedSince;
+    private final String md5Hash;
 
-    private FetchDailyStripTask(final long ifModifiedSince)
+    private FetchDailyStripTask(final String md5Hash)
     {
-      this.ifModifiedSince = ifModifiedSince;
+      this.md5Hash = md5Hash;
     }
 
     private void fireDailyStripUpdated(final DilbertDailyStrip dailyStrip)
@@ -300,7 +300,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     public void run()
     {
       try {
-        final DilbertDailyStrip dailyStrip = new DilbertDailyStripFetcher().fetchDailyStrip(ifModifiedSince);
+        final DilbertDailyStrip dailyStrip = new DilbertDailyStripFetcher().fetchDailyStrip(md5Hash);
 
         if (dailyStrip != null) {
           fireDailyStripUpdated(dailyStrip);

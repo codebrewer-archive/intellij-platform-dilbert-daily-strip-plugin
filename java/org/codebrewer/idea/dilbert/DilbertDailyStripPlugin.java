@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007 Mark Scott
+ *  Copyright 2005, 2007, 2008 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -58,12 +58,12 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent, Configura
 
   /**
    * Requests that registered listeners are refreshed with the current daily
-   * strip from the dilbert.com website if it was modified more recently than
-   * the given time.
+   * strip from the dilbert.com website if it has a checksum value that differs
+   * from that given.
    *
-   * @param ifModifiedSince a number of milliseconds since the epoch.
+   * @param md5Hash the 32-character MD5 checksum hash for the current strip.
    */
-  void fetchDailyStrip(long ifModifiedSince);
+  void fetchDailyStrip(String md5Hash);
 
   /**
    * Gets the last downloaded strip, if any.  Implementations should return

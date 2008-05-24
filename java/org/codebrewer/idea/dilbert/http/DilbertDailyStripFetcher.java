@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2008 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.util.DateParseException;
 import org.apache.commons.httpclient.util.DateUtil;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
@@ -148,15 +147,12 @@ public class DilbertDailyStripFetcher
    * @param client a non-<code>null</code> HTTP client object that should be
    * used to fetch the daily strip.
    * @param stripURL the non-<code>null</code> URL of the current daily strip.
-   * @param lastModified the number of milliseconds since the epoch that the
-   * dilbert.com homepage was last modified.
    *
    * @return the current daily strip.
    *
    * @throws IOException if there is a problem fetching the current daily strip.
    */
-  private static DilbertDailyStrip fetchDailyStrip(
-      final HttpClient client, final HttpURL stripURL, final long lastModified) throws IOException
+  private static DilbertDailyStrip fetchDailyStrip(final HttpClient client, final HttpURL stripURL) throws IOException
   {
     assert client != null;
     assert stripURL != null;
@@ -177,7 +173,7 @@ public class DilbertDailyStripFetcher
 
       if (statusCode == HttpStatus.SC_OK) {
         final byte[] responseBody = getStripBytes(stripURLMethod);
-        result = new DilbertDailyStrip(responseBody, stripURL.getURI(), lastModified);
+        result = new DilbertDailyStrip(responseBody, stripURL.getURI(), System.currentTimeMillis());
       }
       else {
         final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE,
@@ -191,55 +187,6 @@ public class DilbertDailyStripFetcher
     }
 
     return result;
-  }
-
-  /**
-   * Retrieves the bytes comprising the current daily strip image given an
-   * <code>HttpMethod</code> that has already fetched the current daily strip
-   * URL.
-   *
-   * @param homepageURLMethod a non-<code>null</code> <code>HttpMethod</code>
-   * that has already executed a request to fetch the current daily strip.
-   *
-   * @return the number of milliseconds since the epoch that the dilbert.com
-   *         homepage was last modified or zero if the modification time cannot
-   *         be determined.
-   */
-  private static long getLastModified(final HttpMethod homepageURLMethod)
-  {
-    assert homepageURLMethod != null && homepageURLMethod.hasBeenUsed();
-
-    // Find out when the homepage was last modified, assuming the epoch if
-    // the header that provides the information is missing or cannot be
-    // parsed as a date
-    //
-    final Header responseHeader = homepageURLMethod.getResponseHeader(HTTP_HEADER_LAST_MODIFIED);
-    final String lastModifiedStr;
-    if (responseHeader != null) {
-      lastModifiedStr = responseHeader.getValue();
-    }
-    else {
-      lastModifiedStr = EPOCH_STRING;
-    }
-    LOGGER.info(MessageFormat.format("{0} before parsing = {1}", // NON-NLS
-        new Object[]{ HTTP_HEADER_LAST_MODIFIED, lastModifiedStr }));
-
-    // Parse the modification date - we store the modification date of
-    // the *homepage*, not that of the strip itself
-    //
-    long lastModified;
-
-    try {
-      final Date lastModifiedDate = DateUtil.parseDate(lastModifiedStr);
-      LOGGER.info(MessageFormat.format("{0} after parsing = {1}", // NON-NLS
-          new Object[]{ HTTP_HEADER_LAST_MODIFIED, lastModifiedDate.toString() }));
-      lastModified = lastModifiedDate.getTime();
-    }
-    catch (DateParseException ignored) {
-      lastModified = EPOCH;
-    }
-
-    return lastModified;
   }
 
   /**
@@ -374,7 +321,7 @@ public class DilbertDailyStripFetcher
    * Fetches the current daily strip from the dilbert.com website if the site's
    * homepage was modified more recently than a particular time.
    *
-   * @param ifModifiedSince a number of milliseconds since the epoch.
+   * @param md5Hash a 32-character MD5 checksum value.
    *
    * @return the current daily strip or <code>null</code> if the dilbert.com
    *         homepage was last modified before the time represented by
@@ -382,18 +329,10 @@ public class DilbertDailyStripFetcher
    *
    * @throws IOException if an error occurs fetching the strip.
    */
-  public DilbertDailyStrip fetchDailyStrip(final long ifModifiedSince) throws IOException
+  public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException
   {
-    // Format ifModifiedSince using an RFC1123 date format for use in an HTTP
-    // If-Modified-Since header (we only proceed to fetch the daily strip if the
-    // homepage was modified more recently than ifModifiedSince ms since the
-    // epoch)
-    //
-    final String formattedIfModifiedSince = DateUtil.formatDate(new Date(Math.max(EPOCH, ifModifiedSince)));
-    LOGGER.info(
-        new StringBuffer("Fetching strip if homepage modified since ").append(formattedIfModifiedSince).toString()); // NON-NLS
+    LOGGER.info("Looking for strip with an MD5 checksum different from " + md5Hash); // NON-NLS
     final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
-    homepageURLMethod.addRequestHeader(new Header(HTTP_HEADER_IF_MODIFIED_SINCE, formattedIfModifiedSince));
 
     // Set a default return value
     //
@@ -417,24 +356,19 @@ public class DilbertDailyStripFetcher
       // proceed
       //
       if (statusCode == HttpStatus.SC_OK) {
-        final long lastModified = getLastModified(homepageURLMethod);
+        final HttpURL stripURL = getStripURL(homepageURLMethod);
 
-        if (lastModified > ifModifiedSince) {
-          final HttpURL stripURL = getStripURL(homepageURLMethod);
-
-          if (stripURL == null) {
-            final String message = "Couldn't determine URL for daily strip"; // NON-NLS
-            LOGGER.info(message);
-            throw new IOException(message);
-          }
-
-          result = fetchDailyStrip(client, stripURL, lastModified);
+        if (stripURL == null) {
+          final String message = "Couldn't determine URL for daily strip"; // NON-NLS
+          LOGGER.info(message);
+          throw new IOException(message);
         }
-      }
-      else if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
-        final String message = MessageFormat.format("{0} not modified since {1}", // NON-NLS
-            new Object[]{ DilbertDailyStrip.DILBERT_DOT_COM_URL, formattedIfModifiedSince });
-        LOGGER.info(message);
+
+        final DilbertDailyStrip currentStrip = fetchDailyStrip(client, stripURL);
+
+        if (!currentStrip.getImageChecksum().equals(md5Hash)) {
+          result = currentStrip;
+        }
       }
       else {
         final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE,

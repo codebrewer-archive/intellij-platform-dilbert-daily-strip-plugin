@@ -6,7 +6,11 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.1.0</b>
+    <![CDATA[<b>Version 1.2.0</b>
+<ul>
+<li>Fix: An update to the dilbert.com website broke the plug-in by changing URL formats and no longer sending the HTTP <em>Last-Modified</em> header with replies.</li>
+</ul>
+<b>Version 1.1.0</b>
 <ul>
 <li>Fix: If IDEA is configured to send authentication information to an HTTP proxy then the authentication information is sent pre-emptively, avoiding problems with proxy servers that fail to respond with HTTP status code 407.</li>
 <li>Fix: The strip is fetched asynchronously rather than synchronously in the AWT event dispatch thread.</li>

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2008 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
 
         if (currentDailyStrip == null ||
             newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP) ||
-            newDailyStrip.getLastModified() > currentDailyStrip.getLastModified()) {
+            !currentDailyStrip.equals(newDailyStrip)) {
           getDailyStripPresenter().setDailyStrip(newDailyStrip);
         }
       }
@@ -240,10 +240,10 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       // modification time of the currently displayed strip (if any)
       //
       if (getDailyStripPresenter().getDilbertDailyStrip() != null) {
-        dilbertPlugin.fetchDailyStrip(getDailyStripPresenter().getDilbertDailyStrip().getLastModified());
+        dilbertPlugin.fetchDailyStrip(getDailyStripPresenter().getDilbertDailyStrip().getImageChecksum());
       }
       else {
-        dilbertPlugin.fetchDailyStrip(EPOCH);
+        dilbertPlugin.fetchDailyStrip();
       }
     }
   }

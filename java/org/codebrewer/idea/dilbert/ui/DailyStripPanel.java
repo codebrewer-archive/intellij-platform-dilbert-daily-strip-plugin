@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007 Mark Scott
+ * Copyright 2005, 2007, 2008 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       }
       else {
         final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        final long lastModified = newDailyStrip.getLastModified();
+        final long lastModified = newDailyStrip.getRetrievalTime();
 
         stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
       }
