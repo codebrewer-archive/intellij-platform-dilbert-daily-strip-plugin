@@ -6,7 +6,11 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.2.0</b>
+    <![CDATA[<b>Version 1.2.1</b>
+<ul>
+<li>Fix: A change to the IDEA OpenAPI during the IDEA 8.x EAP phase resulted in the plug-in generating the error <em>"Access is allowed from event dispatch thread only."</em>.</li>
+</ul>
+<b>Version 1.2.0</b>
 <ul>
 <li>Fix: An update to the dilbert.com website broke the plug-in by changing URL formats and no longer sending the HTTP <em>Last-Modified</em> header with replies.</li>
 </ul>

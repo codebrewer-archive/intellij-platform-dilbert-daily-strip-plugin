@@ -66,10 +66,6 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
   public DilbertDailyStripProjectComponentImpl(final Project project)
   {
     this.project = project;
-
-    if (project != null && !project.isDefault()) {
-      dailyStripPanel = new DailyStripPanel();
-    }
   }
 
   // Implement BaseComponent
@@ -102,6 +98,8 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
   {
     if (project != null && !project.isDefault()) {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(" + project.getName() + ')');
+
+      dailyStripPanel = new DailyStripPanel();
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       final ToolWindow toolWindow = manager.registerToolWindow(
