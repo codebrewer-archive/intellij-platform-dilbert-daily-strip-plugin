@@ -6,7 +6,13 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.2.1</b>
+    <![CDATA[<b>Version 1.3.0</b>
+<ul>
+<li>Fix: A change to IDEA prior to the IDEA 10.0 final release resulted in the plug-in's toolbar often painting incorrectly.</li>
+<li>Fix: Prevented the circumstances in which the error <em>"Access to realized (ever shown) UI components should be done only from the AWT event dispatch thread, revalidate(), invalidate() & repaint() is ok from any thread"</em> is logged.</li>
+<li>New: The plug-in's toolwindow is now available in IDEA's "dumb" mode <em>e.g.</em> when indexes are being rebuilt.</li>
+</ul>
+<b>Version 1.2.1</b>
 <ul>
 <li>Fix: A change to the IDEA OpenAPI during the IDEA 8.x EAP phase resulted in the plug-in generating the error <em>"Access is allowed from event dispatch thread only."</em>.</li>
 </ul>
