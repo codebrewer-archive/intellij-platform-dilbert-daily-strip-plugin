@@ -45,6 +45,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 
 /**
@@ -225,26 +226,32 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 
   public void setDailyStrip(final DilbertDailyStrip newDailyStrip)
   {
-    if (newDailyStrip == null) {
-      stripLabel.setIcon(null);
-      stripLabel.setText(null);
-      stripLabel.setToolTipText(null);
-    }
-    else {
-      stripLabel.setIcon(newDailyStrip.getIcon());
-      stripLabel.setText(null);
+    SwingUtilities.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+        if (newDailyStrip == null) {
+          stripLabel.setIcon(null);
+          stripLabel.setText(null);
+          stripLabel.setToolTipText(null);
+        }
+        else {
+          stripLabel.setIcon(newDailyStrip.getIcon());
+          stripLabel.setText(null);
 
-      if (newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
-        stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
-            DailyStripPanel.class, "panel.icon-missing.tooltip"));
-      }
-      else {
-        final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
-        final long lastModified = newDailyStrip.getRetrievalTime();
+          if (newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
+            stripLabel.setToolTipText(ResourceBundleManager.getLocalizedString(
+                DailyStripPanel.class, "panel.icon-missing.tooltip"));
+          }
+          else {
+            final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM);
+            final long lastModified = newDailyStrip.getRetrievalTime();
 
-        stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
+            stripLabel.setToolTipText(dateFormat.format(new Date(lastModified)));
+          }
+        }
       }
-    }
+    });
 
     dailyStrip = newDailyStrip;
   }
