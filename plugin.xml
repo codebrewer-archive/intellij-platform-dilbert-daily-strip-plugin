@@ -32,7 +32,7 @@
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="##IDEA_VERSION##" />
+  <idea-version since-build="##IDEA_VERSION_MIN##" until-build="##IDEA_VERSION_MAX##" />
   <extensions xmlns="com.intellij">
     <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
   </extensions>
