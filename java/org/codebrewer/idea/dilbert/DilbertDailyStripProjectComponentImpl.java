@@ -22,7 +22,10 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
 import org.codebrewer.idea.dilbert.ui.DailyStripPanel;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.Icon;
 
@@ -70,6 +73,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 
   // Implement BaseComponent
 
+  @NotNull
   public String getComponentName()
   {
     // The value returned is used inter alia as the value of the 'name'
@@ -103,9 +107,13 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       final ToolWindow toolWindow = manager.registerToolWindow(
-          DilbertDailyStripPlugin.TOOL_WINDOW_ID, dailyStripPanel, ToolWindowAnchor.BOTTOM);
+          DilbertDailyStripPlugin.TOOL_WINDOW_ID, true, ToolWindowAnchor.BOTTOM, project, true);
 
       if (toolWindow != null) {
+        final Content content = ContentFactory.SERVICE.getInstance().createContent(
+          dailyStripPanel, DilbertDailyStripPlugin.TOOL_WINDOW_ID, true);
+
+        toolWindow.getContentManager().addContent(content);
         toolWindow.setIcon(ICON_SMALL);
       }
       else {
