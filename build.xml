@@ -61,7 +61,7 @@
   <target name="compile">
     <mkdir dir="${build}/classes" />
     <mkdir dir="${dist}/lib" />
-    <javac debug="true" destdir="${build}/classes" source="1.4">
+    <javac debug="true" destdir="${build}/classes" source="1.5">
       <src path="${src}" />
       <classpath refid="classpath" />
     </javac>
@@ -84,8 +84,11 @@
     <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
     <copy file="plugin.xml" todir="${build}" />
     <replaceregexp file="${build}/plugin.xml"
-                   match="##IDEA_VERSION##"
+                   match="##IDEA_VERSION_MIN##"
                    replace="${idea.version.min}" />
+    <replaceregexp file="${build}/plugin.xml"
+                   match="##IDEA_VERSION_MAX##"
+                   replace="${idea.version.max}" />
     <replaceregexp file="${build}/plugin.xml"
                    match="##PLUGIN_VERSION##"
                    replace="${build.version.major}.${build.version.minor}.${build.version.revision}.${build.number}" />
