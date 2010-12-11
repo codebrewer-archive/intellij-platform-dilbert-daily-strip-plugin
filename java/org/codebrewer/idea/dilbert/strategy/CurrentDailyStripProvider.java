@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008 Mark Scott
+ *  Copyright 2007, 2008, 2010 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -73,13 +73,12 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
 
     final ActionManager actionManager = ActionManager.getInstance();
     final ActionToolbar actionToolbar = actionManager.createActionToolbar("strategy.currentStrip", dag, true);
-    actionToolbar.getComponent().setMaximumSize(actionToolbar.getComponent().getPreferredSize());
     final JPanel actionsPanel = new JPanel();
+
+    actionToolbar.setReservePlaceAutoPopupIcon(false);
     actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.LINE_AXIS));
     actionsPanel.add(actionToolbar.getComponent());
     actionsPanel.add(Box.createHorizontalStrut(2));
-    final Dimension preferredSize = actionsPanel.getPreferredSize();
-    actionsPanel.setPreferredSize(new Dimension(150, preferredSize.height));
 
     return actionsPanel;
   }
@@ -99,12 +98,12 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       progressBar = null;
     }
 
-    controlPanel.validate();
-    controlPanel.repaint();
+    controlPanel.revalidate();
   }
 
   // Implement/override AbstractDailyStripProvider
 
+  @Override
   protected void doPause()
   {
     // This strategy doesn't really have any state so pausing is effectively the
@@ -113,6 +112,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
     doStop();
   }
 
+  @Override
   protected void doResume()
   {
     // This strategy doesn't really have any state so resuming is effectively
@@ -121,10 +121,11 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
     doStart();
   }
 
+  @Override
   protected void doStart()
   {
     final DilbertDailyStripPlugin dilbertPlugin =
-        (DilbertDailyStripPlugin) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
     dilbertPlugin.addDailyStripListener(this);
     final DilbertDailyStrip dilbertDailyStrip = dilbertPlugin.getCachedDailyStrip();
 
@@ -137,14 +138,16 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
     }
   }
 
+  @Override
   protected void doStop()
   {
     final DilbertDailyStripPlugin dilbertPlugin =
-        (DilbertDailyStripPlugin) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
     dilbertPlugin.removeDailyStripListener(this);
     setProgressBarVisible(false);
   }
 
+  @Override
   public JComponent getControlPanel()
   {
     return controlPanel;
@@ -184,8 +187,6 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
    */
   private final class RefreshDailyStripAction extends AnAction
   {
-    private static final long EPOCH = 0L;
-
     private final DilbertDailyStripPlugin dilbertPlugin;
 
     private RefreshDailyStripAction()
@@ -193,8 +194,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       super(ResourceBundleManager.getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.tooltip"),
           ResourceBundleManager.getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.statusbartext"),
           REFRESH_ICON);
-      dilbertPlugin =
-          (DilbertDailyStripPlugin) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      dilbertPlugin = ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
 
       if (getDailyStripPresenter() instanceof JComponent) {
         final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
@@ -205,6 +205,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       }
     }
 
+    @Override
     public void actionPerformed(final AnActionEvent e)
     {
       // The strip is only fetched if the user has acknowledged the plug-in's

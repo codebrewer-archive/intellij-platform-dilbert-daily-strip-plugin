@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007, 2008 Mark Scott
+ * Copyright 2005, 2007, 2008, 2010 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,13 @@ import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
 import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.DateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JComponent;
@@ -79,7 +77,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     LOGGER.debug("DailyStripPanel()");
 
     final DilbertDailyStripPlugin dilbertPlugin =
-        (DilbertDailyStripPlugin) ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
 
     dailyStrip = DilbertDailyStrip.MISSING_STRIP;
     dailyStripProvider = dilbertPlugin.getDailyStripProviders(this)[0];
@@ -98,21 +96,18 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   {
     final ActionManager actionManager = ActionManager.getInstance();
     final DefaultActionGroup dag = new DefaultActionGroup();
+
     dag.add(new HelpAction());
     dag.add(new AboutAction());
 
-    final ActionToolbar actionToolbar =
-        actionManager.createActionToolbar("DilbertDailyStripToolbar", dag, true);
-
+    final ActionToolbar actionToolbar = actionManager.createActionToolbar("DilbertDailyStripToolbar", dag, true);
     final JComponent actionToolbarComponent = actionToolbar.getComponent();
-    actionToolbarComponent.setMaximumSize(actionToolbarComponent.getPreferredSize());
-
     final JPanel actionsPanel = new JPanel();
 
-    actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.LINE_AXIS));
+    actionToolbar.setReservePlaceAutoPopupIcon(false);
+    actionsPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
     actionsPanel.add(actionToolbarComponent);
     actionsPanel.add(createControlPanelView());
-    actionsPanel.add(Box.createHorizontalGlue());
 
     return actionsPanel;
   }
@@ -179,6 +174,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
     }
 
+    @Override
     public void actionPerformed(final AnActionEvent e)
     {
       final AboutWindow aboutWindow = AboutWindow.getInstance();
@@ -206,6 +202,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
     }
 
+    @Override
     public void actionPerformed(final AnActionEvent e)
     {
       // The value of the target attribute of a helpset tocitem element
