@@ -23,6 +23,7 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.ShowSettingsUtil;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
@@ -185,7 +186,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
   /**
    * An action that refreshes the cartoon strip displayed.
    */
-  private final class RefreshDailyStripAction extends AnAction
+  private final class RefreshDailyStripAction extends AnAction implements DumbAware
   {
     private final DilbertDailyStripPlugin dilbertPlugin;
 

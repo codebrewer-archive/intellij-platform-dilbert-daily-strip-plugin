@@ -24,6 +24,7 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.help.HelpManager;
+import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
@@ -161,7 +162,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   /**
    * An action that displays an 'about' dialog for the plug-in.
    */
-  private final class AboutAction extends AnAction
+  private final class AboutAction extends AnAction implements DumbAware
   {
     private AboutAction()
     {
@@ -189,7 +190,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
    * An action that opens IDEA's help browser to display help information about
    * the plug-in.
    */
-  private final class HelpAction extends AnAction
+  private final class HelpAction extends AnAction implements DumbAware
   {
     private HelpAction()
     {
