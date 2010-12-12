@@ -103,7 +103,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
     if (project != null && !project.isDefault()) {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(" + project.getName() + ')');
 
-      dailyStripPanel = new DailyStripPanel();
+      dailyStripPanel = new DailyStripPanel(project);
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       final ToolWindow toolWindow = manager.registerToolWindow(
@@ -115,6 +115,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 
         toolWindow.getContentManager().addContent(content);
         toolWindow.setIcon(ICON_SMALL);
+        dailyStripPanel.initialise();
       }
       else {
         LOGGER.info("Got null instead of a ToolWindow!");

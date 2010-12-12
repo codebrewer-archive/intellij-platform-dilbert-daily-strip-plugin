@@ -15,6 +15,7 @@
  */
 package org.codebrewer.idea.dilbert.ui;
 
+import com.intellij.openapi.project.Project;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 
 /**
@@ -33,6 +34,12 @@ public interface DailyStripPresenter
   void dispose();
 
   /**
+   * Called to request that this presenter prepares itself to present daily
+   * strips.
+   */
+  void initialise();
+
+  /**
    * Gets the possibly-null daily strip currently being presented.
    *
    * @return the possibly-null daily strip currently being presented.
@@ -45,4 +52,12 @@ public interface DailyStripPresenter
    * @param newDailyStrip the daily strip to be presented.
    */
   void setDailyStrip(DilbertDailyStrip newDailyStrip);
+
+  /**
+   * Gets the non-null project for which this presenter displays daily strips.
+   *
+   * @return the non-null project for which this presenter displays daily
+   *         strips.
+   */
+  Project getProject();
 }

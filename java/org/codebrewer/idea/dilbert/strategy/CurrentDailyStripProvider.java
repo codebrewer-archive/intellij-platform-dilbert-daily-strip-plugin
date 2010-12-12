@@ -27,6 +27,8 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import org.codebrewer.idea.dilbert.DailyStripEvent;
 import org.codebrewer.idea.dilbert.DailyStripListener;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
@@ -197,12 +199,15 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
           REFRESH_ICON);
       dilbertPlugin = ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
 
-      if (getDailyStripPresenter() instanceof JComponent) {
+      final ToolWindowManager manager = ToolWindowManager.getInstance(getDailyStripPresenter().getProject());
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+
+      if (toolWindow != null) {
         final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
         final KeyStroke keyStroke =
             KeyStroke.getKeyStroke(KeyEvent.VK_R, modifiers);
         final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-        registerCustomShortcutSet(shortcutSet, (JComponent) getDailyStripPresenter());
+        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
       }
     }
 

@@ -25,8 +25,11 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.help.HelpManager;
 import com.intellij.openapi.project.DumbAware;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
@@ -63,9 +66,10 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   private static final Icon HELP_ICON = IconLoader.getIcon("/actions/help.png");
 
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private final Project project;
   private DilbertDailyStrip dailyStrip;
   private JLabel stripLabel;
-  private final DailyStripProvider dailyStripProvider;
+  private DailyStripProvider dailyStripProvider;
 
   /**
    * Creates a panel that can be used by an IDEA ToolWindow to show a Dilbert
@@ -74,17 +78,12 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
    * @throws NullPointerException if <code>dilbertDailyStripPlugin</code> is
    * <code>null</code>.
    */
-  public DailyStripPanel()
+  public DailyStripPanel(final Project project)
   {
     LOGGER.debug("DailyStripPanel()");
 
-    final DilbertDailyStripPlugin dilbertPlugin =
-      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
-
+    this.project = project;
     dailyStrip = DilbertDailyStrip.MISSING_STRIP;
-    dailyStripProvider = dilbertPlugin.getDailyStripProviders(this)[0];
-    build();
-    dailyStripProvider.start();
   }
 
   private void build()
@@ -169,11 +168,17 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.about.tooltip"),
           ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.about.statusbartext"),
           ABOUT_ICON);
-      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-      final KeyStroke keyStroke =
-          KeyStroke.getKeyStroke(KeyEvent.VK_I, modifiers);
-      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
+
+      final ToolWindowManager manager = ToolWindowManager.getInstance(project);
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+
+      if (toolWindow != null) {
+        final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
+        final KeyStroke keyStroke =
+            KeyStroke.getKeyStroke(KeyEvent.VK_I, modifiers);
+        final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
+        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
+      }
     }
 
     @Override
@@ -197,11 +202,17 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.help.tooltip"),
           ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.help.statusbartext"),
           HELP_ICON);
-      final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-      final KeyStroke keyStroke =
-          KeyStroke.getKeyStroke(KeyEvent.VK_H, modifiers);
-      final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-      registerCustomShortcutSet(shortcutSet, DailyStripPanel.this);
+
+      final ToolWindowManager manager = ToolWindowManager.getInstance(project);
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+
+      if (toolWindow != null) {
+        final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
+        final KeyStroke keyStroke =
+            KeyStroke.getKeyStroke(KeyEvent.VK_H, modifiers);
+        final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
+        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
+      }
     }
 
     @Override
@@ -218,6 +229,16 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   public void dispose()
   {
     dailyStripProvider.stop();
+  }
+
+  public void initialise()
+  {
+    final DilbertDailyStripPlugin dilbertPlugin =
+      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+
+    dailyStripProvider = dilbertPlugin.getDailyStripProviders(this)[0];
+    build();
+    dailyStripProvider.start();
   }
 
   public DilbertDailyStrip getDilbertDailyStrip()
@@ -255,5 +276,10 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     });
 
     dailyStrip = newDailyStrip;
+  }
+
+  public Project getProject()
+  {
+    return project;
   }
 }
