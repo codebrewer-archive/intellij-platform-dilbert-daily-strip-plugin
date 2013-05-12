@@ -63,7 +63,7 @@
   <target name="compile">
     <mkdir dir="${build}/classes" />
     <mkdir dir="${dist}/lib" />
-    <javac debug="true" destdir="${build}/classes" source="1.5" target="1.5">
+    <javac debug="true" destdir="${build}/classes" source="1.5" target="1.6">
       <src path="${src}" />
       <classpath refid="classpath" />
     </javac>
