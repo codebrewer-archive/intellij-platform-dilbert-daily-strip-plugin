@@ -6,7 +6,14 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.3.2</b>
+    <![CDATA[<b>Version 1.3.3</b>
+<ul>
+<li>Fix: The toolwindow background colour is no longer explicitly set to white.</li>
+<li>Fix: The toolwindow button icon is now the preferred 13x13 size.</li>
+<li>Fix: The plug-in is now compatible with any product built on IntelliJ Platform.</li>
+<li>Fix: The toolwindow title is now just "Dilbert" rather than "Dilbert Dilbert".</li>
+</ul>
+<b>Version 1.3.2</b>
 <ul>
 <li>Fix: Updated for IDEA 10.5 EAP (no longer bundles commons-httpclient, commons-codec or commons-logging).</li>
 </ul>
