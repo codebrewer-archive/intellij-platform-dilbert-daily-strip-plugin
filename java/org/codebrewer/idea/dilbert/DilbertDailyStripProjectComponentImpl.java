@@ -39,10 +39,10 @@ import javax.swing.Icon;
 public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 {
   /**
-   * Icon for use on the toolwindow button and IDEA 'welcome screen'.
+   * Icon for use on the toolwindow button.
    * @noinspection HardcodedFileSeparator
    */
-  private static final Icon ICON_SMALL = IconLoader.getIcon("/dilbert16x16.png"); // NON-NLS
+  private static final Icon ICON_SMALL = IconLoader.getIcon("/dilbert13x13.png"); // NON-NLS
 
   /**
    * For logging messages to IDEA's log.
