@@ -40,9 +40,10 @@
       <include name="jdom.jar" />
       <include name="openapi.jar" />
       <include name="util.jar" />
+      <include name="commons-httpclient-3.1-patched.jar" />
     </fileset>
     <fileset dir="lib">
-      <include name="*.jar" />
+      <include name="CodebrewerIdeaPluginUtilities.jar" />
     </fileset>
   </path>
 
@@ -62,7 +63,7 @@
   <target name="compile">
     <mkdir dir="${build}/classes" />
     <mkdir dir="${dist}/lib" />
-    <javac debug="true" destdir="${build}/classes" source="1.5">
+    <javac debug="true" destdir="${build}/classes" source="1.5" target="1.5">
       <src path="${src}" />
       <classpath refid="classpath" />
     </javac>
