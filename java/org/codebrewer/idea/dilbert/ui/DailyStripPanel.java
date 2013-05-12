@@ -30,6 +30,7 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import com.intellij.ui.components.JBScrollPane;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
@@ -121,10 +122,9 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     stripLabel.setAlignmentY(0.0f);
 
     // The cartoon's JLabel is displayed left-aligned in a JPanel
-    // having a white background and a small border
+    // having a small border
     //
     final JPanel stripPanel = new JPanel();
-    stripPanel.setBackground(Color.WHITE);
     stripPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
     stripPanel.setLayout(new BoxLayout(stripPanel, BoxLayout.LINE_AXIS));
     stripPanel.add(stripLabel);
@@ -132,7 +132,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     // Put the cartoon in a scrollpane so it can be viewed even when
     // the containing ToolWindow is small
     //
-    final JScrollPane scroller = new JScrollPane(stripPanel);
+    final JScrollPane scroller = new JBScrollPane(stripPanel);
     scroller.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     scroller.getVerticalScrollBar().setUnitIncrement(4);
 
