@@ -110,8 +110,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
           DilbertDailyStripPlugin.TOOL_WINDOW_ID, true, ToolWindowAnchor.BOTTOM, project, true);
 
       if (toolWindow != null) {
-        final Content content = ContentFactory.SERVICE.getInstance().createContent(
-          dailyStripPanel, DilbertDailyStripPlugin.TOOL_WINDOW_ID, true);
+        final Content content = ContentFactory.SERVICE.getInstance().createContent(dailyStripPanel, null, true);
 
         toolWindow.getContentManager().addContent(content);
         toolWindow.setIcon(ICON_SMALL);
