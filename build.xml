@@ -34,11 +34,12 @@
   <property name="project" value="Dilbert Daily Strip" />
 
   <path id="classpath" description="Classpath for compiling plug-in sources">
-    <!-- the libs from the JRE /opt/intellij/pallada/lib/openapi.jar-->
     <fileset dir="${idea.home}/lib">
+      <include name="annotations.jar" />
       <include name="extensions.jar" />
       <include name="jdom.jar" />
       <include name="openapi.jar" />
+      <include name="util.jar" />
     </fileset>
     <fileset dir="lib">
       <include name="*.jar" />
@@ -69,7 +70,9 @@
 
   <target name="copy_libs">
     <copy todir="${dist}/lib">
-      <fileset dir="lib" includes="*jar" />
+      <fileset dir="lib">
+        <include name="CodebrewerIdeaPluginUtilities.jar" />
+      </fileset>
     </copy>
   </target>
 
