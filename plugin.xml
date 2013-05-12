@@ -48,6 +48,7 @@
 </ul>]]>
   </change-notes>
   <idea-version since-build="##IDEA_VERSION_MIN##" until-build="##IDEA_VERSION_MAX##" />
+  <depends>com.intellij.modules.platform</depends>
   <extensions xmlns="com.intellij">
     <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
   </extensions>
