@@ -53,7 +53,6 @@ import javax.swing.KeyStroke;
  * A strategy that keeps its client updated with the current daily strip.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class CurrentDailyStripProvider extends LocalizableDailyStripProvider implements DailyStripListener
 {

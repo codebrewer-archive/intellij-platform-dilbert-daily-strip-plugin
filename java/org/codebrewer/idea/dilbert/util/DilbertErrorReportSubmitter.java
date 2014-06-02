@@ -38,7 +38,6 @@ import java.text.MessageFormat;
  * and receive a response in return.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DilbertErrorReportSubmitter extends ErrorReportSubmitter
 {

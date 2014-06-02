@@ -34,7 +34,6 @@ import javax.swing.Icon;
  * that's created for each open IDEA project.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 {

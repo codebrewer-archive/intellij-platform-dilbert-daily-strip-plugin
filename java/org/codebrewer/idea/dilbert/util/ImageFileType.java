@@ -21,7 +21,6 @@ import java.io.File;
  * Typesafe enumeration of image file types.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public abstract class ImageFileType
 {

@@ -20,7 +20,6 @@ import org.codebrewer.idea.util.l10n.ResourceBundleManager;
 
 /**
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 abstract class LocalizableDailyStripProvider extends AbstractDailyStripProvider
 {

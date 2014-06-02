@@ -37,7 +37,6 @@ import javax.swing.JComponent;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class UnattendedDownloadSettings implements JDOMExternalizable, Modifiable
 {

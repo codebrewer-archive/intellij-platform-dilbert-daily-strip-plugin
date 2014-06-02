@@ -30,7 +30,6 @@ import javax.swing.border.TitledBorder;
 
 /**
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 class BasicSettingsPanel extends JPanel
 {

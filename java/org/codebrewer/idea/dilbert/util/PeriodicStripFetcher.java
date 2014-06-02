@@ -32,7 +32,6 @@ import java.util.TimerTask;
  * A class that periodically triggers fetching of a cartoon strip.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class PeriodicStripFetcher
 {

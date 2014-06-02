@@ -41,7 +41,6 @@ import javax.swing.border.TitledBorder;
  * application-level settings.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class SettingsPanel extends JPanel//BasicSettingsPanel
 {

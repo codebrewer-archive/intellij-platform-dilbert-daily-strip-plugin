@@ -22,7 +22,6 @@ import com.intellij.openapi.options.UnnamedConfigurable;
  * enabled or disabled.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface Modifiable extends UnnamedConfigurable
 {

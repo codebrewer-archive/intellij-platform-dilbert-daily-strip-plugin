@@ -23,7 +23,6 @@ import javax.swing.JComponent;
 
 /**
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 abstract class AbstractDailyStripProvider implements DailyStripProvider
 {

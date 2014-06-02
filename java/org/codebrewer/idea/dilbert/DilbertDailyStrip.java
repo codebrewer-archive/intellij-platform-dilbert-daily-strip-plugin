@@ -34,7 +34,6 @@ import javax.swing.ImageIcon;
  * website.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DilbertDailyStrip
 {
