@@ -34,7 +34,7 @@ import com.intellij.ui.components.JBScrollPane;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.*;
 import java.awt.event.InputEvent;

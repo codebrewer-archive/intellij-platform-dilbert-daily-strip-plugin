@@ -18,7 +18,7 @@ package org.codebrewer.idea.dilbert.ui;
 import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
 import org.codebrewer.idea.dilbert.settings.Modifiable;
 import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

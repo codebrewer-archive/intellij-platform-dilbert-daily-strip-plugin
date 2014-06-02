@@ -35,7 +35,7 @@ import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.idea.dilbert.ui.DisclaimerNotAcknowledgedDialog;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.Dimension;
 import java.awt.event.InputEvent;
