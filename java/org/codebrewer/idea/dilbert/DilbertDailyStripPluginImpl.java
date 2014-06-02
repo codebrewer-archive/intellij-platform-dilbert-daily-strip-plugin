@@ -26,7 +26,7 @@ import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.idea.dilbert.ui.SettingsPanel;
 import org.codebrewer.idea.dilbert.util.PeriodicStripFetcher;
 import org.codebrewer.idea.dilbert.util.VersionInfo;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 import org.jdom.Element;
 
 import java.io.IOException;

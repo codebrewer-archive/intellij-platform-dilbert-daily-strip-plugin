@@ -26,7 +26,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.Component;
 import java.io.IOException;
