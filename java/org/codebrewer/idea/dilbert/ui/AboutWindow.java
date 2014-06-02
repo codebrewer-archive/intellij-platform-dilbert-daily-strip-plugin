@@ -41,7 +41,6 @@ import javax.swing.SwingConstants;
  * A singelton class that implements an 'about' screen.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 final class AboutWindow extends JDialog
 {

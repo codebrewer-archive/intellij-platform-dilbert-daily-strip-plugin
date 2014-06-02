@@ -40,7 +40,6 @@ import java.util.Properties;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class VersionInfo
 {

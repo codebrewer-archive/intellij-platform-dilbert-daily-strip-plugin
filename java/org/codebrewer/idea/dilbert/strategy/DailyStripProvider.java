@@ -44,7 +44,6 @@ import javax.swing.JComponent;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface DailyStripProvider extends Identifiable, Presentable
 {

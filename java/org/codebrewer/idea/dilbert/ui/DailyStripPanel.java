@@ -58,7 +58,6 @@ import javax.swing.border.BevelBorder;
  * cartoon.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 {

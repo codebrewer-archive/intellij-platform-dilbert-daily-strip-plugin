@@ -44,7 +44,6 @@ import javax.swing.event.EventListenerList;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugin
 {

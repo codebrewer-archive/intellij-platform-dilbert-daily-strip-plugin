@@ -44,7 +44,6 @@ import java.util.regex.Pattern;
  * website.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class DilbertDailyStripFetcher
 {
