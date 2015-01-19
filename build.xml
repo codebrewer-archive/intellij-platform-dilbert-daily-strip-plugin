@@ -1,6 +1,6 @@
 <!--
 
-  Copyright 2005, 2007 Mark Scott
+  Copyright 2005, 2007, 2015 Mark Scott
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@
   <property name="build" location="${staging}/build" />
   <property name="classes" location="${build}/classes" />
   <property name="dist" location="${staging}/dist" />
-  <property name="help" location="docs/javahelp" />
 
   <property name="project" value="Dilbert Daily Strip" />
 
@@ -48,7 +47,7 @@
   </path>
 
   <target name="build"
-          depends="clean, compile, copy_libs, increment_build_number, make_jar, make_help_jar, make_source_zip, make_plugin_zip"
+          depends="clean, compile, copy_libs, increment_build_number, make_jar, make_source_zip, make_plugin_zip"
           description="Compiles all source code, creates plug-in jar file and zip archive with required libs">
   </target>
 
@@ -116,24 +115,7 @@
     </jar>
   </target>
 
-  <target name="make_help_jar" depends="increment_build_number">
-    <mkdir dir="${dist}/help" />
-    <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
-    <jar jarfile="${dist}/help/DilbertDailyStripHelp.jar" compress="yes">
-      <manifest>
-        <section name="IDEA Plug-in">
-          <attribute name="Build-date" value="${build.date}" />
-          <attribute name="Built-for-IDEA" value="${idea.version.min}" />
-          <attribute name="Description" value="${project}" />
-          <attribute name="Version" value="${build.version.major}.${build.version.minor}.${build.version.revision}.${build.number}" />
-        </section>
-      </manifest>
-      <fileset dir="${help}" excludes="**/*.xcf" includes="**" />
-    </jar>
-  </target>
-
   <target name="make_source_zip">
-    <!--<mkdir dir="${build}/lib" />-->
     <mkdir dir="${build}/src" />
     <mkdir dir="${dist}/src" />
     <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
@@ -152,7 +134,6 @@ IDEA plug-in development sandbox (useful if you want to hack on the plug-in).
 </echo>
     <zip destfile="${dist}/src/DilbertDailyStrip-${build.version.major}.${build.version.minor}.${build.version.revision}.${build.number}-src.zip" encoding="UTF8">
       <zipfileset dir="${cgi-bin}" prefix="cgi-bin" />
-      <zipfileset dir="${docs}/javahelp" prefix="docs/javahelp" />
       <zipfileset dir="${images}" prefix="images" />
       <zipfileset dir="${lib}" prefix="lib" includes="readme.txt" />
       <zipfileset dir="${src}" prefix="java" />
