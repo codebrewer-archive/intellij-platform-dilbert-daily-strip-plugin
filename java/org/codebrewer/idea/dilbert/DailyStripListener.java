@@ -21,7 +21,6 @@ import java.util.EventListener;
  * The listener interface for receiving daily strip events.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface DailyStripListener extends EventListener
 {

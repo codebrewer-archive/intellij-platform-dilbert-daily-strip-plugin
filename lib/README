@@ -1,6 +1,6 @@
 Library dependencies:
 
-CodebrewerIdeaPluginUtilities.jar
+codebrewer-intellij-platform-plugin-utilities-1.0.1.jar
 Apache Commons Codec
 Apache Commons HttpClient
 Apache Commons Logging

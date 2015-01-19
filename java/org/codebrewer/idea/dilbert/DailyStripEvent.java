@@ -21,7 +21,6 @@ import java.util.EventObject;
  * An event that indicates that a new daily strip is available.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class DailyStripEvent extends EventObject
 {

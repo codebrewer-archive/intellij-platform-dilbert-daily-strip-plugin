@@ -15,7 +15,7 @@
  */
 package org.codebrewer.idea.dilbert.ui;
 
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.Color;
 import java.awt.GridBagLayout;
@@ -30,7 +30,6 @@ import javax.swing.border.TitledBorder;
 
 /**
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 class BasicSettingsPanel extends JPanel
 {

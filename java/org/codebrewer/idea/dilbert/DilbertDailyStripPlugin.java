@@ -32,7 +32,6 @@ import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface DilbertDailyStripPlugin extends ApplicationComponent, Configurable, NamedJDOMExternalizable
 {

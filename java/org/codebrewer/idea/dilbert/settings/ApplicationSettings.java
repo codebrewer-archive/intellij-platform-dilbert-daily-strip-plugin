@@ -29,7 +29,6 @@ import org.jdom.Element;
  * </p>
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class ApplicationSettings implements JDOMExternalizable
 {

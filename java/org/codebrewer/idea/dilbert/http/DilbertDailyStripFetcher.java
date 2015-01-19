@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008 Mark Scott
+ *  Copyright 2007, 2008, 2015 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.commons.httpclient.HttpURL;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.util.DateUtil;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.util.ImageFileType;
@@ -35,7 +34,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,7 +42,6 @@ import java.util.regex.Pattern;
  * website.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class DilbertDailyStripFetcher
 {
@@ -60,31 +57,22 @@ public class DilbertDailyStripFetcher
   private static final int CONNECTION_TIMEOUT = 20000;
 
   /**
-   * The time at the Unix epoch.
-   */
-  private static final long EPOCH = 0L;
-
-  /**
-   * The time at the Unix epoch, in a format suitable for use in an HTTP
-   * If-Modified-Since header.
-   */
-  private static final String EPOCH_STRING = DateUtil.formatDate(new Date(EPOCH));
-
-  /**
    * HTTP header used to return the type of content contained in a response.
    */
   private static final String HTTP_HEADER_CONTENT_TYPE = "Content-Type";
 
   /**
    * HTTP header used to specify that an SC_NOT_MODIFIED response should be sent
-   * if a requested resource has not changed since a specified time.
+   * if a requested resource has not changed version since a specified ETag
+   * value.
    */
-  private static final String HTTP_HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+  private static final String HTTP_HEADER_IF_NONE_MATCH = "If-None-Match";
 
   /**
-   * HTTP header used to return the time at which a resource was last modified.
+   * HTTP header used to return the entity tag for a particular version of a
+   * resource.
    */
-  private static final String HTTP_HEADER_LAST_MODIFIED = "Last-Modified";
+  private static final String HTTP_HEADER_ETAG = "ETag";
 
   /**
    * Template used when a status code other than SC_OK is being reported.
@@ -111,7 +99,7 @@ public class DilbertDailyStripFetcher
   {
     assert client != null;
 
-    // Use IDEA's HTTP proxy settings, if confgured
+    // Use IDEA's HTTP proxy settings, if configured
     //
     final HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
 
@@ -152,7 +140,8 @@ public class DilbertDailyStripFetcher
    *
    * @throws IOException if there is a problem fetching the current daily strip.
    */
-  private static DilbertDailyStrip fetchDailyStrip(final HttpClient client, final HttpURL stripURL) throws IOException
+  private static DilbertDailyStrip fetchDailyStrip(
+      final HttpClient client, final HttpURL stripURL, final String checksum) throws IOException
   {
     assert client != null;
     assert stripURL != null;
@@ -173,11 +162,10 @@ public class DilbertDailyStripFetcher
 
       if (statusCode == HttpStatus.SC_OK) {
         final byte[] responseBody = getStripBytes(stripURLMethod);
-        result = new DilbertDailyStrip(responseBody, stripURL.getURI(), System.currentTimeMillis());
+        result = new DilbertDailyStrip(responseBody, checksum, stripURL.getURI(), System.currentTimeMillis());
       }
       else {
-        final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE,
-            new Object[]{ new Integer(statusCode), stripURL.getURI() });
+        final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, stripURL.getURI());
         LOGGER.info(message);
         throw new IOException(message);
       }
@@ -224,8 +212,8 @@ public class DilbertDailyStripFetcher
       }
     }
     else {
-      final String message = MessageFormat.format("Unexpected content type for daily strip image: {0}", // NON-NLS
-          new Object[]{ contentTypeHeader });
+      // NON-NLS
+      final String message = MessageFormat.format("Unexpected content type for daily strip image: {0}", contentTypeHeader);
       LOGGER.info(message);
       throw new IOException(message);
     }
@@ -270,7 +258,7 @@ public class DilbertDailyStripFetcher
             // Try to form the URL for the daily strip image from the homepage
             // URL and the path to the daily strip image
             //
-            result = new HttpURL(new HttpURL(DilbertDailyStrip.DILBERT_DOT_COM_URL), spec);
+            result = new HttpURL(spec);
             break;
           }
         }
@@ -278,9 +266,10 @@ public class DilbertDailyStripFetcher
       while (line != null);
 
       if (result == null) {
+        // NON-NLS
         final String message =
-            MessageFormat.format("Didn't match regular expression {0}  to any line in the homepage content", // NON-NLS
-                new Object[]{ DilbertDailyStrip.IMAGE_URL_REGEX });
+            MessageFormat.format(
+                "Didn't match regular expression {0}  to any line in the homepage content", DilbertDailyStrip.IMAGE_URL_REGEX);
         LOGGER.info(message);
         throw new IOException(message);
       }
@@ -319,20 +308,25 @@ public class DilbertDailyStripFetcher
 
   /**
    * Fetches the current daily strip from the dilbert.com website if the site's
-   * homepage was modified more recently than a particular time.
+   * homepage has been modified since the state represented by a particular hash
+   * value (the page's <em>ETag</em>).
    *
    * @param md5Hash a 32-character MD5 checksum value.
    *
    * @return the current daily strip or <code>null</code> if the dilbert.com
-   *         homepage was last modified before the time represented by
-   *         <code>ifModifiedSince</code>.
+   *         homepage has not been modified since the state represented by
+   *         <code>md5Hash</code>.
    *
    * @throws IOException if an error occurs fetching the strip.
    */
   public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException
   {
-    LOGGER.info("Looking for strip with an MD5 checksum different from " + md5Hash); // NON-NLS
+    LOGGER.info("Looking for strip with from a homepage with an ETag different from " + md5Hash); // NON-NLS
     final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
+
+    if (md5Hash != null) {
+      homepageURLMethod.setRequestHeader(HTTP_HEADER_IF_NONE_MATCH, String.format("\"%s\"", md5Hash));
+    }
 
     // Set a default return value
     //
@@ -352,6 +346,13 @@ public class DilbertDailyStripFetcher
       //
       final int statusCode = client.executeMethod(homepageURLMethod);
 
+      // If we got SC_NOT_MODIFIED (code 304) then the homepage hasn't been
+      // modified
+      if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
+        LOGGER.info("Homepage ETag still " + md5Hash); // NON-NLS
+        return null;
+      }
+
       // If we get SC_OK (code 200) then we found the homepage OK and can
       // proceed
       //
@@ -364,15 +365,24 @@ public class DilbertDailyStripFetcher
           throw new IOException(message);
         }
 
-        final DilbertDailyStrip currentStrip = fetchDailyStrip(client, stripURL);
+        final Header currentETagHeader = homepageURLMethod.getResponseHeader(HTTP_HEADER_ETAG);
+        String eTag = null;
 
-        if (!currentStrip.getImageChecksum().equals(md5Hash)) {
-          result = currentStrip;
+        if (currentETagHeader != null) {
+          final String quotedETag = currentETagHeader.getValue();
+
+          if (quotedETag != null && quotedETag.matches("^\"\\p{Alnum}{32}?\"$")) {
+            eTag = quotedETag.substring(1, 33);
+          }
+        }
+
+        if (eTag == null || !eTag.equals(md5Hash)) {
+          result = fetchDailyStrip(client, stripURL, eTag);
         }
       }
       else {
-        final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE,
-            new Object[]{ new Integer(statusCode), DilbertDailyStrip.DILBERT_DOT_COM_URL });
+        final String message =
+            MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, DilbertDailyStrip.DILBERT_DOT_COM_URL);
         LOGGER.info(message);
         throw new IOException(message);
       }

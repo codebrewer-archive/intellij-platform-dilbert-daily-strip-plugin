@@ -19,7 +19,6 @@ package org.codebrewer.idea.dilbert.util;
  * A time-related utility class.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class TimeUtils
 {

@@ -24,7 +24,6 @@ import java.io.UnsupportedEncodingException;
  * Utility class providing image-related methods.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public class ImageFileUtils
 {

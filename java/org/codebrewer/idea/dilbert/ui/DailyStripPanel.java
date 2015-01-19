@@ -23,7 +23,6 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.help.HelpManager;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
@@ -34,7 +33,7 @@ import com.intellij.ui.components.JBScrollPane;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.strategy.DailyStripProvider;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -58,13 +57,10 @@ import javax.swing.border.BevelBorder;
  * cartoon.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DailyStripPanel extends JPanel implements DailyStripPresenter
 {
   private static final Icon ABOUT_ICON = IconLoader.getIcon("/compiler/information.png");
-  private static final Icon ERROR_ICON = IconLoader.getIcon("/general/toolWindowDebugger.png");
-  private static final Icon HELP_ICON = IconLoader.getIcon("/actions/help.png");
 
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
   private final Project project;
@@ -99,7 +95,6 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     final ActionManager actionManager = ActionManager.getInstance();
     final DefaultActionGroup dag = new DefaultActionGroup();
 
-    dag.add(new HelpAction());
     dag.add(new AboutAction());
 
     final ActionToolbar actionToolbar = actionManager.createActionToolbar("DilbertDailyStripToolbar", dag, true);
@@ -188,39 +183,6 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       aboutWindow.setLocationRelativeTo(getTopLevelAncestor());
       aboutWindow.setVisible(true);
       aboutWindow.requestFocus();
-    }
-  }
-
-  /**
-   * An action that opens IDEA's help browser to display help information about
-   * the plug-in.
-   */
-  private final class HelpAction extends AnAction implements DumbAware
-  {
-    private HelpAction()
-    {
-      super(ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.help.tooltip"),
-          ResourceBundleManager.getLocalizedString(DailyStripPanel.class, "button.help.statusbartext"),
-          HELP_ICON);
-
-      final ToolWindowManager manager = ToolWindowManager.getInstance(project);
-      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
-
-      if (toolWindow != null) {
-        final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
-        final KeyStroke keyStroke =
-            KeyStroke.getKeyStroke(KeyEvent.VK_H, modifiers);
-        final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
-      }
-    }
-
-    @Override
-    public void actionPerformed(final AnActionEvent e)
-    {
-      // The value of the target attribute of a helpset tocitem element
-      //
-      HelpManager.getInstance().invokeHelp("main");
     }
   }
 

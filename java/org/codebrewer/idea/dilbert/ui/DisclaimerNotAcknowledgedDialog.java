@@ -16,7 +16,7 @@
 package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.BorderLayout;
 
@@ -31,7 +31,6 @@ import javax.swing.JPanel;
  * plugin's disclaimer has not been acknowledged.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
 {

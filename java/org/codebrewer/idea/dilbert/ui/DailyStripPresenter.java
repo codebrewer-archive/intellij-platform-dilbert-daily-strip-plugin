@@ -23,7 +23,6 @@ import org.codebrewer.idea.dilbert.DilbertDailyStrip;
  * Dilbert daily strip cartoon.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface DailyStripPresenter
 {

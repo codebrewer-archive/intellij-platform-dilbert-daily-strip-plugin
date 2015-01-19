@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007, 2008 Mark Scott
+ * Copyright 2005, 2007, 2008, 2015 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -34,7 +27,6 @@ import javax.swing.ImageIcon;
  * website.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class DilbertDailyStrip
 {
@@ -48,78 +40,18 @@ public final class DilbertDailyStrip
    * network problem prevents a cartoon from being fetched).
    */
   public static final DilbertDailyStrip MISSING_STRIP =
-      new DilbertDailyStrip(IconLoader.getIcon("/no-dilbert.png"), "8b0e7fc225a524a0fc3ab826f15dc2b9", null, Long.MIN_VALUE);
+      new DilbertDailyStrip(IconLoader.getIcon("/no-dilbert.png"), null, null, Long.MIN_VALUE);
 
   /**
    * A regular expression that, when applied to the dilbert.com homepage,
    * identifies the URL of the current cartoon image.
    */
-  public static final String IMAGE_URL_REGEX = "^<img src=\"(.*\\.strip\\.print\\.gif)\" />$";
+  public static final String IMAGE_URL_REGEX = "^.*<img .*src=\"(http://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
 
   /**
    * The URL of the dilbert.com website.
    */
-  public static final String DILBERT_DOT_COM_URL = "http://www.dilbert.com/fast/";
-
-  /**
-   * Generates a 32-character MD5 checksum value for an array of data.
-   *
-   * @param data the (image) data to be checksummed.
-   *
-   * @return a 32-character MD5 checksum string.
-   */
-  private static String generateMd5Hash(final byte[] data)
-  {
-    BufferedInputStream bis = null;
-
-    try {
-      final MessageDigest md = MessageDigest.getInstance("MD5");
-      bis = new BufferedInputStream(new ByteArrayInputStream(data), 4096);
-
-      while (true) {
-        final int datum = bis.read();
-        if (datum == -1) {
-          break;
-        }
-        else {
-          md.update((byte) datum);
-        }
-      }
-      final BigInteger hash = new BigInteger(1, md.digest());
-      String hexHash = hash.toString(16);
-
-      // MD5 hashes are 16 bytes so check the hex representation is 32
-      // characters, padding with leading zeroes if necessary
-      int l = hexHash.length();
-      if (l < 32) {
-        final StringBuffer sb = new StringBuffer(16);
-        while (l++ < 32) {
-          sb.append('0');
-        }
-        hexHash = sb.append(hexHash).toString();
-      }
-
-      return hexHash;
-    }
-    catch (NoSuchAlgorithmException e) {
-      LOGGER.error("Couldn't generate MD5 hash for image", e);
-      return null;
-    }
-    catch (IOException e) {
-      LOGGER.error("Couldn't generate MD5 hash for image", e);
-      return null;
-    }
-    finally {
-      if (bis != null) {
-        try {
-          bis.close();
-        }
-        catch (IOException e) {
-          LOGGER.error("Couldnt' close image array input stream", e);
-        }
-      }
-    }
-  }
+  public static final String DILBERT_DOT_COM_URL = "http://www.dilbert.com/";
 
   /**
    * The raw image data.
@@ -152,7 +84,7 @@ public final class DilbertDailyStrip
    * at which the URL for the dilbert.com site was last modified.
    *
    * @param image a cartoon image.
-   * @param md5Hash the image's MD5 checksum hash.
+   * @param md5Hash a checksum hash that (somehow) identifies the cartoon image.
    * @param uri the image's URI.
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
@@ -174,9 +106,9 @@ public final class DilbertDailyStrip
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
    */
-  public DilbertDailyStrip(final byte[] imageBytes, final String uri, final long retrievalTime)
+  public DilbertDailyStrip(final byte[] imageBytes, final String md5Hash, final String uri, final long retrievalTime)
   {
-    this(new ImageIcon(imageBytes), generateMd5Hash(imageBytes), uri, retrievalTime);
+    this(new ImageIcon(imageBytes), md5Hash, uri, retrievalTime);
     this.imageBytes = new byte[imageBytes.length];
     System.arraycopy(imageBytes, 0, this.imageBytes, 0, imageBytes.length);
   }
@@ -229,26 +161,29 @@ public final class DilbertDailyStrip
     return uri;
   }
 
+  @Override
   public boolean equals(final Object obj)
   {
     if (this == obj) {
       return true;
     }
+
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
 
     final DilbertDailyStrip that = (DilbertDailyStrip) obj;
 
-    if (!md5Hash.equals(that.md5Hash)) {
+    if (md5Hash != null ? !md5Hash.equals(that.md5Hash) : that.md5Hash != null) {
       return false;
     }
 
     return true;
   }
 
+  @Override
   public int hashCode()
   {
-    return md5Hash.hashCode();
+    return md5Hash == null ? 0 : md5Hash.hashCode();
   }
 }

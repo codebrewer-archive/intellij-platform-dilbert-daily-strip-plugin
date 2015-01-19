@@ -19,7 +19,6 @@ package org.codebrewer.idea.dilbert;
  * An interface for things which may be presented to a human user.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface Presentable
 {

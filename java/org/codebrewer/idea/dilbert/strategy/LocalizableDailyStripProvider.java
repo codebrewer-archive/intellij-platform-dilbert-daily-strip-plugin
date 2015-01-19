@@ -16,11 +16,10 @@
 package org.codebrewer.idea.dilbert.strategy;
 
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 /**
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 abstract class LocalizableDailyStripProvider extends AbstractDailyStripProvider
 {

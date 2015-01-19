@@ -45,7 +45,6 @@ import javax.swing.event.ChangeListener;
  * unattended downloading.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
 {

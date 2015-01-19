@@ -17,7 +17,7 @@ package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.util.IconLoader;
 import org.codebrewer.idea.dilbert.util.VersionInfo;
-import org.codebrewer.idea.util.l10n.ResourceBundleManager;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -41,7 +41,6 @@ import javax.swing.SwingConstants;
  * A singelton class that implements an 'about' screen.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 final class AboutWindow extends JDialog
 {

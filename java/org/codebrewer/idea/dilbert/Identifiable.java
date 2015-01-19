@@ -19,7 +19,6 @@ package org.codebrewer.idea.dilbert;
  * An interface for things having (unique) identities.
  *
  * @author Mark Scott
- * @version $Revision$ $Date$
  */
 public interface Identifiable
 {

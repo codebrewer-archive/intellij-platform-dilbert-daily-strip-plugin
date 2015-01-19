@@ -6,7 +6,12 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.3.3</b>
+    <![CDATA[<b>Version 1.4.0</b>
+<ul>
+<li>Fix: An update to the dilbert.com website broke the plug-in by removing the 'fast' URL.</li>
+<li>Change: The helpset documentation has been removed as it no longer works (presumably due to changes in the IntelliJ Platform help system).</li>
+</ul>
+<b>Version 1.3.3</b>
 <ul>
 <li>Fix: The toolwindow background colour is no longer explicitly set to white.</li>
 <li>Fix: The toolwindow button icon is now the preferred 13x13 size.</li>
@@ -71,5 +76,4 @@
       <option name="workspace" value="true" />
     </component>
   </project-components>
-  <helpset file="DilbertDailyStripHelp.jar" path="/dilbert.hs" />
 </idea-plugin>
