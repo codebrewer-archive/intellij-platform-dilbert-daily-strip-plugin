@@ -1,6 +1,6 @@
 <!--
 
-  Copyright 2005, 2007, 2015 Mark Scott
+  Copyright 2005, 2007, 2010, 2013, 2015 Mark Scott
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
       <include name="commons-httpclient-3.1-patched.jar" />
     </fileset>
     <fileset dir="lib">
-      <include name="CodebrewerIdeaPluginUtilities.jar" />
+      <include name="codebrewer-intellij-platform-plugin-utilities-1.0.1.jar" />
     </fileset>
   </path>
 
@@ -62,7 +62,7 @@
   <target name="compile">
     <mkdir dir="${build}/classes" />
     <mkdir dir="${dist}/lib" />
-    <javac debug="true" destdir="${build}/classes" source="1.5" target="1.6">
+    <javac debug="true" destdir="${build}/classes" source="1.6" target="1.6">
       <src path="${src}" />
       <classpath refid="classpath" />
     </javac>
@@ -71,7 +71,7 @@
   <target name="copy_libs">
     <copy todir="${dist}/lib">
       <fileset dir="lib">
-        <include name="CodebrewerIdeaPluginUtilities.jar" />
+        <include name="codebrewer-intellij-platform-plugin-utilities-1.0.1.jar" />
       </fileset>
     </copy>
   </target>
