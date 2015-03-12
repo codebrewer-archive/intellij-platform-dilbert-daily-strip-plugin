@@ -6,7 +6,11 @@
   <version>##PLUGIN_VERSION##</version>
   <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.4.0</b>
+    <![CDATA[<b>Version 1.4.1</b>
+<ul>
+<li>Fix: The plug-in is now compatible with CLion.</li>
+</ul>
+<b>Version 1.4.0</b>
 <ul>
 <li>Fix: An update to the dilbert.com website broke the plug-in by removing the 'fast' URL.</li>
 <li>Change: The helpset documentation has been removed as it no longer works (presumably due to changes in the IntelliJ Platform help system).</li>
@@ -60,7 +64,7 @@
 </ul>]]>
   </change-notes>
   <idea-version since-build="##IDEA_VERSION_MIN##" until-build="##IDEA_VERSION_MAX##" />
-  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.lang</depends>
   <extensions xmlns="com.intellij">
     <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
   </extensions>
