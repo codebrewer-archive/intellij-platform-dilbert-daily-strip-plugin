@@ -4,9 +4,14 @@
   <id>Dilbert</id>
   <description>Displays the cartoon strip of the day from the dilbert.com website.</description>
   <version>##PLUGIN_VERSION##</version>
-  <vendor email="mark@codebrewer.org" logo="/dilbert16x16.png" url="http://www.codebrewer.org/">Codebrewer</vendor>
+  <vendor email="mark@codebrewer.org" url="http://www.codebrewer.org/">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.4.1</b>
+    <![CDATA[<b>Version 1.5.0</b>
+<ul>
+<li>Fix: The plug-in's settings are now editable in IntelliJ IDEA 16 EAP (and in other products built on the same branch of IntelliJ Platform).</li>
+<li>Fix: The tooltip on the current cartoon strip now shows the correct date once more (instead of "The strip couldn't be retrieved").</li>
+</ul>
+<b>Version 1.4.1</b>
 <ul>
 <li>Fix: The plug-in is now compatible with CLion.</li>
 </ul>
@@ -65,8 +70,13 @@
   </change-notes>
   <idea-version since-build="##IDEA_VERSION_MIN##" until-build="##IDEA_VERSION_MAX##" />
   <depends>com.intellij.modules.lang</depends>
-  <extensions xmlns="com.intellij">
+  <extensions defaultExtensionNs="com.intellij">
     <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
+    <applicationConfigurable
+        provider="org.codebrewer.idea.dilbert.settings.DilbertDailyStripConfigurableProvider"
+        displayName="Dilbert Daily Strip"
+        id="dilbert"
+        parentId="other" />
   </extensions>
   <application-components>
     <component>
