@@ -371,8 +371,13 @@ public class DilbertDailyStripFetcher
         if (currentETagHeader != null) {
           final String quotedETag = currentETagHeader.getValue();
 
-          if (quotedETag != null && quotedETag.matches("^\"\\p{Alnum}{32}?\"$")) {
-            eTag = quotedETag.substring(1, 33);
+          if (quotedETag != null) {
+            if (quotedETag.matches("^\"\\p{Alnum}{32}?\"$")) { // "regular" ETag
+              eTag = quotedETag.substring(1, 33);
+            }
+            else if (quotedETag.matches("^W/\"\\p{Alnum}{32}?\"$")) { // "weak" ETag
+              eTag = quotedETag.substring(3, 36);
+            }
           }
         }
 
