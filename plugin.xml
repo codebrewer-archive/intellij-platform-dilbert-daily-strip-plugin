@@ -65,8 +65,13 @@
   </change-notes>
   <idea-version since-build="##IDEA_VERSION_MIN##" until-build="##IDEA_VERSION_MAX##" />
   <depends>com.intellij.modules.lang</depends>
-  <extensions xmlns="com.intellij">
+  <extensions defaultExtensionNs="com.intellij">
     <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
+    <applicationConfigurable
+        provider="org.codebrewer.idea.dilbert.settings.DilbertDailyStripConfigurableProvider"
+        displayName="Dilbert Daily Strip"
+        id="dilbert"
+        parentId="other" />
   </extensions>
   <application-components>
     <component>
