@@ -104,9 +104,6 @@ public class DilbertDailyStripFetcher
     final HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
 
     if (httpConfigurable != null && httpConfigurable.USE_HTTP_PROXY) {
-      final HostConfiguration hostConfiguration = client.getHostConfiguration();
-      hostConfiguration.setProxy(httpConfigurable.PROXY_HOST, httpConfigurable.PROXY_PORT);
-
       if (httpConfigurable.PROXY_AUTHENTICATION) {
         // Use IDEA's support for showing the proxy credentials dialog (if
         // necessary), but note that <http://www.jetbrains.net/jira/browse/IDEABKL-1509>
@@ -117,8 +114,14 @@ public class DilbertDailyStripFetcher
         // Copy the credentials into our HTTP client, ensuring they're applied
         // to any authentication realm
         //
+        final String proxyLogin = httpConfigurable.getProxyLogin();
+
+        if (proxyLogin == null) {
+          return;
+        }
+
         final UsernamePasswordCredentials credentials =
-            new UsernamePasswordCredentials(httpConfigurable.PROXY_LOGIN, httpConfigurable.getPlainProxyPassword());
+            new UsernamePasswordCredentials(proxyLogin, httpConfigurable.getPlainProxyPassword());
         client.getState().setProxyCredentials(AuthScope.ANY, credentials);
 
         // Handle proxy servers that don't send HTTP code 407 when
@@ -126,6 +129,9 @@ public class DilbertDailyStripFetcher
         //
         client.getParams().setAuthenticationPreemptive(true);
       }
+
+      final HostConfiguration hostConfiguration = client.getHostConfiguration();
+      hostConfiguration.setProxy(httpConfigurable.PROXY_HOST, httpConfigurable.PROXY_PORT);
     }
   }
 
@@ -321,7 +327,7 @@ public class DilbertDailyStripFetcher
    */
   public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException
   {
-    LOGGER.info("Looking for strip with from a homepage with an ETag different from " + md5Hash); // NON-NLS
+    LOGGER.info("Looking for strip from a homepage with an ETag different from " + md5Hash); // NON-NLS
     final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
 
     if (md5Hash != null) {
@@ -348,6 +354,7 @@ public class DilbertDailyStripFetcher
 
       // If we got SC_NOT_MODIFIED (code 304) then the homepage hasn't been
       // modified
+      //
       if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
         LOGGER.info("Homepage ETag still " + md5Hash); // NON-NLS
         return null;
