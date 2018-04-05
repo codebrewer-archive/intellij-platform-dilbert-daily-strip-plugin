@@ -24,7 +24,8 @@
   <property name="docs" location="docs" />
   <property name="images" location="images" />
   <property name="lib" location="lib" />
-  <property name="src" location="java" />
+  <property name="resources" location="src/main/resources" />
+  <property name="java" location="src/main/java" />
   <property name="staging" location="${dilbert.staging}" />
   <property name="build" location="${staging}/build" />
   <property name="classes" location="${build}/classes" />
@@ -63,7 +64,7 @@
     <mkdir dir="${build}/classes" />
     <mkdir dir="${dist}/lib" />
     <javac debug="true" destdir="${build}/classes" source="1.6" target="1.6">
-      <src path="${src}" />
+      <src path="${java}" />
       <classpath refid="classpath" />
     </javac>
   </target>
@@ -77,15 +78,15 @@
   </target>
 
   <target name="increment_build_number">
-    <propertyfile file="${src}/org/codebrewer/idea/dilbert/build/build.properties">
+    <propertyfile file="/org/codebrewer/idea/dilbert/build/build.properties">
       <entry  key="build.number" type="int" default="1" operation="+" />
       <entry  key="build.date" type="date" value="now" pattern="MMMM d, yyyy" />
     </propertyfile>
   </target>
 
   <target name="prepare_plugin_descriptor">
-    <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
-    <copy file="plugin.xml" todir="${build}" />
+    <property file="${resources}/org/codebrewer/idea/dilbert/build/build.properties" />
+    <copy file="${resources}/META-INF/plugin.xml" todir="${build}" />
     <replaceregexp file="${build}/plugin.xml"
                    match="##IDEA_VERSION_MIN##"
                    replace="${idea.version.min}" />
@@ -98,7 +99,7 @@
   </target>
 
   <target name="make_jar" depends="increment_build_number, prepare_plugin_descriptor">
-    <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
+    <property file="${resources}/org/codebrewer/idea/dilbert/build/build.properties" />
     <jar jarfile="${dist}/lib/DilbertDailyStrip.jar" compress="yes">
       <manifest>
         <section name="IDEA Plug-in">
@@ -111,14 +112,14 @@
       <metainf dir="${build}" includes="plugin.xml" />
       <fileset dir="${classes}" includes="**" />
       <fileset dir="${images}" includes="*png" />
-      <fileset dir="${src}" includes="**/*.properties" />
+      <fileset dir="${resources}" includes="**/*.properties" />
     </jar>
   </target>
 
   <target name="make_source_zip">
     <mkdir dir="${build}/src" />
     <mkdir dir="${dist}/src" />
-    <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
+    <property file="${resources}/org/codebrewer/idea/dilbert/build/build.properties" />
     <echo file="${build}/src/README">README for ${project} plug-in sources
 
   Version ${build.version.major}.${build.version.minor}.${build.version.revision}.${build.number}
@@ -136,7 +137,7 @@ IDEA plug-in development sandbox (useful if you want to hack on the plug-in).
       <zipfileset dir="${cgi-bin}" prefix="cgi-bin" />
       <zipfileset dir="${images}" prefix="images" />
       <zipfileset dir="${lib}" prefix="lib" includes="readme.txt" />
-      <zipfileset dir="${src}" prefix="java" />
+      <zipfileset dir="${java}" prefix="java" />
       <zipfileset file="**.xml" />
       <zipfileset file="${user.home}/idea.build.properties" />
       <zipfileset file="${build}/src/README" />
@@ -148,7 +149,7 @@ IDEA plug-in development sandbox (useful if you want to hack on the plug-in).
            depends="update_sandbox_plugin_descriptor" />
 
   <target name="update_sandbox_plugin_descriptor">
-    <property file="${src}/org/codebrewer/idea/dilbert/build/build.properties" />
+    <property file="${resources}/org/codebrewer/idea/dilbert/build/build.properties" />
     <replaceregexp file="${idea.plugins.sandbox.home}/plugins/DilbertDailyStrip/META-INF/plugin.xml"
                    match="##IDEA_VERSION_MIN##"
                    replace="${idea.version.min}" />
