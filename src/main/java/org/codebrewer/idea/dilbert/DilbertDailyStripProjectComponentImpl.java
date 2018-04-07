@@ -106,7 +106,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       final ToolWindow toolWindow = manager.registerToolWindow(
-          DilbertDailyStripPlugin.TOOL_WINDOW_ID, true, ToolWindowAnchor.BOTTOM, project, true);
+          DilbertDailyStripPlugin.TOOL_WINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true);
 
       if (toolWindow != null) {
         final Content content = ContentFactory.SERVICE.getInstance().createContent(dailyStripPanel, null, true);
