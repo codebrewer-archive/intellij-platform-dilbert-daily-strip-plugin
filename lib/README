@@ -1,8 +1,0 @@
-Library dependencies:
-
-codebrewer-intellij-platform-plugin-utilities-1.0.1.jar
-Apache Commons Codec
-Apache Commons HttpClient
-Apache Commons Logging
-
-The Apache libraries that ship with IntelliJ IDEA are suitable.
