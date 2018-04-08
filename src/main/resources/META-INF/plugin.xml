@@ -72,20 +72,20 @@
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
-        provider="org.codebrewer.idea.dilbert.settings.DilbertDailyStripConfigurableProvider"
+        provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
         displayName="Dilbert Daily Strip"
         id="dilbert"
         parentId="other" />
   </extensions>
   <application-components>
     <component>
-      <implementation-class>org.codebrewer.idea.dilbert.DilbertDailyStripPluginImpl</implementation-class>
-      <interface-class>org.codebrewer.idea.dilbert.DilbertDailyStripPlugin</interface-class>
+      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginImpl</implementation-class>
+      <interface-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin</interface-class>
     </component>
   </application-components>
   <project-components>
     <component>
-      <implementation-class>org.codebrewer.idea.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
+      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
       <option name="workspace" value="true" />
     </component>
   </project-components>
