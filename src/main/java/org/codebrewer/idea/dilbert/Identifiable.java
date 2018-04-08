@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
 /**
@@ -20,8 +21,7 @@ package org.codebrewer.idea.dilbert;
  *
  * @author Mark Scott
  */
-public interface Identifiable
-{
+public interface Identifiable {
   /**
    * Gets the unique identifier .
    *

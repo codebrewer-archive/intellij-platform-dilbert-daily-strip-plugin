@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2008 Mark Scott
+ *  Copyright 2005, 2007, 2008, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,10 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.IconLoader;
+import java.io.IOException;
+import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.JComponent;
+import javax.swing.event.EventListenerList;
 import org.codebrewer.idea.dilbert.http.DilbertDailyStripFetcher;
 import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
 import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
@@ -28,14 +34,7 @@ import org.codebrewer.idea.dilbert.util.PeriodicStripFetcher;
 import org.codebrewer.idea.dilbert.util.VersionInfo;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 import org.jdom.Element;
-
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.event.EventListenerList;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>
@@ -45,24 +44,11 @@ import javax.swing.event.EventListenerList;
  *
  * @author Mark Scott
  */
-public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugin
-{
-  /**
-   * Icon for use on the plugin settings page.
-   *
-   * @noinspection HardcodedFileSeparator
-   */
-  private static final Icon ICON_LARGE = IconLoader.getIcon("/dilbert32x32.png"); // NON-NLS
-
+public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugin {
   /**
    * For logging messages to IDEA's log.
    */
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
-
-  /**
-   * The time at the Unix epoch.
-   */
-  private static final int EPOCH = 0;
 
   /**
    * Application-level settings for the plug-in, shared by all open projects.
@@ -86,13 +72,10 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   /**
    * Constructs a plugin implementation.
    */
-  public DilbertDailyStripPluginImpl()
-  {
-    LOGGER.info(new StringBuffer("Dilbert Daily Strip Plug-in, version ") // NON-NLS
-        .append(VersionInfo.getVersionString())
-        .append(", built ") // NON-NLS
-        .append(VersionInfo.getBuildDate())
-        .toString());
+  public DilbertDailyStripPluginImpl() {
+    LOGGER.info(
+        "Dilbert Daily Strip Plug-in, version " + VersionInfo.getVersionString() + ", built " +
+        VersionInfo.getBuildDate());
 
     dilbertDailyStrip = DilbertDailyStrip.MISSING_STRIP;
     settings = new ApplicationSettings();
@@ -101,14 +84,12 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     listenerList = new EventListenerList();
   }
 
-  private void configureUnattendedDownloads()
-  {
+  private void configureUnattendedDownloads() {
     final UnattendedDownloadSettings unattendedDownloadSettings;
 
     if (settings.getUnattendedDownloadSettings().isFetchStripAutomatically()) {
       unattendedDownloadSettings = settings.getUnattendedDownloadSettings();
-    }
-    else {
+    } else {
       unattendedDownloadSettings = UnattendedDownloadSettings.NO_DOWNLOAD_SETTINGS;
     }
 
@@ -117,20 +98,17 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   // Implement DilbertDailyStripPlugin
 
-  public void addDailyStripListener(final DailyStripListener listener)
-  {
+  public void addDailyStripListener(final DailyStripListener listener) {
     if (listener != null) {
       listenerList.add(DailyStripListener.class, listener);
     }
   }
 
-  public void fetchDailyStrip()
-  {
+  public void fetchDailyStrip() {
     fetchDailyStrip(DilbertDailyStrip.MISSING_STRIP.getImageChecksum());
   }
 
-  public void fetchDailyStrip(final String md5Hash)
-  {
+  public void fetchDailyStrip(final String md5Hash) {
     if (isDisclaimerAcknowledged()) {
       LOGGER.info("disclaimer ack'd"); // NON-NLS
 
@@ -138,23 +116,19 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     }
   }
 
-  public DilbertDailyStrip getCachedDailyStrip()
-  {
+  public DilbertDailyStrip getCachedDailyStrip() {
     return dilbertDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP) ? null : dilbertDailyStrip;
   }
 
-  public DailyStripProvider[] getDailyStripProviders(final DailyStripPresenter presenter)
-  {
-    return new DailyStripProvider[]{ new CurrentDailyStripProvider(presenter) };
+  public DailyStripProvider[] getDailyStripProviders(final DailyStripPresenter presenter) {
+    return new DailyStripProvider[] { new CurrentDailyStripProvider(presenter) };
   }
 
-  public boolean isDisclaimerAcknowledged()
-  {
+  public boolean isDisclaimerAcknowledged() {
     return settings.isDisclaimerAcknowledged();
   }
 
-  public void removeDailyStripListener(final DailyStripListener listener)
-  {
+  public void removeDailyStripListener(final DailyStripListener listener) {
     if (listener != null) {
       listenerList.remove(DailyStripListener.class, listener);
     }
@@ -162,51 +136,40 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   // Implement BaseComponent
 
-  public void disposeComponent()
-  {
+  public void disposeComponent() {
     periodicStripFetcher.stopPeriodicFetching();
     backgroundTaskExecutor.cancel();
   }
 
-  public String getComponentName()
-  {
+  @NotNull
+  public String getComponentName() {
     return DilbertDailyStripPlugin.class.getName();
   }
 
-  public void initComponent()
-  {
+  public void initComponent() {
   }
 
   // Implement Configurable
 
-  public String getDisplayName()
-  {
-    return ResourceBundleManager.getResourceBundle(
-        DilbertDailyStripPlugin.class).getString("plugin.name.configuration");
+  public String getDisplayName() {
+    final ResourceBundle resourceBundle =
+        ResourceBundleManager.getResourceBundle(DilbertDailyStripPlugin.class);
+
+    return resourceBundle.getString("plugin.name.configuration");
   }
 
-  public Icon getIcon()
-  {
-    return ICON_LARGE;
-  }
-
-  public String getHelpTopic()
-  {
-    // Return the value of the "target" attribute of a helpset "tocitem" element
-    //
-    return "settings"; // NON-NLS
+  public String getHelpTopic() {
+    return null;
   }
 
   // Implement JDOMExternalizable
 
-  public void readExternal(final Element element)
-  {
+  public void readExternal(final Element element) {
     settings.readExternal(element);
     configureUnattendedDownloads();
   }
 
-  public void writeExternal(final Element element)
-  {
+  public void writeExternal(final Element element) {
     settings.writeExternal(element);
   }
 
@@ -219,24 +182,21 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
    * ${idea.config.path}/options/ directory.
    *
    * @return the root part of the configuration settings filename for the
-   *         plugin.
+   * plugin.
    */
-  public String getExternalFileName()
-  {
+  public String getExternalFileName() {
     return "dilbert.plugin"; // NON-NLS
   }
 
   // Implement UnnamedConfigurable
 
-  public JComponent createComponent()
-  {
+  public JComponent createComponent() {
     settingsPanel = new SettingsPanel(settings);
 
     return settingsPanel;
   }
 
-  public boolean isModified()
-  {
+  public boolean isModified() {
     boolean isModified = false;
 
     if (settingsPanel != null) {
@@ -246,8 +206,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     return isModified;
   }
 
-  public void apply()
-  {
+  public void apply() {
     if (settingsPanel != null) {
       // Save the current settings for future use
       //
@@ -259,28 +218,23 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     }
   }
 
-  public void reset()
-  {
+  public void reset() {
     if (settingsPanel != null) {
       settingsPanel.setSettings(settings);
     }
   }
 
-  public void disposeUIResources()
-  {
+  public void disposeUIResources() {
   }
 
-  private class FetchDailyStripTask extends TimerTask
-  {
+  private class FetchDailyStripTask extends TimerTask {
     private final String md5Hash;
 
-    private FetchDailyStripTask(final String md5Hash)
-    {
+    private FetchDailyStripTask(final String md5Hash) {
       this.md5Hash = md5Hash;
     }
 
-    private void fireDailyStripUpdated(final DilbertDailyStrip dailyStrip)
-    {
+    private void fireDailyStripUpdated(final DilbertDailyStrip dailyStrip) {
       dilbertDailyStrip = dailyStrip;
 
       DailyStripEvent e = null;
@@ -296,16 +250,15 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
       }
     }
 
-    public void run()
-    {
+    public void run() {
       try {
-        final DilbertDailyStrip dailyStrip = new DilbertDailyStripFetcher().fetchDailyStrip(md5Hash);
+        final DilbertDailyStrip dailyStrip =
+            new DilbertDailyStripFetcher().fetchDailyStrip(md5Hash);
 
         if (dailyStrip != null) {
           fireDailyStripUpdated(dailyStrip);
         }
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
         LOGGER.info("Error fetching current daily strip from dilbert.com", e); // NON-NLS
         fireDailyStripUpdated(DilbertDailyStrip.MISSING_STRIP);
       }

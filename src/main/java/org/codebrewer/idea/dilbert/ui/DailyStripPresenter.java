@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007 Mark Scott
+ *  Copyright 2005, 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.project.Project;
@@ -24,8 +25,7 @@ import org.codebrewer.idea.dilbert.DilbertDailyStrip;
  *
  * @author Mark Scott
  */
-public interface DailyStripPresenter
-{
+public interface DailyStripPresenter {
   /**
    * Called to request that this presenter disposes of any resources it may be
    * holding.
@@ -56,7 +56,7 @@ public interface DailyStripPresenter
    * Gets the non-null project for which this presenter displays daily strips.
    *
    * @return the non-null project for which this presenter displays daily
-   *         strips.
+   * strips.
    */
   Project getProject();
 }

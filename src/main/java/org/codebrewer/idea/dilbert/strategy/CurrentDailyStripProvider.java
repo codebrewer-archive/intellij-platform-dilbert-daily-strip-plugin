@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008, 2010 Mark Scott
+ *  Copyright 2007, 2008, 2010, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.strategy;
 
 import com.intellij.openapi.actionSystem.ActionManager;
@@ -29,6 +30,16 @@ import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
+import java.awt.Dimension;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.KeyStroke;
 import org.codebrewer.idea.dilbert.DailyStripEvent;
 import org.codebrewer.idea.dilbert.DailyStripListener;
 import org.codebrewer.idea.dilbert.DilbertDailyStrip;
@@ -37,44 +48,31 @@ import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.idea.dilbert.ui.DisclaimerNotAcknowledgedDialog;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
-import java.awt.Dimension;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.KeyStroke;
-
 /**
  * A strategy that keeps its client updated with the current daily strip.
  *
  * @author Mark Scott
  */
-public class CurrentDailyStripProvider extends LocalizableDailyStripProvider implements DailyStripListener
-{
+public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
+    implements DailyStripListener {
   private static final String PROVIDER_ID = "currentStrip";
   private static final Icon REFRESH_ICON = IconLoader.getIcon("/vcs/refresh.png");
 
   private final JComponent controlPanel;
   private JProgressBar progressBar;
 
-  public CurrentDailyStripProvider(final DailyStripPresenter presenter)
-  {
+  public CurrentDailyStripProvider(final DailyStripPresenter presenter) {
     super(presenter);
     controlPanel = buildControlPanel();
   }
 
-  private JComponent buildControlPanel()
-  {
+  private JComponent buildControlPanel() {
     final DefaultActionGroup dag = new DefaultActionGroup();
     dag.add(new RefreshDailyStripAction());
 
     final ActionManager actionManager = ActionManager.getInstance();
-    final ActionToolbar actionToolbar = actionManager.createActionToolbar("strategy.currentStrip", dag, true);
+    final ActionToolbar actionToolbar =
+        actionManager.createActionToolbar("strategy.currentStrip", dag, true);
     final JPanel actionsPanel = new JPanel();
 
     actionToolbar.setReservePlaceAutoPopupIcon(false);
@@ -85,8 +83,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
     return actionsPanel;
   }
 
-  private void setProgressBarVisible(final boolean visible)
-  {
+  private void setProgressBarVisible(final boolean visible) {
     if (visible && progressBar == null) {
       progressBar = new JProgressBar();
       progressBar.setIndeterminate(true);
@@ -94,8 +91,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       progressBar.setPreferredSize(new Dimension(100, preferredSize.height));
       progressBar.setMaximumSize(new Dimension(100, preferredSize.height));
       controlPanel.add(progressBar);
-    }
-    else if (progressBar != null) {
+    } else if (progressBar != null) {
       controlPanel.remove(progressBar);
       progressBar = null;
     }
@@ -106,8 +102,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
   // Implement/override AbstractDailyStripProvider
 
   @Override
-  protected void doPause()
-  {
+  protected void doPause() {
     // This strategy doesn't really have any state so pausing is effectively the
     // same as stopping
     //
@@ -115,8 +110,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
   }
 
   @Override
-  protected void doResume()
-  {
+  protected void doResume() {
     // This strategy doesn't really have any state so resuming is effectively
     // the same as starting
     //
@@ -124,52 +118,45 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
   }
 
   @Override
-  protected void doStart()
-  {
+  protected void doStart() {
     final DilbertDailyStripPlugin dilbertPlugin =
-      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+        ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
     dilbertPlugin.addDailyStripListener(this);
     final DilbertDailyStrip dilbertDailyStrip = dilbertPlugin.getCachedDailyStrip();
 
     if (dilbertDailyStrip == null && dilbertPlugin.isDisclaimerAcknowledged()) {
       setProgressBarVisible(true);
       dilbertPlugin.fetchDailyStrip();
-    }
-    else {
+    } else {
       getDailyStripPresenter().setDailyStrip(dilbertDailyStrip);
     }
   }
 
   @Override
-  protected void doStop()
-  {
+  protected void doStop() {
     final DilbertDailyStripPlugin dilbertPlugin =
-      ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+        ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
     dilbertPlugin.removeDailyStripListener(this);
     setProgressBarVisible(false);
   }
 
   @Override
-  public JComponent getControlPanel()
-  {
+  public JComponent getControlPanel() {
     return controlPanel;
   }
 
-  public String getId()
-  {
+  public String getId() {
     return PROVIDER_ID;
   }
 
   // Implement DailyStripListener
 
-  public void dailyStripUpdated(final DailyStripEvent e)
-  {
+  public void dailyStripUpdated(final DailyStripEvent e) {
     setProgressBarVisible(false);
 
     if (e == null) {
       LOGGER.info("Listener received null DailyStripEvent!"); // NON-NLS
-    }
-    else {
+    } else {
       final DilbertDailyStrip newDailyStrip = e.getDilbertDailyStrip();
 
       if (newDailyStrip != null) {
@@ -187,18 +174,20 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
   /**
    * An action that refreshes the cartoon strip displayed.
    */
-  private final class RefreshDailyStripAction extends AnAction implements DumbAware
-  {
+  private final class RefreshDailyStripAction extends AnAction implements DumbAware {
     private final DilbertDailyStripPlugin dilbertPlugin;
 
-    private RefreshDailyStripAction()
-    {
-      super(ResourceBundleManager.getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.tooltip"),
-          ResourceBundleManager.getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.statusbartext"),
+    private RefreshDailyStripAction() {
+      super(ResourceBundleManager
+              .getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.tooltip"),
+          ResourceBundleManager
+              .getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.statusbartext"),
           REFRESH_ICON);
-      dilbertPlugin = ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      dilbertPlugin =
+          ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
 
-      final ToolWindowManager manager = ToolWindowManager.getInstance(getDailyStripPresenter().getProject());
+      final ToolWindowManager manager =
+          ToolWindowManager.getInstance(getDailyStripPresenter().getProject());
       final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
 
       if (toolWindow != null) {
@@ -211,8 +200,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
     }
 
     @Override
-    public void actionPerformed(final AnActionEvent e)
-    {
+    public void actionPerformed(final AnActionEvent e) {
       // The strip is only fetched if the user has acknowledged the plug-in's
       // disclaimer
       //
@@ -226,7 +214,8 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
         final DisclaimerNotAcknowledgedDialog dlg = new DisclaimerNotAcknowledgedDialog();
         dlg.show();
         if (dlg.getExitCode() == DialogWrapper.OK_EXIT_CODE && dlg.isOpenSettings()) {
-          ShowSettingsUtil.getInstance().editConfigurable(getControlPanel().getTopLevelAncestor(), dilbertPlugin);
+          ShowSettingsUtil.getInstance()
+                          .editConfigurable(getControlPanel().getTopLevelAncestor(), dilbertPlugin);
 
           // If the disclaimer has now been acknowledged then fetch the strip
           //
@@ -237,8 +226,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       }
     }
 
-    private void fetchDailyStrip()
-    {
+    private void fetchDailyStrip() {
       setProgressBarVisible(true);
       getDailyStripPresenter().setDailyStrip(null);
 
@@ -246,9 +234,9 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider imp
       // modification time of the currently displayed strip (if any)
       //
       if (getDailyStripPresenter().getDilbertDailyStrip() != null) {
-        dilbertPlugin.fetchDailyStrip(getDailyStripPresenter().getDilbertDailyStrip().getImageChecksum());
-      }
-      else {
+        dilbertPlugin
+            .fetchDailyStrip(getDailyStripPresenter().getDilbertDailyStrip().getImageChecksum());
+      } else {
         dilbertPlugin.fetchDailyStrip();
       }
     }

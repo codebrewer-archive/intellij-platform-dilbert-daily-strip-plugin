@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007, 2008, 2015 Mark Scott
+ * Copyright 2005, 2007, 2008, 2015, 2018 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -28,13 +27,7 @@ import javax.swing.ImageIcon;
  *
  * @author Mark Scott
  */
-public final class DilbertDailyStrip
-{
-  /**
-   * For logging messages to IDEA's log.
-   */
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
-
+public final class DilbertDailyStrip {
   /**
    * A constant that can be used to represent a 'missing' strip (e.g. when a
    * network problem prevents a cartoon from being fetched).
@@ -46,7 +39,8 @@ public final class DilbertDailyStrip
    * A regular expression that, when applied to the dilbert.com homepage,
    * identifies the URL of the current cartoon image.
    */
-  public static final String IMAGE_URL_REGEX = "^.*<img .*src=\"(http://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
+  public static final String IMAGE_URL_REGEX =
+      "^.*<img .*src=\"(http://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
 
   /**
    * The URL of the dilbert.com website.
@@ -89,8 +83,10 @@ public final class DilbertDailyStrip
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
    */
-  private DilbertDailyStrip(final Icon image, final String md5Hash, final String uri, final long retrievalTime)
-  {
+  private DilbertDailyStrip(final Icon image,
+                            final String md5Hash,
+                            final String uri,
+                            final long retrievalTime) {
     this.image = image;
     this.md5Hash = md5Hash;
     this.uri = uri;
@@ -106,8 +102,10 @@ public final class DilbertDailyStrip
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
    */
-  public DilbertDailyStrip(final byte[] imageBytes, final String md5Hash, final String uri, final long retrievalTime)
-  {
+  public DilbertDailyStrip(final byte[] imageBytes,
+                           final String md5Hash,
+                           final String uri,
+                           final long retrievalTime) {
     this(new ImageIcon(imageBytes), md5Hash, uri, retrievalTime);
     this.imageBytes = new byte[imageBytes.length];
     System.arraycopy(imageBytes, 0, this.imageBytes, 0, imageBytes.length);
@@ -118,8 +116,7 @@ public final class DilbertDailyStrip
    *
    * @return the cartoon image.
    */
-  public Icon getIcon()
-  {
+  public Icon getIcon() {
     return image;
   }
 
@@ -128,16 +125,14 @@ public final class DilbertDailyStrip
    *
    * @return the bytes that comprise the cartoon image.
    */
-  public byte[] getImageBytes()
-  {
+  public byte[] getImageBytes() {
     final byte[] imageCopy = new byte[imageBytes.length];
     System.arraycopy(imageBytes, 0, imageCopy, 0, imageBytes.length);
 
     return imageCopy;
   }
 
-  public String getImageChecksum()
-  {
+  public String getImageChecksum() {
     return md5Hash;
   }
 
@@ -146,8 +141,7 @@ public final class DilbertDailyStrip
    *
    * @return the time at which the strip was fetched.
    */
-  public long getRetrievalTime()
-  {
+  public long getRetrievalTime() {
     return retrievalTime;
   }
 
@@ -156,24 +150,23 @@ public final class DilbertDailyStrip
    *
    * @return the URI from which the cartoon image was retrieved.
    */
-  public String getUri()
-  {
+  public String getUri() {
     return uri;
   }
 
   @Override
-  public boolean equals(final Object obj)
-  {
+  public boolean equals(final Object obj) {
     if (this == obj) {
       return true;
     }
 
-    if (obj == null || getClass() != obj.getClass()) {
+    if (!(obj instanceof DilbertDailyStrip)) {
       return false;
     }
 
     final DilbertDailyStrip that = (DilbertDailyStrip) obj;
 
+    //noinspection RedundantIfStatement
     if (md5Hash != null ? !md5Hash.equals(that.md5Hash) : that.md5Hash != null) {
       return false;
     }
@@ -182,8 +175,7 @@ public final class DilbertDailyStrip
   }
 
   @Override
-  public int hashCode()
-  {
+  public int hashCode() {
     return md5Hash == null ? 0 : md5Hash.hashCode();
   }
 }

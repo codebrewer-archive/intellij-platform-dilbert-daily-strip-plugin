@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007 Mark Scott
+ * Copyright 2005, 2007, 2018 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.ui;
 
-import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
-import org.codebrewer.idea.dilbert.settings.Modifiable;
-import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
-import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
-
+import com.intellij.util.ui.JBUI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import org.codebrewer.idea.dilbert.settings.ApplicationSettings;
+import org.codebrewer.idea.dilbert.settings.Modifiable;
+import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 /**
  * A panel that provides a UI for the user to configure the plugin's
@@ -54,7 +51,7 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
    * disclaimer has been acknowledged (so that their enabled state can be
    * toggled with the disclaimer acknowledgment).
    */
-  private final List dependentControls;
+  private final List<Modifiable> dependentControls;
 
   private final UnattendedDownloadSettings unattendedDownloadSettings;
   private final UnattendedDownloadSettingsPanel unattendedDownloadSettingsPanel;
@@ -68,8 +65,7 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
    * @throws IllegalArgumentException if <code>settings</code> is
    * <code>null</code>.
    */
-  public SettingsPanel(final ApplicationSettings settings)
-  {
+  public SettingsPanel(final ApplicationSettings settings) {
     if (settings == null) {
       throw new IllegalArgumentException("ApplicationSettings cannot be null");
     }
@@ -80,9 +76,10 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
       throw new IllegalArgumentException("UnattendedDownloadSettings cannot be null");
     }
 
-    unattendedDownloadSettingsPanel = (UnattendedDownloadSettingsPanel) unattendedDownloadSettings.createComponent();
+    unattendedDownloadSettingsPanel =
+        (UnattendedDownloadSettingsPanel) unattendedDownloadSettings.createComponent();
 
-    dependentControls = new ArrayList(2);
+    dependentControls = new ArrayList<>();
     build();
   }
 
@@ -92,14 +89,11 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
    *
    * @return the user's current settings as reflected by the UI.
    */
-  public ApplicationSettings getDisplayedSettings()
-  {
+  public ApplicationSettings getDisplayedSettings() {
     final UnattendedDownloadSettings unattendedDownloadSettingsNow =
         unattendedDownloadSettingsPanel.getDisplayedSettings();
-    final ApplicationSettings displayedSettings =
-        new ApplicationSettings(disclaimerCheckBox.isSelected(), unattendedDownloadSettingsNow);
 
-    return displayedSettings;
+    return new ApplicationSettings(disclaimerCheckBox.isSelected(), unattendedDownloadSettingsNow);
   }
 
   /**
@@ -110,14 +104,11 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
    * @param settings the last settings saved by the user.
    *
    * @return <code>true</code> if the saved settings differ from the settings
-   *         represented by the current state of the configuration UI, otherwise
-   *         <code>false</code>.
+   * represented by the current state of the configuration UI, otherwise
+   * <code>false</code>.
    */
-  public boolean isModified(final ApplicationSettings settings)
-  {
-    final boolean result = !getDisplayedSettings().equals(settings);
-
-    return result;
+  public boolean isModified(final ApplicationSettings settings) {
+    return !getDisplayedSettings().equals(settings);
   }
 
   /**
@@ -129,8 +120,7 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
    * @throws IllegalArgumentException if <code>settings</code> is
    * <code>null</code> or if the .
    */
-  public void setSettings(final ApplicationSettings settings)
-  {
+  public void setSettings(final ApplicationSettings settings) {
     if (settings == null) {
       throw new IllegalArgumentException("null settings");
     }
@@ -140,28 +130,27 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
     setDependentsEnabled(disclaimerAcknowledged);
   }
 
-  private void build()
-  {
+  private void build() {
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
     final JPanel generalSettingsPanel = new JPanel(new BorderLayout());
-    final Border border = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(3, 5, 3, 5));
+    final Border border =
+        new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), JBUI.Borders.empty(3, 5));
     final String panelTitle =
-        ResourceBundleManager.getLocalizedString(SettingsPanel.class, BasicSettingsPanel.PANEL_TITLE_KEY);
+        ResourceBundleManager
+            .getLocalizedString(SettingsPanel.class, BasicSettingsPanel.PANEL_TITLE_KEY);
     generalSettingsPanel.setBorder(new TitledBorder(border, panelTitle));
 
-    disclaimerCheckBox = new JCheckBox(ResourceBundleManager.getLocalizedString(
-        SettingsPanel.class, "button.disclaimer.text"), false);
-    final char disclaimerMnemonic = ResourceBundleManager.getLocalizedMnemonic(
-        SettingsPanel.class, "button.disclaimer.text.mnemonic");
+    disclaimerCheckBox =
+        new JCheckBox(
+            ResourceBundleManager.getLocalizedString(
+                SettingsPanel.class, "button.disclaimer.text"), false);
+    final char disclaimerMnemonic =
+        ResourceBundleManager.getLocalizedMnemonic(
+            SettingsPanel.class, "button.disclaimer.text.mnemonic");
     disclaimerCheckBox.setMnemonic(disclaimerMnemonic);
-    disclaimerCheckBox.addItemListener(new ItemListener()
-    {
-      public void itemStateChanged(final ItemEvent itemEvent)
-      {
-        setDependentsEnabled(disclaimerCheckBox.isSelected());
-      }
-    });
+    disclaimerCheckBox.addItemListener(
+        itemEvent -> setDependentsEnabled(disclaimerCheckBox.isSelected()));
     generalSettingsPanel.add(disclaimerCheckBox, BorderLayout.WEST);
     generalSettingsPanel.setMaximumSize(
         new Dimension(Integer.MAX_VALUE, generalSettingsPanel.getPreferredSize().height));
@@ -169,16 +158,15 @@ public final class SettingsPanel extends JPanel//BasicSettingsPanel
 
     if (unattendedDownloadSettingsPanel != null) {
       unattendedDownloadSettingsPanel.setMaximumSize(
-          new Dimension(Integer.MAX_VALUE, unattendedDownloadSettingsPanel.getPreferredSize().height));
+          new Dimension(
+              Integer.MAX_VALUE, unattendedDownloadSettingsPanel.getPreferredSize().height));
       add(unattendedDownloadSettingsPanel);
       dependentControls.add(unattendedDownloadSettings);
     }
   }
 
-  private void setDependentsEnabled(final boolean state)
-  {
-    for (int i = 0; i < dependentControls.size(); i++) {
-      final Modifiable dependentControl = (Modifiable) dependentControls.get(i);
+  private void setDependentsEnabled(final boolean state) {
+    for (final Modifiable dependentControl : dependentControls) {
       dependentControl.setConfigurationUIEnabled(state);
     }
   }

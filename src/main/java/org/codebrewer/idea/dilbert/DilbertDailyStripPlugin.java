@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2008 Mark Scott
+ *  Copyright 2005, 2007, 2008, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
 import com.intellij.openapi.components.ApplicationComponent;
@@ -33,8 +34,8 @@ import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
  *
  * @author Mark Scott
  */
-public interface DilbertDailyStripPlugin extends ApplicationComponent, Configurable, NamedJDOMExternalizable
-{
+public interface DilbertDailyStripPlugin
+    extends ApplicationComponent, Configurable, NamedJDOMExternalizable {
   /**
    * The text that will be displayed on the button for the plugin's toolwindow.
    */
@@ -70,7 +71,7 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent, Configura
    * <strong>not</strong> attempt to download the current strip.
    *
    * @return the last strip downloaded or <code>null</code> if none has been
-   *         downloaded.
+   * downloaded.
    */
   DilbertDailyStrip getCachedDailyStrip();
 
@@ -82,7 +83,7 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent, Configura
    * @param presenter a client <code>DailyStripPresenter</code>.
    *
    * @return a non-<code>null</code> but possibly empty array of providers for
-   *         <code>presenter</code>.
+   * <code>presenter</code>.
    */
   DailyStripProvider[] getDailyStripProviders(DailyStripPresenter presenter);
 
@@ -90,7 +91,7 @@ public interface DilbertDailyStripPlugin extends ApplicationComponent, Configura
    * Indicates whether or not the user has acknowledged the plugin's disclaimer.
    *
    * @return <code>true</code> if the user has acknowledged the plugin's
-   *         disclaimer, <code>false</code> if not.
+   * disclaimer, <code>false</code> if not.
    */
   boolean isDisclaimerAcknowledged();
 

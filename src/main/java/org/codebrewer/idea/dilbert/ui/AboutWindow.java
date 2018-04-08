@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2006 Mark Scott
+ *  Copyright 2005, 2006, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.util.IconLoader;
-import org.codebrewer.idea.dilbert.util.VersionInfo;
-import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -29,21 +27,21 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.MessageFormat;
-
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import org.codebrewer.idea.dilbert.util.VersionInfo;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 /**
  * A singelton class that implements an 'about' screen.
  *
  * @author Mark Scott
  */
-final class AboutWindow extends JDialog
-{
+final class AboutWindow extends JDialog {
   private static final Icon ICON_ABOUT = IconLoader.getIcon("/dilbert-splash.png");
 
   private static final AboutWindow INSTANCE = new AboutWindow();
@@ -60,25 +58,21 @@ final class AboutWindow extends JDialog
 
   private static final int TOP_BORDER = 10;
 
-  private static final int VERSION_STRING_LENGTH_GUESS = 128;
-
   /**
    * Returns the singleton instance of this class.
    *
    * @return the singleton instance of this class.
    */
-  public static AboutWindow getInstance()
-  {
+  public static AboutWindow getInstance() {
     return INSTANCE;
   }
 
-  private AboutWindow()
-  {
+  private AboutWindow() {
     build();
   }
 
-  private void build()
-  {
+  @SuppressWarnings("UseJBColor")
+  private void build() {
     setModal(true);
     setSize(WIDTH, HEIGHT);
     setUndecorated(true);
@@ -94,43 +88,37 @@ final class AboutWindow extends JDialog
     //
     final String versionLine = MessageFormat.format(
         ResourceBundleManager.getLocalizedString(AboutWindow.class, "about.template.version"),
-        new Object[]{
-            new Integer(VersionInfo.getVersionMajor()),
-            new Integer(VersionInfo.getVersionMinor()),
-            new Integer(VersionInfo.getVersionRevision()) });
+        VersionInfo.getVersionMajor(),
+        VersionInfo.getVersionMinor(),
+        VersionInfo.getVersionRevision());
 
     // A line giving the plugin build number
     //
     final String buildLine = MessageFormat.format(
         ResourceBundleManager.getLocalizedString(AboutWindow.class, "about.template.build"),
-        new Object[]{ new Integer(VersionInfo.getBuildNumber()) });
+        VersionInfo.getBuildNumber());
 
     // A line giving the plugin build date
     //
     final String builtLine = MessageFormat.format(
         ResourceBundleManager.getLocalizedString(AboutWindow.class, "about.template.built"),
-        new Object[]{ VersionInfo.getBuildDate() });
+        VersionInfo.getBuildDate());
 
     // A label that uses html to format the lines of info
     //
-    final StringBuffer sb = new StringBuffer(VERSION_STRING_LENGTH_GUESS);
-    sb.append("<html><b>")
-        .append(versionLine)
-        .append("</b><br>")
-        .append(buildLine)
-        .append("<br>")
-        .append(builtLine)
-        .append("</html>");
-    final String versionString = sb.toString();
+    final String versionString =
+        "<html><b>" + versionLine + "</b><br>" + buildLine + "<br>" + builtLine + "</html>";
     final JLabel versionLabel = new JLabel(versionString, JLabel.LEADING);
-    versionLabel.setBorder(BorderFactory.createEmptyBorder(TOP_BORDER, LEFT_BORDER, BOTTOM_BORDER, RIGHT_BORDER));
+    versionLabel.setBorder(
+        BorderFactory.createEmptyBorder(TOP_BORDER, LEFT_BORDER, BOTTOM_BORDER, RIGHT_BORDER));
     final Font labelFont = new Font("Sans-Serif", Font.PLAIN, 10);
     versionLabel.setFont(labelFont);
     contentPane.add(versionLabel, BorderLayout.CENTER);
 
     // A label containing copyright information
     //
-    final String copyrightString = ResourceBundleManager.getLocalizedString(AboutWindow.class, "about.copyright");
+    final String copyrightString =
+        ResourceBundleManager.getLocalizedString(AboutWindow.class, "about.copyright");
     final JLabel copyrightLabel = new JLabel(copyrightString, JLabel.TRAILING);
     copyrightLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 5));
     copyrightLabel.setFont(labelFont);
@@ -144,19 +132,16 @@ final class AboutWindow extends JDialog
     splashLabel.setVerticalAlignment(SwingConstants.TOP);
 
     glassPanel.add(splashLabel);
-    glassPanel.addMouseListener(new MouseAdapter()
-    {
+    glassPanel.addMouseListener(new MouseAdapter() {
       // Clicking on the panel hides it...
       //
-      public void mouseClicked(final MouseEvent mouseEvent)
-      {
+      public void mouseClicked(final MouseEvent mouseEvent) {
         setVisible(false);
       }
 
       // ...as does the mouse leaving it...
       //
-      public void mouseExited(final MouseEvent mouseEvent)
-      {
+      public void mouseExited(final MouseEvent mouseEvent) {
         setVisible(false);
       }
     });
@@ -165,20 +150,16 @@ final class AboutWindow extends JDialog
 
     // ...or losing focus...
     //
-    addFocusListener(new FocusAdapter()
-    {
-      public void focusLost(FocusEvent e)
-      {
+    addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) {
         setVisible(false);
       }
     });
 
     // ...or typing Esc while while we have focus
     //
-    addKeyListener(new KeyAdapter()
-    {
-      public void keyPressed(KeyEvent keyEvent)
-      {
+    addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent keyEvent) {
         if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE) {
           setVisible(false);
         }

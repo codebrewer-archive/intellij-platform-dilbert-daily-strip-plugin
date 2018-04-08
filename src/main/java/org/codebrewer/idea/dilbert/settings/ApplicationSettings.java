@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007 Mark Scott
+ *  Copyright 2005, 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.settings;
 
 import com.intellij.openapi.diagnostic.Logger;
@@ -30,11 +31,9 @@ import org.jdom.Element;
  *
  * @author Mark Scott
  */
-public final class ApplicationSettings implements JDOMExternalizable
-{
-  public static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
-
+public final class ApplicationSettings implements JDOMExternalizable {
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
   private static final String DISCLAIMER_ACKNOWLEDGED_KEY = "disclaimerAcknowledged";
 
   /**
@@ -57,8 +56,7 @@ public final class ApplicationSettings implements JDOMExternalizable
    * acknowledgment configuration parameter <code>false</code> and no
    * unattended downloads configured.
    */
-  public ApplicationSettings()
-  {
+  public ApplicationSettings() {
     this(DEFAULT_DISCLAIMER_ACKNOWLEDGED, UnattendedDownloadSettings.NO_DOWNLOAD_SETTINGS);
   }
 
@@ -72,9 +70,8 @@ public final class ApplicationSettings implements JDOMExternalizable
    * @param unattendedDownloadSettings settings that control unattended download
    * of strips.
    */
-  public ApplicationSettings(
-      final boolean disclaimerAcknowledged, final UnattendedDownloadSettings unattendedDownloadSettings)
-  {
+  public ApplicationSettings(final boolean disclaimerAcknowledged,
+                             final UnattendedDownloadSettings unattendedDownloadSettings) {
     this.disclaimerAcknowledged = disclaimerAcknowledged;
     this.unattendedDownloadSettings = unattendedDownloadSettings;
   }
@@ -84,8 +81,7 @@ public final class ApplicationSettings implements JDOMExternalizable
    *
    * @return the settings that control unattended downloading of strips.
    */
-  public UnattendedDownloadSettings getUnattendedDownloadSettings()
-  {
+  public UnattendedDownloadSettings getUnattendedDownloadSettings() {
     return unattendedDownloadSettings;
   }
 
@@ -93,15 +89,13 @@ public final class ApplicationSettings implements JDOMExternalizable
    * Indicates whether or not the user has acknowledged the plugin's disclaimer.
    *
    * @return <code>true</code> if the user has acknowledged the plugin's
-   *         disclaimer, <code>false</code> if not.
+   * disclaimer, <code>false</code> if not.
    */
-  public boolean isDisclaimerAcknowledged()
-  {
+  public boolean isDisclaimerAcknowledged() {
     return disclaimerAcknowledged;
   }
 
-  public boolean equals(final Object o)
-  {
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
@@ -122,8 +116,7 @@ public final class ApplicationSettings implements JDOMExternalizable
     return true;
   }
 
-  public int hashCode()
-  {
+  public int hashCode() {
     int result = disclaimerAcknowledged ? 1 : 0;
     result = 31 * result + unattendedDownloadSettings.hashCode();
 
@@ -132,8 +125,7 @@ public final class ApplicationSettings implements JDOMExternalizable
 
   // Implement JDOMExternalizable
 
-  public void readExternal(final Element element)
-  {
+  public void readExternal(final Element element) {
     LOGGER.debug("reading application settings"); // NON-NLS
     disclaimerAcknowledged = JDOMExternalizer.readBoolean(element, DISCLAIMER_ACKNOWLEDGED_KEY);
 
@@ -144,8 +136,7 @@ public final class ApplicationSettings implements JDOMExternalizable
     }
   }
 
-  public void writeExternal(final Element element)
-  {
+  public void writeExternal(final Element element) {
     LOGGER.debug("writing application settings"); // NON-NLS
     JDOMExternalizer.write(element, DISCLAIMER_ACKNOWLEDGED_KEY, disclaimerAcknowledged);
 

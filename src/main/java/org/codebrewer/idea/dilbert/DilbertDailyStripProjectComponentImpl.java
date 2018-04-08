@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
 import com.intellij.openapi.components.ProjectComponent;
@@ -24,10 +25,9 @@ import com.intellij.openapi.wm.ToolWindowAnchor;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import javax.swing.Icon;
 import org.codebrewer.idea.dilbert.ui.DailyStripPanel;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.Icon;
 
 /**
  * A project-level component implementation that manages the plug-in toolwindow
@@ -35,10 +35,10 @@ import javax.swing.Icon;
  *
  * @author Mark Scott
  */
-public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
-{
+public class DilbertDailyStripProjectComponentImpl implements ProjectComponent {
   /**
    * Icon for use on the toolwindow button.
+   *
    * @noinspection HardcodedFileSeparator
    */
   private static final Icon ICON_SMALL = IconLoader.getIcon("/dilbert13x13.png"); // NON-NLS
@@ -65,40 +65,34 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
    * @param project the <code>Project</code> instance with which this
    * <code>ProjectComponent</code> is associated.
    */
-  public DilbertDailyStripProjectComponentImpl(final Project project)
-  {
+  public DilbertDailyStripProjectComponentImpl(final Project project) {
     this.project = project;
   }
 
   // Implement BaseComponent
 
   @NotNull
-  public String getComponentName()
-  {
+  public String getComponentName() {
     // The value returned is used inter alia as the value of the 'name'
     // attribute of a 'component' element in the project's .iws file (this
     // plug-in stores project-level configuration data in the .iws file rather
     // than the .ipr file), so we use this class's fully-qualified name to
     // reduce the possibility of clashing with another element
     //
-    final String componentName = getClass().getPackage().getName();
-    return componentName;
+    return getClass().getPackage().getName();
   }
 
-  public void initComponent()
-  {
+  public void initComponent() {
     // Nothing to do?
   }
 
-  public void disposeComponent()
-  {
+  public void disposeComponent() {
     // Nothing to do?
   }
 
   // Implement ProjectComponent
 
-  public void projectOpened()
-  {
+  public void projectOpened() {
     if (project != null && !project.isDefault()) {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(" + project.getName() + ')');
 
@@ -107,25 +101,18 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       final ToolWindow toolWindow = manager.registerToolWindow(
           DilbertDailyStripPlugin.TOOL_WINDOW_ID, false, ToolWindowAnchor.BOTTOM, project, true);
+      final Content content =
+          ContentFactory.SERVICE.getInstance().createContent(dailyStripPanel, null, true);
 
-      if (toolWindow != null) {
-        final Content content = ContentFactory.SERVICE.getInstance().createContent(dailyStripPanel, null, true);
-
-        toolWindow.getContentManager().addContent(content);
-        toolWindow.setIcon(ICON_SMALL);
-        dailyStripPanel.initialise();
-      }
-      else {
-        LOGGER.info("Got null instead of a ToolWindow!");
-      }
-    }
-    else {
+      toolWindow.getContentManager().addContent(content);
+      toolWindow.setIcon(ICON_SMALL);
+      dailyStripPanel.initialise();
+    } else {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectOpened(null or default project)");
     }
   }
 
-  public void projectClosed()
-  {
+  public void projectClosed() {
     if (project != null && !project.isDefault()) {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosed(" + project.getName() + ')');
 
@@ -135,8 +122,7 @@ public class DilbertDailyStripProjectComponentImpl implements ProjectComponent
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
       manager.unregisterToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
-    }
-    else {
+    } else {
       LOGGER.debug("DilbertDailyStripApplicationImpl.projectClosed(null or default project)");
     }
   }

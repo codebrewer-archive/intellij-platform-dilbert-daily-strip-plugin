@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007 Mark Scott
+ *  Copyright 2005, 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.ui;
 
 import com.intellij.openapi.ui.DialogWrapper;
-import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
-
 import java.awt.BorderLayout;
-
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 /**
  * A <code>DialogWrapper</code> that can be used to inform the user that the
@@ -32,12 +31,10 @@ import javax.swing.JPanel;
  *
  * @author Mark Scott
  */
-public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
-{
+public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper {
   private final JCheckBox isOpenSettings;
 
-  public DisclaimerNotAcknowledgedDialog()
-  {
+  public DisclaimerNotAcknowledgedDialog() {
     super(false);
     final String label = ResourceBundleManager.getLocalizedString(
         DisclaimerNotAcknowledgedDialog.class, "dialog.acknowledge.checkbox.label");
@@ -49,13 +46,11 @@ public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
     init();
   }
 
-  public boolean isOpenSettings()
-  {
+  public boolean isOpenSettings() {
     return isOpenSettings.isSelected();
   }
 
-  protected JComponent createCenterPanel()
-  {
+  protected JComponent createCenterPanel() {
     final JPanel panel = new JPanel();
     panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     final String label = ResourceBundleManager.getLocalizedString(
@@ -66,9 +61,7 @@ public final class DisclaimerNotAcknowledgedDialog extends DialogWrapper
     return panel;
   }
 
-  public String toString()
-  {
-    //noinspection MagicCharacter,StringConcatenation
+  public String toString() {
     return getClass().getName() + "[isOpenSettings=" + isOpenSettings + ']';
   }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008, 2015 Mark Scott
+ *  Copyright 2007, 2008, 2015, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,10 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.http;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.net.HttpConfigurable;
+import com.siyeh.ig.portability.mediatype.ImageMediaType;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.MessageFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -30,21 +38,13 @@ import org.codebrewer.idea.dilbert.DilbertDailyStrip;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.util.ImageFileType;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.text.MessageFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * A class that knows how to fetch the latest daily strip from the dilbert.com
  * website.
  *
  * @author Mark Scott
  */
-public class DilbertDailyStripFetcher
-{
+public class DilbertDailyStripFetcher {
   /**
    * For logging messages to IDEA's log.
    */
@@ -95,8 +95,7 @@ public class DilbertDailyStripFetcher
    * @throws IOException if use of a proxy has been configured but an error
    * occurs if the user is asked for their proxy server credentials.
    */
-  private static void adaptForHttpProxy(final HttpClient client) throws IOException
-  {
+  private static void adaptForHttpProxy(final HttpClient client) throws IOException {
     assert client != null;
 
     // Use IDEA's HTTP proxy settings, if configured
@@ -147,18 +146,13 @@ public class DilbertDailyStripFetcher
    * @throws IOException if there is a problem fetching the current daily strip.
    */
   private static DilbertDailyStrip fetchDailyStrip(
-      final HttpClient client, final HttpURL stripURL, final String checksum) throws IOException
-  {
+      final HttpClient client, final HttpURL stripURL, final String checksum) throws IOException {
     assert client != null;
     assert stripURL != null;
 
     LOGGER.debug(stripURL.toString());
 
     final GetMethod stripURLMethod = new GetMethod(stripURL.getURI());
-
-    // Set a default return value
-    //
-    DilbertDailyStrip result = null;
 
     // Try to retrieve the daily strip image and use its bytes to create a daily
     // strip object
@@ -168,19 +162,17 @@ public class DilbertDailyStripFetcher
 
       if (statusCode == HttpStatus.SC_OK) {
         final byte[] responseBody = getStripBytes(stripURLMethod);
-        result = new DilbertDailyStrip(responseBody, checksum, stripURL.getURI(), System.currentTimeMillis());
-      }
-      else {
-        final String message = MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, stripURL.getURI());
+        return new DilbertDailyStrip(
+            responseBody, checksum, stripURL.getURI(), System.currentTimeMillis());
+      } else {
+        final String message =
+            MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, stripURL.getURI());
         LOGGER.info(message);
         throw new IOException(message);
       }
-    }
-    finally {
+    } finally {
       stripURLMethod.releaseConnection();
     }
-
-    return result;
   }
 
   /**
@@ -192,13 +184,12 @@ public class DilbertDailyStripFetcher
    * has already executed a request to fetch the current daily strip.
    *
    * @return a non-<code>null</code> array of bytes comprising the current daily
-   *         strip image.
+   * strip image.
    *
    * @throws IOException if there is a problem retrieving the image bytes from
    * the response body or if the bytes do not represent a recognized image type.
    */
-  private static byte[] getStripBytes(final HttpMethod stripURLMethod) throws IOException
-  {
+  private static byte[] getStripBytes(final HttpMethod stripURLMethod) throws IOException {
     assert stripURLMethod != null && stripURLMethod.hasBeenUsed();
 
     final byte[] result;
@@ -212,14 +203,13 @@ public class DilbertDailyStripFetcher
         final String message = "Response body does not appear to be an image"; // NON-NLS
         LOGGER.info(message);
         throw new IOException(message);
-      }
-      else {
+      } else {
         result = responseBody;
       }
-    }
-    else {
+    } else {
       // NON-NLS
-      final String message = MessageFormat.format("Unexpected content type for daily strip image: {0}", contentTypeHeader);
+      final String message = MessageFormat
+          .format("Unexpected content type for daily strip image: {0}", contentTypeHeader);
       LOGGER.info(message);
       throw new IOException(message);
     }
@@ -239,8 +229,7 @@ public class DilbertDailyStripFetcher
    * @throws IOException if there is a problem identifying the URL for the
    * current daily strip.
    */
-  private static HttpURL getStripURL(final HttpMethod homepageURLMethod) throws IOException
-  {
+  private static HttpURL getStripURL(final HttpMethod homepageURLMethod) throws IOException {
     assert homepageURLMethod != null && homepageURLMethod.hasBeenUsed();
 
     HttpURL result = null;
@@ -248,10 +237,10 @@ public class DilbertDailyStripFetcher
     // Read the homepage body line by line, looking for a match on the regex
     // that identifies the daily strip image
     //
-    BufferedReader br = null;
 
-    try {
-      br = new BufferedReader(new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()));
+    try (BufferedReader br =
+             new BufferedReader(
+                 new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()))) {
       final Pattern p = Pattern.compile(DilbertDailyStrip.IMAGE_URL_REGEX);
       String line;
       do {
@@ -275,14 +264,10 @@ public class DilbertDailyStripFetcher
         // NON-NLS
         final String message =
             MessageFormat.format(
-                "Didn't match regular expression {0}  to any line in the homepage content", DilbertDailyStrip.IMAGE_URL_REGEX);
+                "Didn't match regular expression {0}  to any line in the homepage content",
+                DilbertDailyStrip.IMAGE_URL_REGEX);
         LOGGER.info(message);
         throw new IOException(message);
-      }
-    }
-    finally {
-      if (br != null) {
-        br.close();
       }
     }
 
@@ -297,16 +282,15 @@ public class DilbertDailyStripFetcher
    * indicating a content type.
    *
    * @return <code>true</code> if the content type is recognized, otherwise
-   *         <code>false</code>.
+   * <code>false</code>.
    */
-  private static boolean isRecognizedImageContentType(final Header contentTypeHeader)
-  {
+  private static boolean isRecognizedImageContentType(final Header contentTypeHeader) {
     boolean result = false;
 
     if (contentTypeHeader != null) {
       final String contentType = contentTypeHeader.getValue();
-      result = ImageFileType.CONTENT_TYPE_IMAGE_GIF.equalsIgnoreCase(contentType) ||
-          ImageFileType.CONTENT_TYPE_IMAGE_JPEG.equalsIgnoreCase(contentType);
+      result = ImageMediaType.GIF.toString().equalsIgnoreCase(contentType) ||
+               ImageMediaType.JPEG.toString().equalsIgnoreCase(contentType);
     }
 
     return result;
@@ -320,18 +304,19 @@ public class DilbertDailyStripFetcher
    * @param md5Hash a 32-character MD5 checksum value.
    *
    * @return the current daily strip or <code>null</code> if the dilbert.com
-   *         homepage has not been modified since the state represented by
-   *         <code>md5Hash</code>.
+   * homepage has not been modified since the state represented by
+   * <code>md5Hash</code>.
    *
    * @throws IOException if an error occurs fetching the strip.
    */
-  public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException
-  {
-    LOGGER.info("Looking for strip from a homepage with an ETag different from " + md5Hash); // NON-NLS
+  public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException {
+    LOGGER.info(
+        "Looking for strip from a homepage with an ETag different from " + md5Hash); // NON-NLS
     final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
 
     if (md5Hash != null) {
-      homepageURLMethod.setRequestHeader(HTTP_HEADER_IF_NONE_MATCH, String.format("\"%s\"", md5Hash));
+      homepageURLMethod
+          .setRequestHeader(HTTP_HEADER_IF_NONE_MATCH, String.format("\"%s\"", md5Hash));
     }
 
     // Set a default return value
@@ -381,8 +366,7 @@ public class DilbertDailyStripFetcher
           if (quotedETag != null) {
             if (quotedETag.matches("^\"\\p{Alnum}{32}?\"$")) { // "regular" ETag
               eTag = quotedETag.substring(1, 33);
-            }
-            else if (quotedETag.matches("^W/\"\\p{Alnum}{32}?\"$")) { // "weak" ETag
+            } else if (quotedETag.matches("^W/\"\\p{Alnum}{32}?\"$")) { // "weak" ETag
               eTag = quotedETag.substring(3, 36);
             }
           }
@@ -391,15 +375,14 @@ public class DilbertDailyStripFetcher
         if (eTag == null || !eTag.equals(md5Hash)) {
           result = fetchDailyStrip(client, stripURL, eTag);
         }
-      }
-      else {
+      } else {
         final String message =
-            MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, DilbertDailyStrip.DILBERT_DOT_COM_URL);
+            MessageFormat
+                .format(HTTP_NOT_SC_OK_MESSAGE, statusCode, DilbertDailyStrip.DILBERT_DOT_COM_URL);
         LOGGER.info(message);
         throw new IOException(message);
       }
-    }
-    finally {
+    } finally {
       homepageURLMethod.releaseConnection();
     }
 

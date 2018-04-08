@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,55 +13,40 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.util;
 
+import com.siyeh.ig.portability.mediatype.ImageMediaType;
 import java.io.File;
 
 /**
- * Typesafe enumeration of image file types.
+ * Enumeration of image file types used for Dilbert cartoons.
  *
  * @author Mark Scott
  */
-public abstract class ImageFileType
-{
-  /**
-   * Constant identifying the GIF content/media type.
-   */
-  public static final String CONTENT_TYPE_IMAGE_GIF = "image/gif";
-
-  /**
-   * Constant identifying the JFIF content/media type.
-   */
-  public static final String CONTENT_TYPE_IMAGE_JPEG = "image/jpeg";
-
+public enum ImageFileType {
   /**
    * Constant representing the GIF file type.
    */
-  public static final ImageFileType GIF = new ImageFileType(CONTENT_TYPE_IMAGE_GIF)
-  {
-    boolean accepts(final byte[] bytes)
-    {
+  GIF(ImageMediaType.GIF) {
+    boolean accepts(final byte[] bytes) {
       return ImageFileUtils.mayBeGIF(bytes);
     }
 
-    protected boolean accepts(final File file)
-    {
+    protected boolean accepts(final File file) {
       return ImageFileUtils.mayBeGIF(file);
     }
-  };
+  },
 
   /**
    * Constant representing the JFIF file type.
    */
-  public static final ImageFileType JFIF = new ImageFileType(CONTENT_TYPE_IMAGE_JPEG)
-  {
-    boolean accepts(final byte[] bytes)
-    {
+  JFIF(ImageMediaType.JPEG) {
+    boolean accepts(final byte[] bytes) {
       return ImageFileUtils.mayBeJFIF(bytes);
     }
 
-    protected boolean accepts(final File file)
-    {
+    protected boolean accepts(final File file) {
       return ImageFileUtils.mayBeJFIF(file);
     }
   };
@@ -73,23 +58,19 @@ public abstract class ImageFileType
    * @param bytes an array that may contain image data.
    *
    * @return a constant of this class that represents the image type contained
-   *         in <code>bytes</code>, or <code>null</code> if no match is found.
+   * in <code>bytes</code>, or <code>null</code> if no match is found.
    *
    * @see #GIF
    * @see #JFIF
    */
-  public static ImageFileType getImageFileType(final byte[] bytes)
-  {
-    ImageFileType result = null;
-
-    if (GIF.accepts(bytes)) {
-      result = GIF;
-    }
-    else if (JFIF.accepts(bytes)) {
-      result = JFIF;
+  public static ImageFileType getImageFileType(final byte[] bytes) {
+    for (final ImageFileType imageFileType : ImageFileType.values()) {
+      if (imageFileType.accepts(bytes)) {
+        return imageFileType;
+      }
     }
 
-    return result;
+    return null;
   }
 
   /**
@@ -99,30 +80,25 @@ public abstract class ImageFileType
    * @param file a file that may contain image data.
    *
    * @return a constant of this class that represents the image type contained
-   *         in <code>file</code>, or <code>null</code> if no match is found.
+   * in <code>file</code>, or <code>null</code> if no match is found.
    *
    * @see #GIF
    * @see #JFIF
    */
-  public static ImageFileType getImageFileType(final File file)
-  {
-    ImageFileType result = null;
-
-    if (GIF.accepts(file)) {
-      result = GIF;
-    }
-    else if (JFIF.accepts(file)) {
-      result = JFIF;
+  public static ImageFileType getImageFileType(final File file) {
+    for (final ImageFileType imageFileType : ImageFileType.values()) {
+      if (imageFileType.accepts(file)) {
+        return imageFileType;
+      }
     }
 
-    return result;
+    return null;
   }
 
-  private final String name;
+  private final ImageMediaType imageMediaType;
 
-  private ImageFileType(final String name)
-  {
-    this.name = name;
+  ImageFileType(final ImageMediaType imageMediaType) {
+    this.imageMediaType = imageMediaType;
   }
 
   /**
@@ -132,7 +108,7 @@ public abstract class ImageFileType
    * @param bytes an array that may contain image data.
    *
    * @return <code>true</code> if <code>bytes</code> may contain image data
-   *         represented by this instance, otherwise <code>false</code>.
+   * represented by this instance, otherwise <code>false</code>.
    */
   abstract boolean accepts(byte[] bytes);
 
@@ -143,19 +119,11 @@ public abstract class ImageFileType
    * @param file a file that may contain image data.
    *
    * @return <code>true</code> if <code>file</code> may contain image data
-   *         represented by this instance, otherwise <code>false</code>.
+   * represented by this instance, otherwise <code>false</code>.
    */
   abstract boolean accepts(File file);
 
-  public String toString()
-  {
-    final StringBuffer sb = new StringBuffer(100);
-
-    sb.append(ImageFileType.class.getName());
-    sb.append("[name='");
-    sb.append(name);
-    sb.append("']");
-
-    return sb.toString();
+  public String toString() {
+    return ImageFileType.class.getName() + "[imageMediaType='" + imageMediaType.toString() + "']";
   }
 }

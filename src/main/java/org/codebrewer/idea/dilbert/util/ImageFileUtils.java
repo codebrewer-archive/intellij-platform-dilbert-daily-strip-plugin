@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.util;
 
 import java.io.File;
@@ -25,8 +26,7 @@ import java.io.UnsupportedEncodingException;
  *
  * @author Mark Scott
  */
-public class ImageFileUtils
-{
+class ImageFileUtils {
   /**
    * The string at the beginning of a GIF87a image if its bytes are interpreted
    * in the ASCII character set.
@@ -43,8 +43,10 @@ public class ImageFileUtils
    * The bytes that appear at the start of a JFIF file (JPEG image), with the
    * two bytes that indicate the image length (indexes 4 and 5) zeroed out.
    */
-  private static final byte[] JFIF_FILE_PATTERN = new byte[]{ (byte) 0xff, (byte) 0xd8, (byte) 0xff, (byte) 0xe0,
-      (byte) 0x00, (byte) 0x00, (byte) 0x4a, (byte) 0x46, (byte) 0x49, (byte) 0x46, (byte) 0x00 };
+  private static final byte[] JFIF_FILE_PATTERN = new byte[] {
+      (byte) 0xff, (byte) 0xd8, (byte) 0xff, (byte) 0xe0,
+      (byte) 0x00, (byte) 0x00, (byte) 0x4a, (byte) 0x46, (byte) 0x49, (byte) 0x46, (byte) 0x00
+  };
 
   /**
    * The identifier used for the ASCII character set by the <code>String</code>
@@ -65,30 +67,17 @@ public class ImageFileUtils
    * @throws IOException if <code>file</code> cannot be found or an error occurs
    * reading from it.
    */
-  private static byte[] getLeadingBytes(final int bytesNeeded, final File file) throws IOException
-  {
+  private static byte[] getLeadingBytes(final int bytesNeeded, final File file) throws IOException {
     assert bytesNeeded > 0;
     assert file != null;
 
     final byte[] result;
     final byte[] buffer = new byte[bytesNeeded];
-    FileInputStream fis = null;
 
-    try {
-      fis = new FileInputStream(file);
+    try (final FileInputStream fis = new FileInputStream(file)) {
       final int bytesRead = fis.read(buffer);
       result = new byte[bytesRead];
       System.arraycopy(buffer, 0, result, 0, bytesRead);
-    }
-    finally {
-      if (fis != null) {
-        try {
-          fis.close();
-        }
-        catch (IOException e) {
-          // Ignore...
-        }
-      }
     }
 
     return result;
@@ -100,12 +89,10 @@ public class ImageFileUtils
    * @param file a file to be tested.
    *
    * @return <code>true</code> if <code>file</code> is non-<code>null</code>
-   *         and readable, otherwise <code>false</code>.
+   * and readable, otherwise <code>false</code>.
    */
-  private static boolean isCandidateFile(final File file)
-  {
-    final boolean result = file != null && file.canRead();
-    return result;
+  private static boolean isCandidateFile(final File file) {
+    return file != null && file.canRead();
   }
 
   /**
@@ -114,10 +101,9 @@ public class ImageFileUtils
    * @param bytes data to be tested.
    *
    * @return <code>true</code> if <code>bytes</code> may contain GIF data,
-   *         otherwise <code>false</code>.
+   * otherwise <code>false</code>.
    */
-  public static boolean mayBeGIF(final byte[] bytes)
-  {
+  static boolean mayBeGIF(final byte[] bytes) {
     assert GIF87A_IDENTIFIER.length() == GIF89A_IDENTIFIER.length();
 
     // Assume it's not a GIF header...
@@ -134,9 +120,9 @@ public class ImageFileUtils
 
       try {
         final String leadingBytesAsString = new String(leadingBytes, US_ASCII_CHARSET_NAME);
-        result = GIF87A_IDENTIFIER.equals(leadingBytesAsString) || GIF89A_IDENTIFIER.equals(leadingBytesAsString);
-      }
-      catch (UnsupportedEncodingException ignored) {
+        result = GIF87A_IDENTIFIER.equals(leadingBytesAsString) ||
+                 GIF89A_IDENTIFIER.equals(leadingBytesAsString);
+      } catch (UnsupportedEncodingException ignored) {
         // Should never happen...?
         //
         result = false;
@@ -152,10 +138,9 @@ public class ImageFileUtils
    * @param file a file to be tested.
    *
    * @return <code>true</code> if <code>file</code> may contain GIF data,
-   *         otherwise <code>false</code>.
+   * otherwise <code>false</code>.
    */
-  public static boolean mayBeGIF(final File file)
-  {
+  static boolean mayBeGIF(final File file) {
     assert GIF87A_IDENTIFIER.length() == GIF89A_IDENTIFIER.length();
 
     // Assume it's not a GIF header...
@@ -166,8 +151,7 @@ public class ImageFileUtils
       try {
         final byte[] imageBytes = getLeadingBytes(GIF87A_IDENTIFIER.length(), file);
         result = mayBeGIF(imageBytes);
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
         // Ignore - default will stand...
       }
     }
@@ -181,10 +165,9 @@ public class ImageFileUtils
    * @param bytes data to be tested.
    *
    * @return <code>true</code> if <code>bytes</code> may contain JFIF data,
-   *         otherwise <code>false</code>.
+   * otherwise <code>false</code>.
    */
-  public static boolean mayBeJFIF(final byte[] bytes)
-  {
+  static boolean mayBeJFIF(final byte[] bytes) {
     // Assume it's a JFIF header...
     //
     boolean result = true;
@@ -206,8 +189,7 @@ public class ImageFileUtils
           break;
         }
       }
-    }
-    else {
+    } else {
       result = false;
     }
 
@@ -220,10 +202,9 @@ public class ImageFileUtils
    * @param file a file to be tested.
    *
    * @return <code>true</code> if <code>file</code> may contain JFIF data,
-   *         otherwise <code>false</code>.
+   * otherwise <code>false</code>.
    */
-  public static boolean mayBeJFIF(final File file)
-  {
+  static boolean mayBeJFIF(final File file) {
     // Assume it's not a JFIF header...
     //
     boolean result = false;
@@ -232,8 +213,7 @@ public class ImageFileUtils
       try {
         final byte[] imageBytes = getLeadingBytes(JFIF_FILE_PATTERN.length, file);
         result = mayBeJFIF(imageBytes);
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
         // Ignore - default will stand...
       }
     }
@@ -241,8 +221,7 @@ public class ImageFileUtils
     return result;
   }
 
-  private ImageFileUtils()
-  {
+  private ImageFileUtils() {
     // Utility class
   }
 }

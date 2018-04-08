@@ -71,7 +71,6 @@
   <idea-version since-build="0" until-build="" />
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
-    <errorHandler implementation="org.codebrewer.idea.dilbert.util.DilbertErrorReportSubmitter" />
     <applicationConfigurable
         provider="org.codebrewer.idea.dilbert.settings.DilbertDailyStripConfigurableProvider"
         displayName="Dilbert Daily Strip"

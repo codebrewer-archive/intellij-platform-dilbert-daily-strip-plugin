@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,22 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.ui;
 
-import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
-
+import com.intellij.util.ui.JBUI;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -37,8 +32,8 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import org.codebrewer.idea.dilbert.settings.UnattendedDownloadSettings;
 
 /**
  * A panel that provides a UI for the user to configure the settings related to
@@ -46,8 +41,7 @@ import javax.swing.event.ChangeListener;
  *
  * @author Mark Scott
  */
-public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
-{
+public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
   /**
    * Pattern used in a spinner control for choosing a time.
    */
@@ -87,7 +81,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    * A list for holding the controls used to configure custom fetch settings,
    * to permit easy dis/enabling.
    */
-  private final List customFetchSettingsControls;
+  private final List<JComponent> customFetchSettingsControls;
 
   /**
    * Constructs a settings panel that has its UI intialized from the given
@@ -97,44 +91,48 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    *
    * @throws IllegalArgumentException if settings is <code>null</code>.
    */
-  public UnattendedDownloadSettingsPanel(final UnattendedDownloadSettings settings)
-  {
+  public UnattendedDownloadSettingsPanel(final UnattendedDownloadSettings settings) {
     if (settings == null) {
       throw new IllegalArgumentException("null settings");
     }
 
-    customFetchSettingsControls = new ArrayList(10);
+    customFetchSettingsControls = new ArrayList<>(10);
     build();
     addListeners();
     setDisplayedSettings(settings);
   }
 
-  protected void build()
-  {
+  protected void build() {
     super.build();
 
     // Labeled checkbox for toggling unattended daily strip fetching
     //
-    fetchStripsAutomaticallyCheckbox = new JCheckBox(getLocalizedString("button.fetchdailystrips.text"));
-    final char fetchDailyStripsMnemonic = getLocalizedMnemonic("button.fetchdailystrips.text.mnemonic");
+    fetchStripsAutomaticallyCheckbox =
+        new JCheckBox(getLocalizedString("button.fetchdailystrips.text"));
+    final char fetchDailyStripsMnemonic =
+        getLocalizedMnemonic("button.fetchdailystrips.text.mnemonic");
     fetchStripsAutomaticallyCheckbox.setMnemonic(fetchDailyStripsMnemonic);
-    final Insets emptyInsets = new Insets(0, 0, 0, 0);
+    final Insets emptyInsets = JBUI.emptyInsets();
     add(fetchStripsAutomaticallyCheckbox,
         new GridBagConstraints(
-            0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, emptyInsets, 0, 0));
+            0, 0, 3, 1, 1.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            emptyInsets, 0, 0));
 
-    final Insets nestedInsets = new Insets(0, new JCheckBox().getPreferredSize().width - 1, 0, 0);
+    final Insets nestedInsets = JBUI.insetsLeft(new JCheckBox().getPreferredSize().width - 1);
 
     // Label for the timezone offset chooser widget
     //
-    final JLabel timezoneOffsetChooserLabel = new JLabel(getLocalizedString("label.spinner.tzoffset.text"));
-    timezoneOffsetChooserLabel.setDisplayedMnemonic(getLocalizedMnemonic("label.spinner.tzoffset.text.mnemonic"));
+    final JLabel timezoneOffsetChooserLabel =
+        new JLabel(getLocalizedString("label.spinner.tzoffset.text"));
+    timezoneOffsetChooserLabel
+        .setDisplayedMnemonic(getLocalizedMnemonic("label.spinner.tzoffset.text.mnemonic"));
     timezoneOffsetChooserLabel.setAlignmentX(RIGHT_ALIGNMENT);
     customFetchSettingsControls.add(timezoneOffsetChooserLabel);
-    final Insets spinnerInsets = new Insets(5, 5, 0, 0);
+    final Insets spinnerInsets = JBUI.insets(5, 5, 0, 0);
     add(timezoneOffsetChooserLabel,
         new GridBagConstraints(
-            0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, nestedInsets, 0, 0));
+            0, 1, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            nestedInsets, 0, 0));
 
     // Spinner that selects the offset from Dilbert's timezone
     //
@@ -142,24 +140,27 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
     final JSpinner.DefaultEditor localDownloadTimeSpinnerEditor =
         new JSpinner.DateEditor(localDownloadTimeSpinner, DATE_EDITOR_FORMAT_PATTERN);
     localDownloadTimeSpinner.setEditor(localDownloadTimeSpinnerEditor);
-    localDownloadTimeSpinnerEditor.getTextField().setColumns(4);
+    localDownloadTimeSpinnerEditor.getTextField().setColumns(5);
     localDownloadTimeSpinnerEditor.getTextField().setHorizontalAlignment(SwingConstants.RIGHT);
     timezoneOffsetChooserLabel.setLabelFor(localDownloadTimeSpinner);
     customFetchSettingsControls.add(localDownloadTimeSpinner);
     add(localDownloadTimeSpinner,
         new GridBagConstraints(
-            2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, spinnerInsets, 0, 0));
+            2, 1, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            spinnerInsets, 0, 0));
 
     // Label for the max fetch attempts chooser widget
     //
-    final JLabel maxFetchAttemptsSpinnerLabel = new JLabel(getLocalizedString("label.spinner.maxfetchattempts.text"));
+    final JLabel maxFetchAttemptsSpinnerLabel =
+        new JLabel(getLocalizedString("label.spinner.maxfetchattempts.text"));
     maxFetchAttemptsSpinnerLabel.setDisplayedMnemonic(
         getLocalizedMnemonic("label.spinner.maxfetchattempts.text.mnemonic"));
     maxFetchAttemptsSpinnerLabel.setAlignmentX(RIGHT_ALIGNMENT);
     customFetchSettingsControls.add(maxFetchAttemptsSpinnerLabel);
     add(maxFetchAttemptsSpinnerLabel,
         new GridBagConstraints(
-            0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, nestedInsets, 0, 0));
+            0, 2, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            nestedInsets, 0, 0));
 
     // Spinner that limits the number of fetch attempts to be made
     //
@@ -168,22 +169,26 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
         new Integer(UnattendedDownloadSettings.MIN_MAX_FETCH_ATTEMPTS),
         new Integer(UnattendedDownloadSettings.MAX_MAX_FETCH_ATTEMPTS),
         new Integer(1)));
-    ((JSpinner.DefaultEditor) maxFetchAttemptsSpinner.getEditor()).getTextField().setColumns(4);
+    ((JSpinner.DefaultEditor) maxFetchAttemptsSpinner.getEditor()).getTextField().setColumns(5);
     maxFetchAttemptsSpinnerLabel.setLabelFor(maxFetchAttemptsSpinner);
     customFetchSettingsControls.add(maxFetchAttemptsSpinner);
     add(maxFetchAttemptsSpinner,
         new GridBagConstraints(
-            2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, spinnerInsets, 0, 0));
+            2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            spinnerInsets, 0, 0));
 
     // Label for the fetch attempt interval chooser widget
     //
-    final JLabel fetchIntervalSpinnerLabel = new JLabel(getLocalizedString("label.spinner.fetchinterval.text"));
-    fetchIntervalSpinnerLabel.setDisplayedMnemonic(getLocalizedMnemonic("label.spinner.fetchinterval.text.mnemonic"));
+    final JLabel fetchIntervalSpinnerLabel =
+        new JLabel(getLocalizedString("label.spinner.fetchinterval.text"));
+    fetchIntervalSpinnerLabel
+        .setDisplayedMnemonic(getLocalizedMnemonic("label.spinner.fetchinterval.text.mnemonic"));
     fetchIntervalSpinnerLabel.setAlignmentX(RIGHT_ALIGNMENT);
     customFetchSettingsControls.add(fetchIntervalSpinnerLabel);
     add(fetchIntervalSpinnerLabel,
         new GridBagConstraints(
-            0, 3, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, nestedInsets, 0, 0));
+            0, 3, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            nestedInsets, 0, 0));
 
     // Spinner that limits the number of fetch attempts to be made
     //
@@ -192,65 +197,53 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
         new Integer(UnattendedDownloadSettings.MIN_FETCH_INTERVAL),
         new Integer(UnattendedDownloadSettings.MAX_FETCH_INTERVAL),
         new Integer(1)));
-    ((JSpinner.DefaultEditor) fetchIntervalSpinner.getEditor()).getTextField().setColumns(4);
+    ((JSpinner.DefaultEditor) fetchIntervalSpinner.getEditor()).getTextField().setColumns(5);
     fetchIntervalSpinnerLabel.setLabelFor(fetchIntervalSpinner);
     customFetchSettingsControls.add(fetchIntervalSpinner);
     add(fetchIntervalSpinner,
         new GridBagConstraints(
-            2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, spinnerInsets, 0, 0));
+            2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            spinnerInsets, 0, 0));
 
     // A button for resetting other controls to their default values
     //
-    useDefaultFetchProfile = new JButton(getLocalizedString("button.fetchdailystrips.default.text"));
-    useDefaultFetchProfile.setMnemonic(getLocalizedMnemonic("button.fetchdailystrips.default.text.mnemonic"));
-    final Insets resetInsets = new Insets(5, nestedInsets.left, nestedInsets.bottom, nestedInsets.right);
+    useDefaultFetchProfile =
+        new JButton(getLocalizedString("button.fetchdailystrips.default.text"));
+    useDefaultFetchProfile
+        .setMnemonic(getLocalizedMnemonic("button.fetchdailystrips.default.text.mnemonic"));
+    final Insets resetInsets =
+        JBUI.insets(5, nestedInsets.left, nestedInsets.bottom, nestedInsets.right);
     add(useDefaultFetchProfile,
         new GridBagConstraints(
-            0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, resetInsets, 0, 0));
+            0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            resetInsets, 0, 0));
 
     // A label describing the default settings
     //
     defaultFetchProfileDescription = new JLabel(
         MessageFormat.format(getLocalizedString("label.fetchdailystrips.default.description"),
-            new Object[]{ new Integer(UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS.getMaxFetchAttempts()),
-                new Integer(UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS.getFetchInterval()) }));
+            UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS.getMaxFetchAttempts(),
+            UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS.getFetchInterval()));
     add(defaultFetchProfileDescription,
         new GridBagConstraints(
-            1, 4, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, spinnerInsets, 0, 0));
+            1, 4, 2, 1, 0.0, 0.0, GridBagConstraints.LINE_START, GridBagConstraints.NONE,
+            spinnerInsets, 0, 0));
   }
 
-  private void addListeners()
-  {
+  private void addListeners() {
     // Only enable controls if the user has opted to fetch strips automatically
     //
-    fetchStripsAutomaticallyCheckbox.addItemListener(new ItemListener()
-    {
-      public void itemStateChanged(final ItemEvent itemEvent)
-      {
-        setComponentsEnabled();
-      }
-    });
+    fetchStripsAutomaticallyCheckbox.addItemListener(itemEvent -> setComponentsEnabled());
 
     // React to the user pressing the Defaults button
     //
-    useDefaultFetchProfile.addActionListener(new ActionListener()
-    {
-      public void actionPerformed(final ActionEvent e)
-      {
-        setDisplayedSettings(UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS);
-      }
-    });
+    useDefaultFetchProfile.addActionListener(
+        e -> setDisplayedSettings(UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS));
 
     // Listen for changes in any of the spinner controls so that the reset
     // button and description label can be enabled/disabled as appropriate
     //
-    final ChangeListener spinnerListener = new ChangeListener()
-    {
-      public void stateChanged(final ChangeEvent e)
-      {
-        setComponentsEnabled();
-      }
-    };
+    final ChangeListener spinnerListener = e -> setComponentsEnabled();
 
     localDownloadTimeSpinner.addChangeListener(spinnerListener);
     maxFetchAttemptsSpinner.addChangeListener(spinnerListener);
@@ -261,8 +254,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    * Sets the enabled state of the UI's controls to reflect the current settings
    * state.
    */
-  private void setComponentsEnabled()
-  {
+  private void setComponentsEnabled() {
     final boolean panelEnabled = isEnabled();
 
     if (panelEnabled) {
@@ -270,12 +262,12 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
       final UnattendedDownloadSettings currentSettings = getDisplayedSettings();
       final boolean fetchStripsAutomatically = currentSettings.isFetchStripAutomatically();
       final boolean useDefaultSettings =
-          UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS.equalsIgnoreFetchAutomatically(currentSettings);
+          UnattendedDownloadSettings.DEFAULT_DOWNLOAD_SETTINGS
+              .equalsIgnoreFetchAutomatically(currentSettings);
 
       setCustomProfileControlsEnabled(fetchStripsAutomatically);
       setDefaultProfileControlsEnabled(fetchStripsAutomatically && !useDefaultSettings);
-    }
-    else {
+    } else {
       fetchStripsAutomaticallyCheckbox.setEnabled(false);
       setCustomProfileControlsEnabled(false);
       setDefaultProfileControlsEnabled(false);
@@ -291,11 +283,9 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    * @param enabled <code>true</code> when unattended downloads have been
    * selected, otherwise <code>false</code>.
    */
-  private void setCustomProfileControlsEnabled(final boolean enabled)
-  {
-    for (int i = 0; i < customFetchSettingsControls.size(); i++) {
-      final JComponent control = (JComponent) customFetchSettingsControls.get(i);
-      control.setEnabled(enabled);
+  private void setCustomProfileControlsEnabled(final boolean enabled) {
+    for (JComponent customFetchSettingsControl : customFetchSettingsControls) {
+      customFetchSettingsControl.setEnabled(enabled);
     }
   }
 
@@ -307,8 +297,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    * @param enabled <code>true</code> when a non-default download profile has
    * been configured, otherwise <code>false</code>.
    */
-  private void setDefaultProfileControlsEnabled(final boolean enabled)
-  {
+  private void setDefaultProfileControlsEnabled(final boolean enabled) {
     useDefaultFetchProfile.setEnabled(enabled);
     defaultFetchProfileDescription.setEnabled(enabled);
   }
@@ -319,20 +308,17 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    *
    * @return the user's current settings as reflected by the UI.
    */
-  public UnattendedDownloadSettings getDisplayedSettings()
-  {
+  public UnattendedDownloadSettings getDisplayedSettings() {
     final Date localDownloadTimeDate = (Date) localDownloadTimeSpinner.getValue();
     final Calendar cal = Calendar.getInstance();
     cal.setTime(localDownloadTimeDate);
     final int localDownloadTime = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE);
 
-    final UnattendedDownloadSettings currentSettings =
-        new UnattendedDownloadSettings(fetchStripsAutomaticallyCheckbox.isSelected(),
-            localDownloadTime,
-            ((Number) maxFetchAttemptsSpinner.getValue()).intValue(),
-            ((Number) fetchIntervalSpinner.getValue()).intValue());
-
-    return currentSettings;
+    return new UnattendedDownloadSettings(
+        fetchStripsAutomaticallyCheckbox.isSelected(),
+        localDownloadTime,
+        ((Number) maxFetchAttemptsSpinner.getValue()).intValue(),
+        ((Number) fetchIntervalSpinner.getValue()).intValue());
   }
 
   /**
@@ -344,10 +330,9 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    * compared.
    *
    * @return <code>true</code> if the given settings differ from the current
-   *         settings, otherwise <code>false</code>.
+   * settings, otherwise <code>false</code>.
    */
-  public boolean isModified(final UnattendedDownloadSettings settings)
-  {
+  public boolean isModified(final UnattendedDownloadSettings settings) {
     return !getDisplayedSettings().equals(settings);
   }
 
@@ -359,8 +344,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
    *
    * @throws IllegalArgumentException if settings is <code>null</code>.
    */
-  public void setDisplayedSettings(final UnattendedDownloadSettings settings)
-  {
+  public void setDisplayedSettings(final UnattendedDownloadSettings settings) {
     if (settings == null) {
       throw new IllegalArgumentException("null settings");
     }
@@ -374,28 +358,24 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
     cal.set(Calendar.MINUTE, localDownloadTime % 60);
     cal.set(Calendar.HOUR_OF_DAY, localDownloadTime / 60);
     localDownloadTimeSpinner.setValue(cal.getTime());
-    maxFetchAttemptsSpinner.setValue(new Integer(settings.getMaxFetchAttempts()));
-    fetchIntervalSpinner.setValue(new Integer(settings.getFetchInterval()));
+    maxFetchAttemptsSpinner.setValue(settings.getMaxFetchAttempts());
+    fetchIntervalSpinner.setValue(settings.getFetchInterval());
   }
 
-  public void setEnabled(final boolean enabled)
-  {
+  public void setEnabled(final boolean enabled) {
     super.setEnabled(enabled);
     setBorderEnabled(enabled);
     setComponentsEnabled();
   }
 
-  private static class SpinnerHalfHourModel extends SpinnerDateModel
-  {
+  private static class SpinnerHalfHourModel extends SpinnerDateModel {
     private Calendar currentValue;
 
-    SpinnerHalfHourModel()
-    {
+    SpinnerHalfHourModel() {
       this(new Date());
     }
 
-    SpinnerHalfHourModel(final Date value)
-    {
+    SpinnerHalfHourModel(final Date value) {
       if (value == null) {
         throw new IllegalArgumentException("value cannot be null");
       }
@@ -405,36 +385,18 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
       roundMinutesDown();
     }
 
-    private void roundMinutesDown()
-    {
+    private void roundMinutesDown() {
       int mins = currentValue.get(Calendar.MINUTE);
       mins = mins >= 30 ? 30 : 0;
       currentValue.set(Calendar.MINUTE, mins);
     }
 
-    public int getHour()
-    {
-      return currentValue.get(Calendar.HOUR_OF_DAY);
-    }
-
-    public int getMinute()
-    {
-      return currentValue.get(Calendar.MINUTE);
-    }
-
-    public int getMinutesPastMidnight()
-    {
-      return 60 * getHour() + getMinute();
-    }
-
-    public Object getValue()
-    {
+    public Object getValue() {
       return currentValue.getTime();
     }
 
-    public void setValue(final Object value)
-    {
-      if (value == null || !(value instanceof Date)) {
+    public void setValue(final Object value) {
+      if (!(value instanceof Date)) {
         throw new IllegalArgumentException("value must be a Date");
       }
 
@@ -445,22 +407,18 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel
       }
     }
 
-    public Object getNextValue()
-    {
+    public Object getNextValue() {
       final Calendar calendar = Calendar.getInstance();
       calendar.setTime(currentValue.getTime());
       calendar.add(Calendar.MINUTE, 30);
-      final Date next = calendar.getTime();
-      return next;
+      return calendar.getTime();
     }
 
-    public Object getPreviousValue()
-    {
+    public Object getPreviousValue() {
       final Calendar calendar = Calendar.getInstance();
       calendar.setTime(currentValue.getTime());
       calendar.add(Calendar.MINUTE, -30);
-      final Date next = calendar.getTime();
-      return next;
+      return calendar.getTime();
     }
   }
 }

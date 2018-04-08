@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.settings;
 
 import com.intellij.openapi.options.UnnamedConfigurable;
@@ -23,8 +24,7 @@ import com.intellij.openapi.options.UnnamedConfigurable;
  *
  * @author Mark Scott
  */
-public interface Modifiable extends UnnamedConfigurable
-{
+public interface Modifiable extends UnnamedConfigurable {
   /**
    * Sets the availability of this <code>Modifiable</code>'s configuration UI.
    * A disabled UI should display no enabled components.

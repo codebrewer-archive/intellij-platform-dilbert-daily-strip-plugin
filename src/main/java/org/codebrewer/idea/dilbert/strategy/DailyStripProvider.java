@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.strategy;
 
 import com.intellij.openapi.options.Configurable;
+import javax.swing.JComponent;
 import org.codebrewer.idea.dilbert.Identifiable;
 import org.codebrewer.idea.dilbert.Presentable;
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
-
-import javax.swing.JComponent;
 
 /**
  * <p>
@@ -45,13 +45,12 @@ import javax.swing.JComponent;
  *
  * @author Mark Scott
  */
-public interface DailyStripProvider extends Identifiable, Presentable
-{
+public interface DailyStripProvider extends Identifiable, Presentable {
   /**
    * Gets a UI component that an end-user can use to control the provider.
    *
    * @return a controller UI component or <code>null</code> if the provider
-   *         is not controllable.
+   * is not controllable.
    */
   JComponent getControlPanel();
 
@@ -59,7 +58,7 @@ public interface DailyStripProvider extends Identifiable, Presentable
    * Gets the client (the <em>context</em>) of this provider (<em>strategy</em>).
    *
    * @return the non-<code>null</code> <code>DailyStripPresenter</code> context
-   *         in which this provider operates.
+   * in which this provider operates.
    */
   DailyStripPresenter getDailyStripPresenter();
 

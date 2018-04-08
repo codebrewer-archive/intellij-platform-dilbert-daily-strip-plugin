@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.strategy;
 
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
@@ -21,32 +22,24 @@ import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 /**
  * @author Mark Scott
  */
-abstract class LocalizableDailyStripProvider extends AbstractDailyStripProvider
-{
-  protected LocalizableDailyStripProvider(final DailyStripPresenter presenter)
-  {
+abstract class LocalizableDailyStripProvider extends AbstractDailyStripProvider {
+  protected LocalizableDailyStripProvider(final DailyStripPresenter presenter) {
     setDailyStripPresenter(presenter);
   }
 
-  public String getDescription()
-  {
-    final String description = ResourceBundleManager.getLocalizedString(getClass(), "strategy.description");
-    return description;
+  public String getDescription() {
+    return ResourceBundleManager.getLocalizedString(getClass(), "strategy.description");
   }
 
-  public String getDisplayName()
-  {
-    final String name = ResourceBundleManager.getLocalizedString(getClass(), "strategy.name");
-    return name;
+  public String getDisplayName() {
+    return ResourceBundleManager.getLocalizedString(getClass(), "strategy.name");
   }
 
-  public final void setDailyStripPresenter(final DailyStripPresenter context)
-  {
+  public final void setDailyStripPresenter(final DailyStripPresenter context) {
     super.setDailyStripPresenter(context);
   }
 
-  public String toString()
-  {
+  public String toString() {
     return getDisplayName();
   }
 }

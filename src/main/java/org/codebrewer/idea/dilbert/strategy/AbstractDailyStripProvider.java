@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,23 +13,23 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.strategy;
 
 import com.intellij.openapi.diagnostic.Logger;
+import javax.swing.JComponent;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.ui.DailyStripPresenter;
-
-import javax.swing.JComponent;
 
 /**
  * @author Mark Scott
  */
-abstract class AbstractDailyStripProvider implements DailyStripProvider
-{
+abstract class AbstractDailyStripProvider implements DailyStripProvider {
   /**
    * For logging messages to IDEA's log.
    */
-  protected static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  protected static final Logger LOGGER =
+      Logger.getInstance(DilbertDailyStripPlugin.class.getName());
 
   /**
    * Has {@link #pause()} been called without (yet) a corresponding call to
@@ -48,8 +48,7 @@ abstract class AbstractDailyStripProvider implements DailyStripProvider
    */
   private DailyStripPresenter presenter;
 
-  protected AbstractDailyStripProvider()
-  {
+  protected AbstractDailyStripProvider() {
     isPaused = false;
     isRunning = false;
   }
@@ -62,39 +61,33 @@ abstract class AbstractDailyStripProvider implements DailyStripProvider
 
   protected abstract void doStop();
 
-  public JComponent getControlPanel()
-  {
+  public JComponent getControlPanel() {
     return null;
   }
 
-  public DailyStripPresenter getDailyStripPresenter()
-  {
+  public DailyStripPresenter getDailyStripPresenter() {
     return presenter;
   }
 
-  public synchronized void pause()
-  {
+  public synchronized void pause() {
     if (isRunning && !isPaused) {
       doPause();
       isPaused = true;
     }
   }
 
-  public synchronized void resume()
-  {
+  public synchronized void resume() {
     if (isPaused) {
       doResume();
       isPaused = false;
     }
   }
 
-  public void setDailyStripPresenter(final DailyStripPresenter context)
-  {
+  public void setDailyStripPresenter(final DailyStripPresenter context) {
     presenter = context;
   }
 
-  public synchronized void start()
-  {
+  public synchronized void start() {
     if (!isRunning) {
       doStart();
       isPaused = false;
@@ -102,8 +95,7 @@ abstract class AbstractDailyStripProvider implements DailyStripProvider
     }
   }
 
-  public synchronized void stop()
-  {
+  public synchronized void stop() {
     if (isRunning) {
       doStop();
       isPaused = false;

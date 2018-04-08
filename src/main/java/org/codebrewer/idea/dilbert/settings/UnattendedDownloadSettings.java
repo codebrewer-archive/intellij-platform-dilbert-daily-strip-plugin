@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,21 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.settings;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.JDOMExternalizable;
 import com.intellij.openapi.util.JDOMExternalizer;
+import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import javax.swing.JComponent;
 import org.codebrewer.idea.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.idea.dilbert.ui.UnattendedDownloadSettingsPanel;
 import org.codebrewer.idea.dilbert.util.TimeUtils;
 import org.jdom.Element;
-
-import java.text.MessageFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
-
-import javax.swing.JComponent;
 
 /**
  * <p>
@@ -38,8 +38,7 @@ import javax.swing.JComponent;
  *
  * @author Mark Scott
  */
-public final class UnattendedDownloadSettings implements JDOMExternalizable, Modifiable
-{
+public final class UnattendedDownloadSettings implements JDOMExternalizable, Modifiable {
   /**
    * For logging messages to IDEA's log.
    */
@@ -55,17 +54,24 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
   /**
    * The ID of the timezone in which the dilbert.com website seems to be hosted.
    */
-  public static final String DILBERT_TIME_ZONE_ID = "America/Los_Angeles";
+  private static final String DILBERT_TIME_ZONE_ID_NAME = "America/Los_Angeles";
 
   /**
    * The timezone in which the dilbert.com website seems to be hosted.
    */
-  public static final TimeZone DILBERT_TIME_ZONE = TimeZone.getTimeZone(DILBERT_TIME_ZONE_ID);
+  private static final ZoneId DILBERT_TIME_ZONE_ID = ZoneId.of(DILBERT_TIME_ZONE_ID_NAME);
 
   /**
    * Default value for fetching strips automatically.
    */
-  public static final boolean DEFAULT_FETCH_AUTOMATICALLY = false;
+  private static final boolean DEFAULT_FETCH_AUTOMATICALLY = false;
+
+  /**
+   * The number of seconds between the IDEA instance hosting the plug-in and the
+   * dilbert.com website (assuming that the user's machine is configured for
+   * localtime and has the expected locale set).
+   */
+  private static final int DEFAULT_LOCAL_DOWNLOAD_TIME = getDefaultLocalDownloadTime();
 
   /**
    * Default maximum number of fetch attempts.
@@ -76,13 +82,6 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
    * Default interval (in minutes) between successive fetch attempts.
    */
   public static final int DEFAULT_FETCH_INTERVAL = 10;
-
-  /**
-   * The number of seconds between the IDEA instance hosting the plug-in and the
-   * dilbert.com website (assuming that the user's machine is configured for
-   * localtime and has the expected locale set).
-   */
-  public static final int DEFAULT_LOCAL_DOWNLOAD_TIME = getDefaultLocalDownloadTime();
 
   /**
    * The maximum number of minutes that may elapse between successive fetch
@@ -142,18 +141,18 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
    *
    * @return the number of minutes between IDEA and Dilbert.
    */
-  private static int getDefaultLocalDownloadTime()
-  {
-    final Calendar hereAndNow = Calendar.getInstance();
-    final long millisHereAndNow = hereAndNow.getTimeInMillis();
-    final int offsetHere = hereAndNow.getTimeZone().getOffset(millisHereAndNow);
-    final Calendar atDilbertNow = Calendar.getInstance(DILBERT_TIME_ZONE);
-    final int offsetForDilbert = atDilbertNow.getTimeZone().getOffset(millisHereAndNow);
-    final int difference = (offsetHere - offsetForDilbert) / TimeUtils.MILLIS_PER_SECOND / TimeUtils.SECONDS_PER_MINUTE;
-    final int localDownloadTime = difference < 0 ?
-        TimeUtils.MINUTES_PER_HOUR * TimeUtils.HOURS_PER_DAY + difference :
-        difference;
-    return localDownloadTime;
+  private static int getDefaultLocalDownloadTime() {
+    final Instant now = Instant.now();
+    final ZoneOffset systemZoneOffset = ZoneId.systemDefault().getRules().getOffset(now);
+    final ZoneOffset dilbertZoneOffset = DILBERT_TIME_ZONE_ID.getRules().getOffset(now);
+
+    int difference = systemZoneOffset.getTotalSeconds() - dilbertZoneOffset.getTotalSeconds();
+
+    if (difference < 0) {
+      difference = TimeUtils.SECONDS_PER_DAY + difference;
+    }
+
+    return TimeUtils.secondsToMinutes(difference);
   }
 
   /**
@@ -200,30 +199,29 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
       final boolean fetchStripAutomatically,
       final int localDownloadTime,
       final int maxFetchAttempts,
-      final int fetchInterval)
-  {
-    if (localDownloadTime < 0 || localDownloadTime >= TimeUtils.MINUTES_PER_HOUR * TimeUtils.HOURS_PER_DAY) {
-      throw new IllegalArgumentException(MessageFormat.format("tzOffsetFromDilbert must be in range {0} to {1} : {2}", // NON-NLS
-          new Object[]{
-              new Integer(0),
-              new Integer(TimeUtils.MINUTES_PER_HOUR * TimeUtils.HOURS_PER_DAY),
-              new Integer(localDownloadTime) }));
+      final int fetchInterval) {
+    if (localDownloadTime < 0 || localDownloadTime >= TimeUtils.MINUTES_PER_DAY) {
+      throw new IllegalArgumentException(
+          MessageFormat.format("tzOffsetFromDilbert must be in range {0} to {1} : {2}", // NON-NLS
+              0,
+              TimeUtils.MINUTES_PER_DAY,
+              localDownloadTime));
     }
 
     if (maxFetchAttempts < MIN_MAX_FETCH_ATTEMPTS || maxFetchAttempts > MAX_MAX_FETCH_ATTEMPTS) {
-      throw new IllegalArgumentException(MessageFormat.format("maxFetchAttempts must be in range {0} to {1} : {2}", // NON-NLS
-          new Object[]{
-              new Integer(MIN_MAX_FETCH_ATTEMPTS),
-              new Integer(MAX_MAX_FETCH_ATTEMPTS),
-              new Integer(maxFetchAttempts) }));
+      throw new IllegalArgumentException(
+          MessageFormat.format("maxFetchAttempts must be in range {0} to {1} : {2}", // NON-NLS
+              MIN_MAX_FETCH_ATTEMPTS,
+              MAX_MAX_FETCH_ATTEMPTS,
+              maxFetchAttempts));
     }
 
     if (fetchInterval < MIN_FETCH_INTERVAL || fetchInterval > MAX_FETCH_INTERVAL) {
-      throw new IllegalArgumentException(MessageFormat.format("fetchInterval must be in range {0} to {1} : {2}", // NON-NLS
-          new Object[]{
-              new Integer(MIN_FETCH_INTERVAL),
-              new Integer(MAX_FETCH_INTERVAL),
-              new Integer(fetchInterval) }));
+      throw new IllegalArgumentException(
+          MessageFormat.format("fetchInterval must be in range {0} to {1} : {2}", // NON-NLS
+              MIN_FETCH_INTERVAL,
+              MAX_FETCH_INTERVAL,
+              fetchInterval));
     }
 
     this.fetchStripAutomatically = fetchStripAutomatically;
@@ -232,24 +230,21 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     this.fetchInterval = fetchInterval;
   }
 
-  public boolean equalsIgnoreFetchAutomatically(final UnattendedDownloadSettings settings)
-  {
+  public boolean equalsIgnoreFetchAutomatically(final UnattendedDownloadSettings settings) {
     final boolean result;
 
     if (settings == null) {
       result = false;
-    }
-    else {
+    } else {
       result = settings.getFetchInterval() == DEFAULT_FETCH_INTERVAL &&
-          settings.getLocalDownloadTime() == DEFAULT_LOCAL_DOWNLOAD_TIME &&
-          settings.getMaxFetchAttempts() == DEFAULT_MAX_FETCH_ATTEMPTS;
+               settings.getLocalDownloadTime() == DEFAULT_LOCAL_DOWNLOAD_TIME &&
+               settings.getMaxFetchAttempts() == DEFAULT_MAX_FETCH_ATTEMPTS;
     }
 
     return result;
   }
 
-  public Object getCurrentSettings()
-  {
+  public Object getCurrentSettings() {
     UnattendedDownloadSettings modifiedSettings = null;
 
     if (settingsPanel != null) {
@@ -259,28 +254,23 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     return modifiedSettings;
   }
 
-  public int getFetchInterval()
-  {
+  public int getFetchInterval() {
     return fetchInterval;
   }
 
-  public int getMaxFetchAttempts()
-  {
+  public int getMaxFetchAttempts() {
     return maxFetchAttempts;
   }
 
-  public int getLocalDownloadTime()
-  {
+  public int getLocalDownloadTime() {
     return localDownloadTime;
   }
 
-  public boolean isFetchStripAutomatically()
-  {
+  public boolean isFetchStripAutomatically() {
     return fetchStripAutomatically;
   }
 
-  public boolean equals(final Object o)
-  {
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
@@ -307,8 +297,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     return true;
   }
 
-  public int hashCode()
-  {
+  public int hashCode() {
     int result = fetchStripAutomatically ? 1 : 0;
     result = 31 * result + localDownloadTime;
     result = 31 * result + maxFetchAttempts;
@@ -318,17 +307,18 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
 
   // Implement JDOMExternalizable
 
-  public void readExternal(final Element element)
-  {
+  public void readExternal(final Element element) {
     LOGGER.debug("reading download settings"); // NON-NLS
     fetchStripAutomatically = JDOMExternalizer.readBoolean(element, FETCH_STRIP_AUTOMATICALLY_KEY);
-    localDownloadTime = JDOMExternalizer.readInteger(element, LOCAL_DOWNLOAD_TIME_KEY, DEFAULT_LOCAL_DOWNLOAD_TIME);
-    maxFetchAttempts = JDOMExternalizer.readInteger(element, MAX_FETCH_ATTEMPTS_KEY, DEFAULT_MAX_FETCH_ATTEMPTS);
-    fetchInterval = JDOMExternalizer.readInteger(element, FETCH_INTERVAL_KEY, DEFAULT_FETCH_INTERVAL);
+    localDownloadTime =
+        JDOMExternalizer.readInteger(element, LOCAL_DOWNLOAD_TIME_KEY, DEFAULT_LOCAL_DOWNLOAD_TIME);
+    maxFetchAttempts =
+        JDOMExternalizer.readInteger(element, MAX_FETCH_ATTEMPTS_KEY, DEFAULT_MAX_FETCH_ATTEMPTS);
+    fetchInterval =
+        JDOMExternalizer.readInteger(element, FETCH_INTERVAL_KEY, DEFAULT_FETCH_INTERVAL);
   }
 
-  public void writeExternal(final Element element)
-  {
+  public void writeExternal(final Element element) {
     LOGGER.debug("writing download settings"); // NON-NLS
     JDOMExternalizer.write(element, FETCH_STRIP_AUTOMATICALLY_KEY, fetchStripAutomatically);
     JDOMExternalizer.write(element, LOCAL_DOWNLOAD_TIME_KEY, localDownloadTime);
@@ -338,8 +328,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
 
   // Implement Modifiable
 
-  public void setConfigurationUIEnabled(final boolean enabled)
-  {
+  public void setConfigurationUIEnabled(final boolean enabled) {
     if (settingsPanel != null) {
       settingsPanel.setEnabled(enabled);
     }
@@ -347,8 +336,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
 
   // Implement UnnamedConfigurable
 
-  public JComponent createComponent()
-  {
+  public JComponent createComponent() {
     if (settingsPanel == null) {
       settingsPanel = new UnattendedDownloadSettingsPanel(this);
     }
@@ -356,8 +344,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     return settingsPanel;
   }
 
-  public boolean isModified()
-  {
+  public boolean isModified() {
     boolean isModified = false;
 
     if (settingsPanel != null) {
@@ -367,8 +354,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     return isModified;
   }
 
-  public void apply()
-  {
+  public void apply() {
     if (settingsPanel != null) {
       final UnattendedDownloadSettings displayedSettings = settingsPanel.getDisplayedSettings();
       fetchStripAutomatically = displayedSettings.isFetchStripAutomatically();
@@ -378,15 +364,13 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     }
   }
 
-  public void reset()
-  {
+  public void reset() {
     if (settingsPanel != null) {
       settingsPanel.setDisplayedSettings(this);
     }
   }
 
-  public void disposeUIResources()
-  {
+  public void disposeUIResources() {
     LOGGER.info("UnattendedDownloadSettings.disposeUIResources()"); // NON-NLS
   }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert;
 
 import java.util.EventObject;
@@ -22,12 +23,10 @@ import java.util.EventObject;
  *
  * @author Mark Scott
  */
-public class DailyStripEvent extends EventObject
-{
+public class DailyStripEvent extends EventObject {
   private final DilbertDailyStrip dailyStrip;
 
-  public DailyStripEvent(final Object source, final DilbertDailyStrip dailyStrip)
-  {
+  DailyStripEvent(final Object source, final DilbertDailyStrip dailyStrip) {
     super(source);
 
     if (dailyStrip == null) {
@@ -42,21 +41,11 @@ public class DailyStripEvent extends EventObject
    *
    * @return a non-<code>null</code> daily strip.
    */
-  public DilbertDailyStrip getDilbertDailyStrip()
-  {
+  public DilbertDailyStrip getDilbertDailyStrip() {
     return dailyStrip;
   }
 
-  public String toString()
-  {
-    final StringBuffer sb = new StringBuffer(100);
-
-    sb.append(DailyStripEvent.class.getName());
-    sb.append("[dailyStrip=").append(dailyStrip);
-    //noinspection MagicCharacter
-    sb.append(']');
-    sb.append(super.toString());
-
-    return sb.toString();
+  public String toString() {
+    return DailyStripEvent.class.getName() + "[dailyStrip=" + dailyStrip + ']' + super.toString();
   }
 }

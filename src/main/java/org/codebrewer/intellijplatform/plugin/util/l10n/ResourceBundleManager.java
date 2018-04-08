@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2009, 2013 Mark Scott
+ * Copyright 2006, 2009, 2013, 2018 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.codebrewer.intellijplatform.plugin.util.l10n;
 
-import com.intellij.openapi.diagnostic.Logger;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Objects;
 import java.util.ResourceBundle;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Utility class to aid in loading resource bundles and finding resources for
@@ -28,23 +27,7 @@ import java.util.ResourceBundle;
  *
  * @author Mark Scott
  */
-public final class ResourceBundleManager
-{
-  private static final int RESOURCE_BUNDLE_NAME_MAX_LENGTH = 128;
-
-  /**
-   * Logs to IDEA's logfile.
-   */
-  private static final Logger LOGGER =
-      Logger.getInstance(ResourceBundleManager.class.getName());
-
-  /**
-   * A map of resource bundle names to the corresponding resource bundles, used
-   * to cache loaded bundles for quick retrieval on subsequent requests for the
-   * same bundle.
-   */
-  private static final Map<String, ResourceBundle> NAME_TO_BUNDLE_MAP = new HashMap<String, ResourceBundle>();
-
+public final class ResourceBundleManager {
   /**
    * Gets a localized mnemonic for a given key.  If the string associated with
    * the key contains more than one character then the first character is
@@ -54,19 +37,17 @@ public final class ResourceBundleManager
    * @param key the key identifying the required resource.
    *
    * @return the localized mnemonic char for the given key or <code>'\0'</code>
-   *         if no such resource is found.
+   * if no such resource is found.
    *
-   * @throws IllegalArgumentException if either parameter is <code>null</code>.
+   * @throws NullPointerException if either parameter is <code>null</code>.
    */
-  public static char getLocalizedMnemonic(final Class clazz, final String key)
-  {
+  public static char getLocalizedMnemonic(final Class clazz, final String key) {
     final String localizedString = getLocalizedString(clazz, key);
     final char mnemonic;
 
-    if (localizedString != null && localizedString.length() > 0) {
+    if (localizedString.length() > 0) {
       mnemonic = localizedString.charAt(0);
-    }
-    else {
+    } else {
       mnemonic = '\0';
     }
 
@@ -80,28 +61,17 @@ public final class ResourceBundleManager
    * @param key the key identifying the required resource.
    *
    * @return the localized string for the given key or <code>null</code> if no
-   *         such resource is found.
+   * such resource is found.
    *
-   * @throws IllegalArgumentException if either parameter is <code>null</code>.
+   * @throws NullPointerException if either parameter is <code>null</code>.
+   * @throws MissingResourceException if no resource is found.
    */
-  public static String getLocalizedString(final Class clazz, final String key)
-  {
-    if (clazz == null) {
-      throw new IllegalArgumentException("null class not allowed");
-    }
+  @NotNull
+  public static String getLocalizedString(final Class clazz, final String key) {
+    Objects.requireNonNull(clazz);
+    Objects.requireNonNull(key);
 
-    if (key == null) {
-      throw new IllegalArgumentException("null key not allowed");
-    }
-
-    final ResourceBundle resourceBundle = getResourceBundle(clazz);
-    String localizedString = null;
-
-    if (resourceBundle != null) {
-      localizedString = resourceBundle.getString(key);
-    }
-
-    return localizedString;
+    return getResourceBundle(clazz).getString(key);
   }
 
   /**
@@ -114,45 +84,22 @@ public final class ResourceBundleManager
    * @param clazz the class for which a resource bundle is to be loaded.
    *
    * @return a resource bundle for the given class or <code>null</code> if no
-   *         resource bundle could be loaded.
+   * resource bundle could be loaded.
    *
    * @throws NullPointerException if the given class is <code>null</code>.
+   * @throws MissingResourceException if the requested bundle is not found.
    */
-  public static ResourceBundle getResourceBundle(final Class clazz)
-  {
-    if (clazz == null) {
-      throw new IllegalArgumentException("Class object cannot be null");
-    }
+  @NotNull
+  public static ResourceBundle getResourceBundle(final Class clazz) {
+    Objects.requireNonNull(clazz);
 
-    final String bundleName = new StringBuilder(RESOURCE_BUNDLE_NAME_MAX_LENGTH)
-        .append(clazz.getName())
-        .append("Resources")
-        .toString();
-    ResourceBundle bundle = NAME_TO_BUNDLE_MAP.get(bundleName);
-
-    if (bundle == null && !NAME_TO_BUNDLE_MAP.containsKey(bundleName)) {
-      LOGGER.debug("Cache miss for ResourceBundle: " + bundleName);
-      try {
-        bundle = ResourceBundle.getBundle(bundleName);
-        LOGGER.debug("Loaded ResourceBundle: " + bundleName);
-      }
-      catch (MissingResourceException mre) {
-        LOGGER.error("Missing ResourceBundle: " + bundleName);
-      }
-      NAME_TO_BUNDLE_MAP.put(bundleName, bundle);
-    }
-    else if (bundle != null) {
-      LOGGER.debug("Cache hit for ResourceBundle: " + bundleName);
-    }
-
-    return bundle;
+    return ResourceBundle.getBundle(clazz.getName() + "Resources");
   }
 
   /**
    * Private constructor that prevents instantiation from outside this class
    * and is never called.
    */
-  private ResourceBundleManager()
-  {
+  private ResourceBundleManager() {
   }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005 Mark Scott
+ *  Copyright 2005, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.util;
 
 import com.intellij.openapi.diagnostic.Logger;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,17 +40,14 @@ import java.util.Properties;
  *
  * @author Mark Scott
  */
-public final class VersionInfo
-{
-  private static final int VERSION_STRING_MAX_LENGTH = 16;
-
+public final class VersionInfo {
   private static final String BUILD_DATE_KEY = "build.date";
   private static final String BUILD_NUMBER_KEY = "build.number";
   private static final String BUILD_VERSION_MAJOR_KEY = "build.version.major";
   private static final String BUILD_VERSION_MINOR_KEY = "build.version.minor";
   private static final String BUILD_VERSION_REVISION_KEY = "build.version.revision";
 
-  private static final Map BUILD_PROPERTIES_MAP = new HashMap();
+  private static final Map<String, Object> BUILD_PROPERTIES_MAP = new HashMap<>();
 
   private static final Logger LOGGER = Logger.getInstance(VersionInfo.class.getName());
 
@@ -74,10 +70,8 @@ public final class VersionInfo
    *
    * @return the date the plugin was built.
    */
-  public static String getBuildDate()
-  {
-    final String buildDate = (String) BUILD_PROPERTIES_MAP.get(BUILD_DATE_KEY);
-    return buildDate;
+  public static String getBuildDate() {
+    return (String) BUILD_PROPERTIES_MAP.get(BUILD_DATE_KEY);
   }
 
   /**
@@ -86,10 +80,8 @@ public final class VersionInfo
    *
    * @return the plugin's build number.
    */
-  public static int getBuildNumber()
-  {
-    final Integer buildNumber = (Integer) BUILD_PROPERTIES_MAP.get(BUILD_NUMBER_KEY);
-    return buildNumber.intValue();
+  public static int getBuildNumber() {
+    return (Integer) BUILD_PROPERTIES_MAP.get(BUILD_NUMBER_KEY);
   }
 
   /**
@@ -98,10 +90,8 @@ public final class VersionInfo
    *
    * @return the plugin's major version number.
    */
-  public static int getVersionMajor()
-  {
-    final Integer versionMajor = (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_MAJOR_KEY);
-    return versionMajor.intValue();
+  public static int getVersionMajor() {
+    return (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_MAJOR_KEY);
   }
 
   /**
@@ -110,10 +100,8 @@ public final class VersionInfo
    *
    * @return the plugin's minor version number.
    */
-  public static int getVersionMinor()
-  {
-    final Integer versionMinor = (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_MINOR_KEY);
-    return versionMinor.intValue();
+  public static int getVersionMinor() {
+    return (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_MINOR_KEY);
   }
 
   /**
@@ -122,10 +110,8 @@ public final class VersionInfo
    *
    * @return the plugin's revision number.
    */
-  public static int getVersionRevision()
-  {
-    final Integer versionRevision = (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_REVISION_KEY);
-    return versionRevision.intValue();
+  public static int getVersionRevision() {
+    return (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_REVISION_KEY);
   }
 
   /**
@@ -134,43 +120,29 @@ public final class VersionInfo
    *
    * @return an aggregate form of the plugin's version information.
    */
-  public static String getVersionString()
-  {
-    final char dot = '.';
-    final String s = new StringBuffer(VERSION_STRING_MAX_LENGTH)
-        .append(getVersionMajor())
-        .append(dot)
-        .append(getVersionMinor())
-        .append(dot)
-        .append(getVersionRevision())
-        .append(dot)
-        .append(getBuildNumber()).toString();
-    return s;
+  public static String getVersionString() {
+    return String.format(
+        "%d.%d.%d.%d", getVersionMajor(), getVersionMinor(), getVersionRevision(),
+        getBuildNumber());
   }
 
-  private static void loadBuildInfo()
-  {
+  private static void loadBuildInfo() {
     final InputStream is = VersionInfo.class.getResourceAsStream(BUILD_PROPERTIES_FILE);
 
     if (is != null) {
       try {
         BUILD_PROPERTIES.load(is);
         final String defaultValue = "";
-        final Integer missingValue = new Integer(0);
+        final Integer missingValue = 0;
 
         // Iterate over the 4 integers that comprise the version number.
         //
-        final Iterator iterator = BUILD_PROPERTIES_MAP.keySet().iterator();
-        while (iterator.hasNext()) {
-          final String key = (String) iterator.next();
-          final Integer value = getInteger(BUILD_PROPERTIES.getProperty(key, defaultValue));
-          if (value != null) {
-            BUILD_PROPERTIES_MAP.put(key, value);
-          }
-          else {
-            LOGGER.error("No value for key " + key);
-            BUILD_PROPERTIES_MAP.put(key, missingValue);
-          }
+        for (String key : BUILD_PROPERTIES_MAP.keySet()) {
+          final Integer value =
+              getIntegerOrDefaultValue(
+                  BUILD_PROPERTIES.getProperty(key, defaultValue),
+                  missingValue);
+          BUILD_PROPERTIES_MAP.put(key, value);
         }
 
         //  Get the build date.
@@ -178,34 +150,26 @@ public final class VersionInfo
         final String buildDate = BUILD_PROPERTIES.getProperty(BUILD_DATE_KEY);
         if (buildDate != null) {
           BUILD_PROPERTIES_MAP.put(BUILD_DATE_KEY, buildDate);
-        }
-        else {
+        } else {
           LOGGER.error("No value for key " + BUILD_DATE_KEY);
           BUILD_PROPERTIES_MAP.put(BUILD_DATE_KEY, missingValue);
         }
-      }
-      catch (IOException e) {
+      } catch (IOException e) {
         LOGGER.error("Couldn't load build information", e);
       }
     }
   }
 
-  private static Integer getInteger(final String s)
-  {
-    Integer value = null;
-
+  private static int getIntegerOrDefaultValue(final String s, int defaultValue) {
     try {
-      value = new Integer(Integer.parseInt(s));
-    }
-    catch (NumberFormatException nfe) {
+      return Integer.parseInt(s);
+    } catch (NumberFormatException nfe) {
       LOGGER.error("Couldn't parse int from " + s);
+      return defaultValue;
     }
-
-    return value;
   }
 
-  private VersionInfo()
-  {
+  private VersionInfo() {
     // Private constructor to prevent instantiation (never called, even from
     // this class).
   }

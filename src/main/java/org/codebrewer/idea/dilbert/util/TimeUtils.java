@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007 Mark Scott
+ *  Copyright 2007, 2018 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,47 +13,50 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package org.codebrewer.idea.dilbert.util;
+
+import java.time.Duration;
 
 /**
  * A time-related utility class.
  *
  * @author Mark Scott
  */
-public class TimeUtils
-{
+public class TimeUtils {
   /**
-   * The number of milliseconds in a second.
+   * The number of milliseconds in a minute.
    */
-  public static final int MILLIS_PER_SECOND = 1000;
-
-  /**
-   * The number of seconds in a minute.
-   */
-  public static final int SECONDS_PER_MINUTE = 60;
-
-  /**
-   * The number of minutes in an hour.
-   */
-  public static final int MINUTES_PER_HOUR = 60;
-
-  /**
-   * The number of hours in a day.
-   */
-  public static final int HOURS_PER_DAY = 24;
+  static final int MILLIS_PER_MINUTE = (int) Duration.ofMinutes(1).toMillis();
 
   /**
    * The number of milliseconds in a day.
    */
-  public static final int MILLIS_PER_DAY = MILLIS_PER_SECOND * SECONDS_PER_MINUTE * MINUTES_PER_HOUR * HOURS_PER_DAY;
+  static final int MILLIS_PER_DAY = (int) Duration.ofDays(1).toMillis();
+
+  /**
+   * The number of seconds in a day.
+   */
+  public static final int SECONDS_PER_DAY = (int) Duration.ofDays(1).getSeconds();
 
   /**
    * The number of minutes in a day.
    */
-  public static final int MINUTES_PER_DAY = MINUTES_PER_HOUR * HOURS_PER_DAY;
+  public static final int MINUTES_PER_DAY = (int) Duration.ofDays(1).toMinutes();
 
-  private TimeUtils()
-  {
+  /**
+   * Gets the smallest number of whole minutes represented by a number of
+   * seconds, preserving sign.
+   *
+   * @param seconds a number of seconds
+   *
+   * @return the number of whole minutes represented by {@code seconds}
+   */
+  public static int secondsToMinutes(int seconds) {
+    return (int) Duration.ofSeconds(seconds).toMinutes();
+  }
+
+  private TimeUtils() {
     // Utility class
   }
 }
