@@ -6,7 +6,19 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.5.0</b>
+    <![CDATA[<b>Version 1.6.0</b>
+<ul>
+<li>Fix: The plug-in should once again successfully fetch strips if the IntelliJ Platform application is configured to use an HTTP proxy with authentication.</li>
+<li>Fix: The plug-in toolwindow no longer shows a close button on products built on IntelliJ Platform 2018.1 and later.</li>
+<li>Removed: The plug-in's custom error handler has been removed as the server-side CGI script is no longer deployed.</li>
+</ul>
+There are some non-visible changes:
+<ul>
+<li>The plug-in is now built using the JetBrains gradle-intellij-plugin.</li>
+<li>Source code has been brought up to date (Java 5 -> Java 8).</li>
+<li>Source code is no longer bundled with the plug-ing but is now available on <a href="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">GitHub</a>.</li>
+</ul>
+<b>Version 1.5.0</b>
 <ul>
 <li>Fix: The plug-in's settings are now editable in IntelliJ IDEA 16 EAP (and in other products built on the same branch of IntelliJ Platform).</li>
 <li>Fix: The tooltip on the current cartoon strip now shows the correct date once more (instead of "The strip couldn't be retrieved").</li>
@@ -72,10 +84,10 @@
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
-            provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
-            displayName="Dilbert Daily Strip"
-            id="dilbert"
-            parentId="other" />
+        provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
+        displayName="Dilbert Daily Strip"
+        id="dilbert"
+        parentId="other" />
   </extensions>
   <application-components>
     <component>
