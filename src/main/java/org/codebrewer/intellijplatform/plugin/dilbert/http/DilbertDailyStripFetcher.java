@@ -18,7 +18,6 @@ package org.codebrewer.intellijplatform.plugin.dilbert.http;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.net.HttpConfigurable;
-import com.siyeh.ig.portability.mediatype.ImageMediaType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -289,8 +288,8 @@ public class DilbertDailyStripFetcher {
 
     if (contentTypeHeader != null) {
       final String contentType = contentTypeHeader.getValue();
-      result = ImageMediaType.GIF.toString().equalsIgnoreCase(contentType) ||
-               ImageMediaType.JPEG.toString().equalsIgnoreCase(contentType);
+      result = ImageFileType.GIF.toString().equalsIgnoreCase(contentType) ||
+               ImageFileType.JFIF.toString().equalsIgnoreCase(contentType);
     }
 
     return result;
