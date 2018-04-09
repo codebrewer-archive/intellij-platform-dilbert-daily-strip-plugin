@@ -16,7 +16,6 @@
 
 package org.codebrewer.intellijplatform.plugin.dilbert.util;
 
-import com.siyeh.ig.portability.mediatype.ImageMediaType;
 import java.io.File;
 
 /**
@@ -28,7 +27,7 @@ public enum ImageFileType {
   /**
    * Constant representing the GIF file type.
    */
-  GIF(ImageMediaType.GIF) {
+  GIF(Constants.MEDIA_TYPE_IMAGE_GIF) {
     boolean accepts(final byte[] bytes) {
       return ImageFileUtils.mayBeGIF(bytes);
     }
@@ -41,7 +40,7 @@ public enum ImageFileType {
   /**
    * Constant representing the JFIF file type.
    */
-  JFIF(ImageMediaType.JPEG) {
+  JFIF(Constants.MEDIA_TYPE_IMAGE_JPEG) {
     boolean accepts(final byte[] bytes) {
       return ImageFileUtils.mayBeJFIF(bytes);
     }
@@ -50,6 +49,11 @@ public enum ImageFileType {
       return ImageFileUtils.mayBeJFIF(file);
     }
   };
+
+  private static class Constants {
+    private static final String MEDIA_TYPE_IMAGE_GIF = "image/gif";
+    private static final String MEDIA_TYPE_IMAGE_JPEG = "image/jpeg";
+  }
 
   /**
    * Searches for the constant value of this class that matches image data that
@@ -95,9 +99,9 @@ public enum ImageFileType {
     return null;
   }
 
-  private final ImageMediaType imageMediaType;
+  private final String imageMediaType;
 
-  ImageFileType(final ImageMediaType imageMediaType) {
+  ImageFileType(final String imageMediaType) {
     this.imageMediaType = imageMediaType;
   }
 
@@ -124,6 +128,6 @@ public enum ImageFileType {
   abstract boolean accepts(File file);
 
   public String toString() {
-    return ImageFileType.class.getName() + "[imageMediaType='" + imageMediaType.toString() + "']";
+    return imageMediaType;
   }
 }
