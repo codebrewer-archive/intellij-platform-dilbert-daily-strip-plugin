@@ -1,10 +1,10 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
-<idea-plugin url="http://www.codebrewer.org/idea/dilbert/">
+<idea-plugin url="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">
   <name>Dilbert Daily Strip</name>
   <id>Dilbert</id>
   <description>Displays the cartoon strip of the day from the dilbert.com website.</description>
   <version>0</version>
-  <vendor email="mark@codebrewer.org">Codebrewer</vendor>
+  <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
     <![CDATA[<b>Version 1.5.0</b>
 <ul>
@@ -72,10 +72,10 @@
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
-        provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
-        displayName="Dilbert Daily Strip"
-        id="dilbert"
-        parentId="other" />
+            provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
+            displayName="Dilbert Daily Strip"
+            id="dilbert"
+            parentId="other" />
   </extensions>
   <application-components>
     <component>
