@@ -1,0 +1,104 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin url="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">
+  <name>Dilbert Daily Strip</name>
+  <id>Dilbert</id>
+  <description>Displays the cartoon strip of the day from the dilbert.com website.</description>
+  <version>0</version>
+  <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
+  <change-notes>
+    <![CDATA[<b>Version 1.6.0</b>
+<ul>
+<li>Fix: The plug-in should once again successfully fetch strips if the IntelliJ Platform application is configured to use an HTTP proxy with authentication.</li>
+<li>Fix: The plug-in toolwindow no longer shows a close button on products built on IntelliJ Platform 2018.1 and later.</li>
+<li>Removed: The plug-in's custom error handler has been removed as the server-side CGI script is no longer deployed.</li>
+</ul>
+There are some non-visible changes:
+<ul>
+<li>The plug-in is now built using the JetBrains gradle-intellij-plugin.</li>
+<li>Source code has been brought up to date (Java 5 -> Java 8).</li>
+<li>Source code is no longer bundled with the plug-ing but is now available on <a href="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">GitHub</a>.</li>
+</ul>
+<b>Version 1.5.0</b>
+<ul>
+<li>Fix: The plug-in's settings are now editable in IntelliJ IDEA 16 EAP (and in other products built on the same branch of IntelliJ Platform).</li>
+<li>Fix: The tooltip on the current cartoon strip now shows the correct date once more (instead of "The strip couldn't be retrieved").</li>
+</ul>
+<b>Version 1.4.1</b>
+<ul>
+<li>Fix: The plug-in is now compatible with CLion.</li>
+</ul>
+<b>Version 1.4.0</b>
+<ul>
+<li>Fix: An update to the dilbert.com website broke the plug-in by removing the 'fast' URL.</li>
+<li>Change: The helpset documentation has been removed as it no longer works (presumably due to changes in the IntelliJ Platform help system).</li>
+</ul>
+<b>Version 1.3.3</b>
+<ul>
+<li>Fix: The toolwindow background colour is no longer explicitly set to white.</li>
+<li>Fix: The toolwindow button icon is now the preferred 13x13 size.</li>
+<li>Fix: The plug-in is now compatible with any product built on IntelliJ Platform.</li>
+<li>Fix: The toolwindow title is now just "Dilbert" rather than "Dilbert Dilbert".</li>
+</ul>
+<b>Version 1.3.2</b>
+<ul>
+<li>Fix: Updated for IDEA 10.5 EAP (no longer bundles commons-httpclient, commons-codec or commons-logging).</li>
+</ul>
+<b>Version 1.3.1</b>
+<ul>
+<li>Fix: The toolbar action buttons are now available in IDEA's "dumb" mode <em>e.g.</em> when indexes are being rebuilt.</li>
+<li>Fix: The keyboard shortcuts for the toolbar actions now work once more.</li>
+</ul>
+<b>Version 1.3.0</b>
+<ul>
+<li>Fix: A change to IDEA prior to the IDEA 10.0 final release resulted in the plug-in's toolbar often painting incorrectly.</li>
+<li>Fix: Prevented the circumstances in which the error <em>"Access to realized (ever shown) UI components should be done only from the AWT event dispatch thread, revalidate(), invalidate() & repaint() is ok from any thread"</em> is logged.</li>
+<li>New: The plug-in's toolwindow is now available in IDEA's "dumb" mode <em>e.g.</em> when indexes are being rebuilt.</li>
+</ul>
+<b>Version 1.2.1</b>
+<ul>
+<li>Fix: A change to the IDEA OpenAPI during the IDEA 8.x EAP phase resulted in the plug-in generating the error <em>"Access is allowed from event dispatch thread only."</em>.</li>
+</ul>
+<b>Version 1.2.0</b>
+<ul>
+<li>Fix: An update to the dilbert.com website broke the plug-in by changing URL formats and no longer sending the HTTP <em>Last-Modified</em> header with replies.</li>
+</ul>
+<b>Version 1.1.0</b>
+<ul>
+<li>Fix: If IDEA is configured to send authentication information to an HTTP proxy then the authentication information is sent pre-emptively, avoiding problems with proxy servers that fail to respond with HTTP status code 407.</li>
+<li>Fix: The strip is fetched asynchronously rather than synchronously in the AWT event dispatch thread.</li>
+<li>New: Strips may be scheduled for automatic daily download.</li>
+</ul>
+<b>Version 1.0.1</b>
+<ul>
+<li>Fix: Any anticipated exception caught when downloading the strip results in an 'error' image being displayed rather than the exception being reported to IDEA's log.</li>
+<li>Fix: Help system typos corrected.</li>
+<li>New: The 'About' window can now be dismissed with the Esc key, removing any dependency at all on the mouse.</li>
+<li>New: IDEA's HTTP proxy settings are honoured.</li>
+</ul>
+<b>Version 1.0.0</b>
+<ul>
+<li>Initial release</li>
+</ul>]]>
+  </change-notes>
+  <idea-version since-build="0" until-build="" />
+  <depends>com.intellij.modules.lang</depends>
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationConfigurable
+        provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
+        displayName="Dilbert Daily Strip"
+        id="dilbert"
+        parentId="other" />
+  </extensions>
+  <application-components>
+    <component>
+      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginImpl</implementation-class>
+      <interface-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin</interface-class>
+    </component>
+  </application-components>
+  <project-components>
+    <component>
+      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
+      <option name="workspace" value="true" />
+    </component>
+  </project-components>
+</idea-plugin>
