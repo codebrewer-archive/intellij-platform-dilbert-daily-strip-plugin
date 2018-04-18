@@ -35,16 +35,9 @@ apply plugin: 'java'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-compileJava {
-  def buildProperties = new Properties()
-  buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").newInputStream())
-  version = new PropertiesVersion(buildProperties)
-}
-
 intellij {
   version = 'IC-2016.3'
   pluginName = 'DilbertDailyStrip'
-  patchPluginXml.untilBuild = ''
 }
 
 patchPluginXml {
@@ -55,4 +48,9 @@ patchPluginXml {
     entry(key: 'build.number', type: 'int', default: '1', operation: '+')
     entry(key: 'build.date', type: 'date', value: 'now', pattern: 'MMMM d, yyyy')
   }
+
+  def buildProperties = new Properties()
+  buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").newInputStream())
+  version = new PropertiesVersion(buildProperties)
+  untilBuild = ''
 }
