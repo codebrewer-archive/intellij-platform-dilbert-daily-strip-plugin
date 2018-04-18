@@ -80,7 +80,7 @@ There are some non-visible changes:
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="0" until-build="" />
+  <idea-version since-build="0" />
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
