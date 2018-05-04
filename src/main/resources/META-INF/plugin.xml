@@ -6,7 +6,11 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.6.1</b>
+    <![CDATA[<b>Version 1.7.0</b>
+<ul>
+<li>Fix: An update to the dilbert.com website broke the plug-in by switching from an &lt;img&gt; tag with a <code>src</code> attribute to a &lt;div&gt; tag with a <code>data-image</code> attribute for identifying the strip image URL.</li>
+</ul>
+<b>Version 1.6.1</b>
 <ul>
 <li>Fix: The <code>idea-version</code> element in the plug-in's <code>plugin.xml</code> should no longer be rejected by the JetBrains plugin repository.</li>
 </ul>

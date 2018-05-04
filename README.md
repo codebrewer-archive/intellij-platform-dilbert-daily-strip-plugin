@@ -17,7 +17,7 @@ just the current strip (_e.g._ the previous day's strip or a weekly digest
 or...). As a result, the source code is _way_ over engineered for what it
 actually does - a good example of violating the
 [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) principle.
-Updates often start with _"WTF was I **thinking**?!_ as I try to get my head
+Updates often start with _"WTF was I **thinking**?!"_ as I try to get my head
 around the code again.
 
 Source code was originally tracked in a private CVS repository, migrated to Git
