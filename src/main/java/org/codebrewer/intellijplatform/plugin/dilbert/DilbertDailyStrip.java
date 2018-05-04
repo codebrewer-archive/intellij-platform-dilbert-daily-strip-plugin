@@ -40,7 +40,7 @@ public final class DilbertDailyStrip {
    * identifies the URL of the current cartoon image.
    */
   public static final String IMAGE_URL_REGEX =
-      "^.*<img .*src=\"(http://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
+      "^.*data-image=\"(https://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
 
   /**
    * The URL of the dilbert.com website.

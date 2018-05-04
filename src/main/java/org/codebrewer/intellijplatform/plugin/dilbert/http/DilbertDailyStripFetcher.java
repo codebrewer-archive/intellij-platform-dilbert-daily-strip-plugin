@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.HttpURL;
+import org.apache.commons.httpclient.HttpsURL;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -249,10 +250,13 @@ public class DilbertDailyStripFetcher {
           if (matcher.matches()) {
             final String spec = matcher.group(1);
 
-            // Try to form the URL for the daily strip image from the homepage
-            // URL and the path to the daily strip image
-            //
-            result = new HttpURL(spec);
+            if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
+              result = new HttpsURL(spec);
+            }
+            else if (spec.startsWith(new String(HttpURL.DEFAULT_SCHEME))) {
+              result = new HttpURL(spec);
+            }
+
             break;
           }
         }
@@ -262,8 +266,8 @@ public class DilbertDailyStripFetcher {
       if (result == null) {
         // NON-NLS
         final String message =
-            MessageFormat.format(
-                "Didn't match regular expression {0}  to any line in the homepage content",
+            String.format(
+                "Didn't match regular expression %s to any line in the homepage content",
                 DilbertDailyStrip.IMAGE_URL_REGEX);
         LOGGER.info(message);
         throw new IOException(message);
