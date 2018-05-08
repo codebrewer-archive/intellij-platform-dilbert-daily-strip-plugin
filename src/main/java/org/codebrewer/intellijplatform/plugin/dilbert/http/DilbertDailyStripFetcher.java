@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -234,41 +233,36 @@ public class DilbertDailyStripFetcher {
 
     HttpURL result = null;
 
-    // Read the homepage body line by line, looking for a match on the regex
-    // that identifies the daily strip image
+    // Read the homepage body line by line, looking for the first match on the
+    // regex that identifies the daily strip image
     //
-
     try (BufferedReader br =
              new BufferedReader(
                  new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()))) {
-      final Pattern p = Pattern.compile(DilbertDailyStrip.IMAGE_URL_REGEX);
       String line;
-      do {
-        line = br.readLine();
-        if (line != null) {
-          final Matcher matcher = p.matcher(line);
-          if (matcher.matches()) {
-            final String spec = matcher.group(1);
 
-            if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
-              result = new HttpsURL(spec);
-            }
-            else if (spec.startsWith(new String(HttpURL.DEFAULT_SCHEME))) {
-              result = new HttpURL(spec);
-            }
+      while ((line = br.readLine()) != null) {
+        final Matcher matcher = DilbertDailyStrip.IMAGE_URL_PATTERN.matcher(line);
 
-            break;
+        if (matcher.matches()) {
+          final String spec = matcher.group(1);
+
+          if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
+            result = new HttpsURL(spec);
+          } else if (spec.startsWith(new String(HttpURL.DEFAULT_SCHEME))) {
+            result = new HttpURL(spec);
           }
+
+          break;
         }
       }
-      while (line != null);
 
       if (result == null) {
         // NON-NLS
         final String message =
             String.format(
                 "Didn't match regular expression %s to any line in the homepage content",
-                DilbertDailyStrip.IMAGE_URL_REGEX);
+                DilbertDailyStrip.IMAGE_URL_PATTERN);
         LOGGER.info(message);
         throw new IOException(message);
       }
