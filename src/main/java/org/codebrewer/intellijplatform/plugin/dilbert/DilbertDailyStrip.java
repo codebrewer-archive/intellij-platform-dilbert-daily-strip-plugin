@@ -18,6 +18,7 @@ package org.codebrewer.intellijplatform.plugin.dilbert;
 
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
+import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -36,11 +37,11 @@ public final class DilbertDailyStrip {
       new DilbertDailyStrip(IconLoader.getIcon("/no-dilbert.png"), null, null, Long.MIN_VALUE);
 
   /**
-   * A regular expression that, when applied to the dilbert.com homepage,
-   * identifies the URL of the current cartoon image.
+   * A regular expression pattern that, when applied to the dilbert.com homepage
+   * content, identifies the URL of a cartoon image.
    */
-  public static final String IMAGE_URL_REGEX =
-      "^.*data-image=\"(https://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$";
+  public static final Pattern IMAGE_URL_PATTERN =
+      Pattern.compile("^.*=\"(https*://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$");
 
   /**
    * The URL of the dilbert.com website.
