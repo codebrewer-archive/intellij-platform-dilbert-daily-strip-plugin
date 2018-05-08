@@ -6,7 +6,11 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.7.0</b>
+    <![CDATA[<b>Version 1.7.1</b>
+<ul>
+<li>Fix: An(other!) update to the dilbert.com website broke the plug-in by switching from https to http for the strip image URL. This update accommodates both schemes in case of future changes...</li>
+</ul>
+<b>Version 1.7.0</b>
 <ul>
 <li>Fix: An update to the dilbert.com website broke the plug-in by switching from an &lt;img&gt; tag with a <code>src</code> attribute to a &lt;div&gt; tag with a <code>data-image</code> attribute for identifying the strip image URL.</li>
 </ul>
