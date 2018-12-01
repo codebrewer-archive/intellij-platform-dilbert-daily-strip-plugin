@@ -41,12 +41,12 @@ public final class DilbertDailyStrip {
    * content, identifies the URL of a cartoon image.
    */
   public static final Pattern IMAGE_URL_PATTERN =
-      Pattern.compile("^.*=\"(https*://assets\\.amuniversal\\.com/\\p{Alnum}{32}?)\".*$");
+      Pattern.compile("^.*=\"((https?:)?//assets\\.amuniversal\\.com/\\p{Alnum}{32})\".*$");
 
   /**
    * The URL of the dilbert.com website.
    */
-  public static final String DILBERT_DOT_COM_URL = "http://www.dilbert.com/";
+  public static final String DILBERT_DOT_COM_URL = "https://www.dilbert.com/";
 
   /**
    * The raw image data.
