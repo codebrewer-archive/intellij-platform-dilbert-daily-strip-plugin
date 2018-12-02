@@ -6,7 +6,12 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.7.1</b>
+    <![CDATA[<b>Version 1.8.0</b>
+<ul>
+<li>Fix: Yet another update to the dilbert.com website broke the plug-in by removing the scheme from the strip image URL. This update accommodates no scheme, http or https in case of future changes.</li>
+<li>New: Ctrl-&lt;mouse-button-1-click&gt; (on Linux or Windows) or Cmd-&lt;mouse-button-1-click&gt; (on macOS) opens dilbert.com in the system's default web browser.</li>
+</ul>
+<b>Version 1.7.1</b>
 <ul>
 <li>Fix: An(other!) update to the dilbert.com website broke the plug-in by switching from https to http for the strip image URL. This update accommodates both schemes in case of future changes...</li>
 </ul>
