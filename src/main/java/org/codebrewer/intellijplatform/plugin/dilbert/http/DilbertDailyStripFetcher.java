@@ -247,7 +247,10 @@ public class DilbertDailyStripFetcher {
         if (matcher.matches()) {
           final String spec = matcher.group(1);
 
-          if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
+          if (spec.startsWith("//")) {
+            result = new HttpsURL(new String(HttpsURL.DEFAULT_SCHEME) + ':' + spec);
+          }
+          else if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
             result = new HttpsURL(spec);
           } else if (spec.startsWith(new String(HttpURL.DEFAULT_SCHEME))) {
             result = new HttpURL(spec);
