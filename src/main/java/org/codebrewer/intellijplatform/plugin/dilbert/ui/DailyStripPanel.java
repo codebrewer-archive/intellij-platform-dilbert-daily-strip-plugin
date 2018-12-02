@@ -16,12 +16,14 @@
 
 package org.codebrewer.intellijplatform.plugin.dilbert.ui;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CustomShortcutSet;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.MouseShortcut;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
@@ -35,6 +37,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.util.Date;
 import javax.swing.BorderFactory;
@@ -127,6 +130,11 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     scroller.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     scroller.getVerticalScrollBar().setUnitIncrement(4);
 
+    // Install an action on the scrollpane to open dilbert.com in a
+    // web browser
+    //
+    new LaunchWebsiteAction().install(scroller);
+
     return scroller;
   }
 
@@ -175,6 +183,34 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       aboutWindow.setLocationRelativeTo(getTopLevelAncestor());
       aboutWindow.setVisible(true);
       aboutWindow.requestFocus();
+    }
+  }
+
+  /**
+   * An action that opens the Dilbert website in a web browser.
+   */
+  private final class LaunchWebsiteAction extends AnAction implements DumbAware {
+    private LaunchWebsiteAction() {
+      super();
+
+      final ToolWindowManager manager = ToolWindowManager.getInstance(project);
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+
+      if (toolWindow != null) {
+        final int modifiers = SystemInfo.isMac ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
+        final MouseShortcut mouseShortcut = new MouseShortcut(MouseEvent.BUTTON1, modifiers, 1);
+        final CustomShortcutSet shortcutSet = new CustomShortcutSet(mouseShortcut);
+        setShortcutSet(shortcutSet);
+      }
+    }
+
+    private void install(JComponent component) {
+      registerCustomShortcutSet(getShortcutSet(), component);
+    }
+
+    @Override
+    public void actionPerformed(final AnActionEvent e) {
+      BrowserUtil.browse(DilbertDailyStrip.DILBERT_DOT_COM_URL);
     }
   }
 
