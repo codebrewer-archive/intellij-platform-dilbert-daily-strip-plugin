@@ -27,6 +27,14 @@ plugins {
   id 'org.jetbrains.intellij' version '0.4.21'
 }
 
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.codebrewer.intellij.platform:intellij-platform-plugin-utilities:1.0.2'
+}
+
 group = 'org.codebrewer'
 
 apply plugin: 'idea'
