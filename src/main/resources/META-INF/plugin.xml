@@ -6,7 +6,11 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.8.0</b>
+    <![CDATA[<b>Version 1.9.0</b>
+<ul>
+<li>Fix: An exception thrown when closing a project in versions of IntelliJ Platform products from around 2020.1 onwards has been resolved.</li>
+</ul>
+<b>Version 1.8.0</b>
 <ul>
 <li>Fix: Yet another update to the dilbert.com website broke the plug-in by removing the scheme from the strip image URL. This update accommodates no scheme, http or https in case of future changes.</li>
 <li>New: Ctrl-&lt;mouse-button-1-click&gt; (on Linux or Windows) or Cmd-&lt;mouse-button-1-click&gt; (on macOS) opens dilbert.com in the system's default web browser.</li>
@@ -97,7 +101,7 @@ There are some non-visible changes:
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="0" />
+  <idea-version since-build="201.7223.91" />
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
@@ -105,6 +109,11 @@ There are some non-visible changes:
         displayName="Dilbert Daily Strip"
         id="dilbert"
         parentId="other" />
+    <toolWindow
+            id="Dilbert"
+            anchor="bottom"
+            factoryClass="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripToolWindowFactory"
+            icon="/dilbert13x13.png" />
   </extensions>
   <application-components>
     <component>
@@ -112,10 +121,4 @@ There are some non-visible changes:
       <interface-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin</interface-class>
     </component>
   </application-components>
-  <project-components>
-    <component>
-      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
-      <option name="workspace" value="true" />
-    </component>
-  </project-components>
 </idea-plugin>

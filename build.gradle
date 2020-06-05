@@ -23,7 +23,16 @@ buildscript {
 }
 
 plugins {
-  id "org.jetbrains.intellij" version "0.3.12"
+  id 'java'
+  id 'org.jetbrains.intellij' version '0.4.21'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'org.codebrewer.intellij.platform:intellij-platform-plugin-utilities:1.0.2'
 }
 
 group = 'org.codebrewer'
@@ -36,19 +45,21 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 intellij {
-  version = 'IC-2016.3'
+  version = 'IC-2020.1'
   pluginName = 'DilbertDailyStrip'
 }
 
-patchPluginXml {
+build {
   // A build counter and date are maintained in build.properties and updating
-  // them whenever plugin.xml is patched during a build seems reasonable
+  // them whenever a build is made seems reasonable
   //
   ant.propertyfile(file: 'src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties') {
     entry(key: 'build.number', type: 'int', default: '1', operation: '+')
     entry(key: 'build.date', type: 'date', value: 'now', pattern: 'MMMM d, yyyy')
   }
+}
 
+patchPluginXml {
   def buildProperties = new Properties()
   buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").newInputStream())
   version = new PropertiesVersion(buildProperties)
