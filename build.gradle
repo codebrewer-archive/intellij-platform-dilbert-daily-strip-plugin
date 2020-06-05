@@ -49,15 +49,17 @@ intellij {
   pluginName = 'DilbertDailyStrip'
 }
 
-patchPluginXml {
+build {
   // A build counter and date are maintained in build.properties and updating
-  // them whenever plugin.xml is patched during a build seems reasonable
+  // them whenever a build is made seems reasonable
   //
   ant.propertyfile(file: 'src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties') {
     entry(key: 'build.number', type: 'int', default: '1', operation: '+')
     entry(key: 'build.date', type: 'date', value: 'now', pattern: 'MMMM d, yyyy')
   }
+}
 
+patchPluginXml {
   def buildProperties = new Properties()
   buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").newInputStream())
   version = new PropertiesVersion(buildProperties)
