@@ -97,7 +97,7 @@ There are some non-visible changes:
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="0" />
+  <idea-version since-build="201.7223.91" />
   <depends>com.intellij.modules.lang</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
@@ -105,6 +105,11 @@ There are some non-visible changes:
         displayName="Dilbert Daily Strip"
         id="dilbert"
         parentId="other" />
+    <toolWindow
+            id="Dilbert"
+            anchor="bottom"
+            factoryClass="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripToolWindowFactory"
+            icon="/dilbert13x13.png" />
   </extensions>
   <application-components>
     <component>
@@ -112,10 +117,4 @@ There are some non-visible changes:
       <interface-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin</interface-class>
     </component>
   </application-components>
-  <project-components>
-    <component>
-      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripProjectComponentImpl</implementation-class>
-      <option name="workspace" value="true" />
-    </component>
-  </project-components>
 </idea-plugin>
