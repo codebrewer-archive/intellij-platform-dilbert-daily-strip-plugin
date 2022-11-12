@@ -1,43 +1,63 @@
-plugins {
-    id("java")
-    id("org.jetbrains.intellij") version "1.8.0"
+import java.util.Properties
+
+data class PropertiesVersion(val properties: Properties) {
+    private val major = properties["build.version.major"]
+    private val minor = properties["build.version.minor"]
+    private val revision = properties["build.version.revision"]
+    private val build = properties["build.number"]
+
+    override fun toString(): String {
+        return "${this.major}.${this.minor}.${this.revision}.${this.build}"
+    }
 }
 
-group = "com.example"
-version = "1.0-SNAPSHOT"
+plugins {
+    id("java")
+    id("org.jetbrains.intellij") version "1.9.0"
+}
+
+group = "org.codebrewer"
 
 repositories {
     mavenCentral()
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-    version.set("2021.3.3")
-    type.set("IC") // Target IDE Platform
+dependencies {
+    implementation("org.codebrewer.intellij.platform:intellij-platform-plugin-utilities:1.0.2")
+}
 
-    plugins.set(listOf(/* Plugin Dependencies */))
+intellij {
+    pluginName.set("DilbertDailyStrip")
+    version.set("2022.2.3")
+    type.set("IC")
 }
 
 tasks {
-    // Set the JVM compatibility versions
+    register("updateBuildData") {
+        doFirst {
+            ant.withGroovyBuilder {
+                "echo"("message" to "Hello from Ant in Gradle")
+                "propertyfile"("file" to "src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties") {
+                    "entry"("key" to "build.number", "type" to "int", "default" to "1", "operation" to "+")
+                    "entry"("key" to "build.date", "type" to "date", "value" to "now", "pattern" to "MMMM d, yyyy")
+                }
+            }
+        }
+    }
+
+    findByName("patchPluginXml")?.dependsOn("updateBuildData")
+
     withType<JavaCompile> {
         sourceCompatibility = "11"
         targetCompatibility = "11"
     }
 
     patchPluginXml {
-        sinceBuild.set("213")
-        untilBuild.set("223.*")
-    }
+        sinceBuild.set("221.*")
+        untilBuild.set("222.*")
 
-    signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-    }
-
-    publishPlugin {
-        token.set(System.getenv("PUBLISH_TOKEN"))
+        val buildProperties = Properties()
+        buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").inputStream())
+        version.set(PropertiesVersion(buildProperties).toString())
     }
 }
