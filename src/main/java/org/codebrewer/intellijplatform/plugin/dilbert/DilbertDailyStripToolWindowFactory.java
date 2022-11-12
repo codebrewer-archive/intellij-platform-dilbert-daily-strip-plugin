@@ -1,5 +1,5 @@
 /*
- *  Copyright 2020 Mark Scott
+ *  Copyright 2020, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.codebrewer.intellijplatform.plugin.dilbert;
 
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
@@ -31,9 +30,9 @@ public class DilbertDailyStripToolWindowFactory implements DumbAware, ToolWindow
   public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
     final DailyStripPanel dailyStripPanel = new DailyStripPanel(project);
     final Content content =
-        ContentFactory.SERVICE.getInstance().createContent(dailyStripPanel, null, true);
+        ContentFactory.getInstance().createContent(dailyStripPanel, null, true);
 
-    Disposer.register(project, dailyStripPanel::dispose);
+    content.setDisposer(dailyStripPanel::dispose);
     toolWindow.getContentManager().addContent(content);
     dailyStripPanel.initialise();
   }
