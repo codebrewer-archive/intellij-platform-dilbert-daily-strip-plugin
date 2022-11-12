@@ -36,7 +36,6 @@ tasks {
     register("updateBuildData") {
         doFirst {
             ant.withGroovyBuilder {
-                "echo"("message" to "Hello from Ant in Gradle")
                 "propertyfile"("file" to "src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties") {
                     "entry"("key" to "build.number", "type" to "int", "default" to "1", "operation" to "+")
                     "entry"("key" to "build.date", "type" to "date", "value" to "now", "pattern" to "MMMM d, yyyy")
@@ -53,7 +52,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("221.*")
+        sinceBuild.set("222.2680.4")
         untilBuild.set("222.*")
 
         val buildProperties = Properties()

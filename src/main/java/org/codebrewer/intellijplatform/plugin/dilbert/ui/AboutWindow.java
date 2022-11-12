@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2006, 2018 Mark Scott
+ *  Copyright 2005, 2006, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -37,12 +37,13 @@ import org.codebrewer.intellijplatform.plugin.dilbert.util.VersionInfo;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 
 /**
- * A singelton class that implements an 'about' screen.
+ * A singleton class that implements an 'about' screen.
  *
  * @author Mark Scott
  */
 final class AboutWindow extends JDialog {
-  private static final Icon ICON_ABOUT = IconLoader.getIcon("/dilbert-splash.png");
+  private static final Icon ICON_ABOUT =
+      IconLoader.getIcon("/dilbert-splash.png", AboutWindow.class);
 
   private static final AboutWindow INSTANCE = new AboutWindow();
 
@@ -156,7 +157,7 @@ final class AboutWindow extends JDialog {
       }
     });
 
-    // ...or typing Esc while while we have focus
+    // ...or typing Esc while we have focus
     //
     addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent keyEvent) {

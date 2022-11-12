@@ -1,5 +1,5 @@
 /*
- * Copyright 2005, 2007, 2008, 2015, 2018 Mark Scott
+ * Copyright 2005, 2007, 2008, 2015, 2018, 2022 Mark Scott
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public final class DilbertDailyStrip {
    * network problem prevents a cartoon from being fetched).
    */
   public static final DilbertDailyStrip MISSING_STRIP =
-      new DilbertDailyStrip(IconLoader.getIcon("/no-dilbert.png"), null, null, Long.MIN_VALUE);
+      new DilbertDailyStrip(IconLoader.getIcon("/no-dilbert.png", DilbertDailyStrip.class), null, null, Long.MIN_VALUE);
 
   /**
    * A regular expression pattern that, when applied to the dilbert.com homepage

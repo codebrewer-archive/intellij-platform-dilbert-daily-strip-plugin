@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008, 2010, 2018 Mark Scott
+ *  Copyright 2007, 2008, 2010, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DisclaimerNotAcknowledgedDialog;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A strategy that keeps its client updated with the current daily strip.
@@ -56,7 +57,8 @@ import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
     implements DailyStripListener {
   private static final String PROVIDER_ID = "currentStrip";
-  private static final Icon REFRESH_ICON = IconLoader.getIcon("/vcs/refresh.png");
+  private static final Icon REFRESH_ICON =
+      IconLoader.getIcon("/vcs/refresh.png", CurrentDailyStripProvider.class);
 
   private final JComponent controlPanel;
   private JProgressBar progressBar;
@@ -191,7 +193,8 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
       final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
 
       if (toolWindow != null) {
-        final int modifiers = SystemInfo.isMac ? InputEvent.META_MASK : InputEvent.CTRL_MASK;
+        final int modifiers = SystemInfo.isMac ?
+                              InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
         final KeyStroke keyStroke =
             KeyStroke.getKeyStroke(KeyEvent.VK_R, modifiers);
         final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
@@ -200,7 +203,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
     }
 
     @Override
-    public void actionPerformed(final AnActionEvent e) {
+    public void actionPerformed(@NotNull final AnActionEvent e) {
       // The strip is only fetched if the user has acknowledged the plug-in's
       // disclaimer
       //
