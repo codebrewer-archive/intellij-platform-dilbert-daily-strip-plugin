@@ -1,4 +1,3 @@
-<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin url="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">
   <name>Dilbert Daily Strip</name>
   <id>Dilbert</id>
@@ -101,8 +100,8 @@ There are some non-visible changes:
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="201.7223.91" />
-  <depends>com.intellij.modules.lang</depends>
+  <idea-version since-build="222.*" />
+  <depends>com.intellij.modules.platform</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
         provider="org.codebrewer.intellijplatform.plugin.dilbert.settings.DilbertDailyStripConfigurableProvider"
