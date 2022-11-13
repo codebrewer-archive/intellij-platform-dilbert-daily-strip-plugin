@@ -33,6 +33,7 @@ public class DilbertDailyStripToolWindowFactory implements DumbAware, ToolWindow
         ContentFactory.getInstance().createContent(dailyStripPanel, null, true);
 
     content.setDisposer(dailyStripPanel::dispose);
+    content.setPreferredFocusableComponent(dailyStripPanel);
     toolWindow.getContentManager().addContent(content);
     dailyStripPanel.initialise();
   }

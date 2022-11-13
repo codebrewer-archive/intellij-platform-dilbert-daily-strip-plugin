@@ -104,6 +104,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
     final JPanel actionsPanel = new JPanel();
 
     actionToolbar.setReservePlaceAutoPopupIcon(false);
+    actionToolbar.setTargetComponent(this);
     actionsPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
     actionsPanel.add(actionToolbarComponent);
     actionsPanel.add(createControlPanelView());
@@ -176,7 +177,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
         final KeyStroke keyStroke =
             KeyStroke.getKeyStroke(KeyEvent.VK_I, modifiers);
         final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
+        registerCustomShortcutSet(shortcutSet, toolWindow.getContentManager().getComponent());
       }
     }
 
