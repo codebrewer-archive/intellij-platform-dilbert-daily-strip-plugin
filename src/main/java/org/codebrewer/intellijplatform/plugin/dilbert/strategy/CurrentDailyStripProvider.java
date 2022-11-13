@@ -78,6 +78,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
     final JPanel actionsPanel = new JPanel();
 
     actionToolbar.setReservePlaceAutoPopupIcon(false);
+    actionToolbar.setTargetComponent(actionsPanel);
     actionsPanel.setLayout(new BoxLayout(actionsPanel, BoxLayout.LINE_AXIS));
     actionsPanel.add(actionToolbar.getComponent());
     actionsPanel.add(Box.createHorizontalStrut(2));
@@ -198,7 +199,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
         final KeyStroke keyStroke =
             KeyStroke.getKeyStroke(KeyEvent.VK_R, modifiers);
         final CustomShortcutSet shortcutSet = new CustomShortcutSet(keyStroke);
-        registerCustomShortcutSet(shortcutSet, toolWindow.getComponent());
+        registerCustomShortcutSet(shortcutSet, toolWindow.getContentManager().getComponent());
       }
     }
 
