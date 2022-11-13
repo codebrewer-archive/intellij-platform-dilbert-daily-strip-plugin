@@ -51,7 +51,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStrip;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.strategy.DailyStripProvider;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +66,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   private static final Icon ABOUT_ICON =
       IconLoader.getIcon("/compiler/information.png", DailyStripPanel.class);
 
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPluginService.class.getName());
   private final Project project;
   private DilbertDailyStrip dailyStrip;
   private JLabel stripLabel;
@@ -168,7 +168,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
           ABOUT_ICON);
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
-      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+      final ToolWindow toolWindow =manager.getToolWindow(DilbertDailyStripPluginService.TOOL_WINDOW_ID);
 
       if (toolWindow != null) {
         final int modifiers =
@@ -197,7 +197,7 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
       super();
 
       final ToolWindowManager manager = ToolWindowManager.getInstance(project);
-      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPluginService.TOOL_WINDOW_ID);
 
       if (toolWindow != null) {
         final int modifiers = SystemInfo.isMac ? InputEvent.META_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;
@@ -224,10 +224,10 @@ public final class DailyStripPanel extends JPanel implements DailyStripPresenter
   }
 
   public void initialise() {
-    final DilbertDailyStripPlugin dilbertPlugin =
-        ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+    final DilbertDailyStripPluginService dilbertPluginService =
+        ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
 
-    dailyStripProvider = dilbertPlugin.getDailyStripProviders(this)[0];
+    dailyStripProvider = dilbertPluginService.getDailyStripProviders(this)[0];
     build();
     dailyStripProvider.start();
   }

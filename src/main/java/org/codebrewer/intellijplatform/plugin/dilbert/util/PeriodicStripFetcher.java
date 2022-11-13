@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008, 2018 Mark Scott
+ *  Copyright 2007, 2008, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.TimerTask;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripEvent;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripListener;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStrip;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.settings.UnattendedDownloadSettings;
 
 /**
@@ -38,7 +38,8 @@ public final class PeriodicStripFetcher {
   /**
    * For logging messages to IDEA's log.
    */
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER =
+      Logger.getInstance(DilbertDailyStripPluginService.class.getName());
 
   /**
    * Gets the number of milliseconds to wait until the next strip download is
@@ -113,7 +114,7 @@ public final class PeriodicStripFetcher {
           LOGGER.info("It's time to see if there's a new Dilbert strip available..."); // NON-NLS
           timer.schedule(new SelfCancellingStripFetcherTask(maxFetchAttempts),
               0,
-              new Integer(TimeUtils.MILLIS_PER_MINUTE * fetchInterval).longValue());
+              Integer.valueOf(TimeUtils.MILLIS_PER_MINUTE * fetchInterval).longValue());
         }
       }, delay, TimeUtils.MILLIS_PER_DAY);
     }
@@ -143,7 +144,7 @@ public final class PeriodicStripFetcher {
 
     // The object that can retrieve a daily strip
     //
-    private final DilbertDailyStripPlugin dilbertPlugin;
+    private final DilbertDailyStripPluginService dilbertPluginService;
 
     /**
      * Creates a task that will run at most <code>runLimit</code> times.
@@ -155,13 +156,13 @@ public final class PeriodicStripFetcher {
 
       this.runLimit = runLimit;
       timeToLive = runLimit;
-      dilbertPlugin =
-          ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
-      dilbertPlugin.addDailyStripListener(this);
+      dilbertPluginService =
+          ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
+      dilbertPluginService.addDailyStripListener(this);
     }
 
     public boolean cancel() {
-      dilbertPlugin.removeDailyStripListener(this);
+      dilbertPluginService.removeDailyStripListener(this);
 
       return super.cancel();
     }
@@ -174,12 +175,12 @@ public final class PeriodicStripFetcher {
             MessageFormat.format(
                 "Making fetch attempt number {0}", runLimit - timeToLive));
 
-        final DilbertDailyStrip dilbertDailyStrip = dilbertPlugin.getCachedDailyStrip();
+        final DilbertDailyStrip dilbertDailyStrip = dilbertPluginService.getCachedDailyStrip();
 
         if (dilbertDailyStrip == null) {
-          dilbertPlugin.fetchDailyStrip();
+          dilbertPluginService.fetchDailyStrip();
         } else {
-          dilbertPlugin.fetchDailyStrip(dilbertDailyStrip.getImageChecksum());
+          dilbertPluginService.fetchDailyStrip(dilbertDailyStrip.getImageChecksum());
         }
       } else {
         LOGGER.debug("Cancelling fetches because TTL reached zero"); // NON-NLS

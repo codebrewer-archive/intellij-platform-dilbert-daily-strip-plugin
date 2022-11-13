@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2008, 2018 Mark Scott
+ *  Copyright 2005, 2007, 2008, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.codebrewer.intellijplatform.plugin.dilbert;
 
-import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.util.NamedJDOMExternalizable;
 import org.codebrewer.intellijplatform.plugin.dilbert.strategy.DailyStripProvider;
@@ -34,10 +34,10 @@ import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
  *
  * @author Mark Scott
  */
-public interface DilbertDailyStripPlugin
-    extends ApplicationComponent, Configurable, NamedJDOMExternalizable {
+public interface DilbertDailyStripPluginService
+    extends Configurable, Disposable, NamedJDOMExternalizable {
   /**
-   * The text that will be displayed on the button for the plugin's toolwindow.
+   * The text that will be displayed on the button for the plugin's tool window.
    */
   String TOOL_WINDOW_ID = "Dilbert";
 
@@ -88,7 +88,7 @@ public interface DilbertDailyStripPlugin
   DailyStripProvider[] getDailyStripProviders(DailyStripPresenter presenter);
 
   /**
-   * Indicates whether or not the user has acknowledged the plugin's disclaimer.
+   * Has the user has acknowledged the plugin's disclaimer?
    *
    * @return <code>true</code> if the user has acknowledged the plugin's
    * disclaimer, <code>false</code> if not.

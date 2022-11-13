@@ -43,7 +43,7 @@ import javax.swing.KeyStroke;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripEvent;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripListener;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStrip;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DisclaimerNotAcknowledgedDialog;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
@@ -121,8 +121,8 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
 
   @Override
   protected void doStart() {
-    final DilbertDailyStripPlugin dilbertPlugin =
-        ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+    final DilbertDailyStripPluginService dilbertPlugin =
+        ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
     dilbertPlugin.addDailyStripListener(this);
     final DilbertDailyStrip dilbertDailyStrip = dilbertPlugin.getCachedDailyStrip();
 
@@ -136,8 +136,8 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
 
   @Override
   protected void doStop() {
-    final DilbertDailyStripPlugin dilbertPlugin =
-        ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+    final DilbertDailyStripPluginService dilbertPlugin =
+        ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
     dilbertPlugin.removeDailyStripListener(this);
     setProgressBarVisible(false);
   }
@@ -177,7 +177,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
    * An action that refreshes the cartoon strip displayed.
    */
   private final class RefreshDailyStripAction extends AnAction implements DumbAware {
-    private final DilbertDailyStripPlugin dilbertPlugin;
+    private final DilbertDailyStripPluginService dilbertPluginService;
 
     private RefreshDailyStripAction() {
       super(ResourceBundleManager
@@ -185,12 +185,12 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
           ResourceBundleManager
               .getLocalizedString(CurrentDailyStripProvider.class, "button.refresh.statusbartext"),
           REFRESH_ICON);
-      dilbertPlugin =
-          ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+      dilbertPluginService =
+          ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
 
       final ToolWindowManager manager =
           ToolWindowManager.getInstance(getDailyStripPresenter().getProject());
-      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPlugin.TOOL_WINDOW_ID);
+      final ToolWindow toolWindow = manager.getToolWindow(DilbertDailyStripPluginService.TOOL_WINDOW_ID);
 
       if (toolWindow != null) {
         final int modifiers = SystemInfo.isMac ?
@@ -207,7 +207,7 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
       // The strip is only fetched if the user has acknowledged the plug-in's
       // disclaimer
       //
-      if (dilbertPlugin.isDisclaimerAcknowledged()) {
+      if (dilbertPluginService.isDisclaimerAcknowledged()) {
         fetchDailyStrip();
       }
       // The user hasn't acknowledged the plug-in's disclaimer so notify them
@@ -218,11 +218,11 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
         dlg.show();
         if (dlg.getExitCode() == DialogWrapper.OK_EXIT_CODE && dlg.isOpenSettings()) {
           ShowSettingsUtil.getInstance()
-                          .editConfigurable(getControlPanel().getTopLevelAncestor(), dilbertPlugin);
+                          .editConfigurable(getControlPanel().getTopLevelAncestor(), dilbertPluginService);
 
           // If the disclaimer has now been acknowledged then fetch the strip
           //
-          if (dilbertPlugin.isDisclaimerAcknowledged()) {
+          if (dilbertPluginService.isDisclaimerAcknowledged()) {
             fetchDailyStrip();
           }
         }
@@ -237,10 +237,10 @@ public class CurrentDailyStripProvider extends LocalizableDailyStripProvider
       // modification time of the currently displayed strip (if any)
       //
       if (getDailyStripPresenter().getDilbertDailyStrip() != null) {
-        dilbertPlugin
+        dilbertPluginService
             .fetchDailyStrip(getDailyStripPresenter().getDilbertDailyStrip().getImageChecksum());
       } else {
-        dilbertPlugin.fetchDailyStrip();
+        dilbertPluginService.fetchDailyStrip();
       }
     }
   }

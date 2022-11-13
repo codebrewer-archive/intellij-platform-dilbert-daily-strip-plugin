@@ -113,11 +113,8 @@ There are some non-visible changes:
             anchor="bottom"
             factoryClass="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripToolWindowFactory"
             icon="/dilbert13x13.png" />
+    <applicationService
+            serviceInterface="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService"
+            serviceImplementation="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginServiceImpl" />
   </extensions>
-  <application-components>
-    <component>
-      <implementation-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginImpl</implementation-class>
-      <interface-class>org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin</interface-class>
-    </component>
-  </application-components>
 </idea-plugin>
