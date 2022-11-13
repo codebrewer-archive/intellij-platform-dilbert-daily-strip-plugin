@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2018 Mark Scott
+ *  Copyright 2007, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.codebrewer.intellijplatform.plugin.dilbert.strategy;
 
 import com.intellij.openapi.diagnostic.Logger;
 import javax.swing.JComponent;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
 
 /**
@@ -29,7 +29,7 @@ abstract class AbstractDailyStripProvider implements DailyStripProvider {
    * For logging messages to IDEA's log.
    */
   protected static final Logger LOGGER =
-      Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+      Logger.getInstance(DilbertDailyStripPluginService.class.getName());
 
   /**
    * Has {@link #pause()} been called without (yet) a corresponding call to

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2018 Mark Scott
+ *  Copyright 2005, 2007, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.codebrewer.intellijplatform.plugin.dilbert.settings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.JDOMExternalizable;
 import com.intellij.openapi.util.JDOMExternalizer;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.jdom.Element;
 
 /**
@@ -32,7 +32,8 @@ import org.jdom.Element;
  * @author Mark Scott
  */
 public final class ApplicationSettings implements JDOMExternalizable {
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER =
+      Logger.getInstance(DilbertDailyStripPluginService.class.getName());
   private static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
   private static final String DISCLAIMER_ACKNOWLEDGED_KEY = "disclaimerAcknowledged";
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2008, 2018 Mark Scott
+ *  Copyright 2005, 2007, 2008, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import org.codebrewer.intellijplatform.plugin.dilbert.util.PeriodicStripFetcher;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.VersionInfo;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
 import org.jdom.Element;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * <p>
@@ -44,11 +43,12 @@ import org.jetbrains.annotations.NotNull;
  *
  * @author Mark Scott
  */
-public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugin {
+public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStripPluginService {
   /**
    * For logging messages to IDEA's log.
    */
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER =
+      Logger.getInstance(DilbertDailyStripPluginService.class.getName());
 
   /**
    * Application-level settings for the plug-in, shared by all open projects.
@@ -72,7 +72,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
   /**
    * Constructs a plugin implementation.
    */
-  public DilbertDailyStripPluginImpl() {
+  public DilbertDailyStripPluginServiceImpl() {
     LOGGER.info(
         "Dilbert Daily Strip Plug-in, version " + VersionInfo.getVersionString() + ", built " +
         VersionInfo.getBuildDate());
@@ -110,7 +110,7 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
 
   public void fetchDailyStrip(final String md5Hash) {
     if (isDisclaimerAcknowledged()) {
-      LOGGER.info("disclaimer ack'd"); // NON-NLS
+      LOGGER.info("disclaimer acknowledged");
 
       backgroundTaskExecutor.schedule(new FetchDailyStripTask(md5Hash), 0);
     }
@@ -134,26 +134,18 @@ public final class DilbertDailyStripPluginImpl implements DilbertDailyStripPlugi
     }
   }
 
-  // Implement BaseComponent
+  // Implement Disposable
 
-  public void disposeComponent() {
+  public void dispose() {
     periodicStripFetcher.stopPeriodicFetching();
     backgroundTaskExecutor.cancel();
-  }
-
-  @NotNull
-  public String getComponentName() {
-    return DilbertDailyStripPlugin.class.getName();
-  }
-
-  public void initComponent() {
   }
 
   // Implement Configurable
 
   public String getDisplayName() {
     final ResourceBundle resourceBundle =
-        ResourceBundleManager.getResourceBundle(DilbertDailyStripPlugin.class);
+        ResourceBundleManager.getResourceBundle(DilbertDailyStripPluginService.class);
 
     return resourceBundle.getString("plugin.name.configuration");
   }

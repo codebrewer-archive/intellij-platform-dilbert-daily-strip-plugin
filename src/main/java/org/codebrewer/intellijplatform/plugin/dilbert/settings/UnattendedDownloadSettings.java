@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2018 Mark Scott
+ *  Copyright 2007, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import javax.swing.JComponent;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.UnattendedDownloadSettingsPanel;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.TimeUtils;
 import org.jdom.Element;
@@ -42,7 +42,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
   /**
    * For logging messages to IDEA's log.
    */
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPluginService.class.getName());
 
   // Keys used when persisting download settings
   //
@@ -135,7 +135,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
    * Gets the number of minutes that IDEA's timezone is in advance of the
    * timezone hosting the dilbert.com website.  A negative return value
    * indicates that IDEA is west of Dilbert.
-   *
+   * <p/>
    * Gets the number of minutes after midnight localtime at which it's midnight
    * in LA.
    *
