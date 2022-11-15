@@ -18,7 +18,6 @@ package org.codebrewer.intellijplatform.plugin.dilbert;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.util.NamedJDOMExternalizable;
 import org.codebrewer.intellijplatform.plugin.dilbert.strategy.DailyStripProvider;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
 
@@ -34,8 +33,7 @@ import org.codebrewer.intellijplatform.plugin.dilbert.ui.DailyStripPresenter;
  *
  * @author Mark Scott
  */
-public interface DilbertDailyStripPluginService
-    extends Configurable, Disposable, NamedJDOMExternalizable {
+public interface DilbertDailyStripPluginService extends Configurable, Disposable {
   /**
    * The text that will be displayed on the button for the plugin's tool window.
    */

@@ -25,6 +25,7 @@ import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 import org.codebrewer.intellijplatform.plugin.dilbert.http.DilbertDailyStripFetcher;
 import org.codebrewer.intellijplatform.plugin.dilbert.settings.ApplicationSettings;
+import org.codebrewer.intellijplatform.plugin.dilbert.settings.SettingsService;
 import org.codebrewer.intellijplatform.plugin.dilbert.settings.UnattendedDownloadSettings;
 import org.codebrewer.intellijplatform.plugin.dilbert.strategy.CurrentDailyStripProvider;
 import org.codebrewer.intellijplatform.plugin.dilbert.strategy.DailyStripProvider;
@@ -33,7 +34,6 @@ import org.codebrewer.intellijplatform.plugin.dilbert.ui.SettingsPanel;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.PeriodicStripFetcher;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.VersionInfo;
 import org.codebrewer.intellijplatform.plugin.util.l10n.ResourceBundleManager;
-import org.jdom.Element;
 
 /**
  * <p>
@@ -78,10 +78,11 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
         VersionInfo.getBuildDate());
 
     dilbertDailyStrip = DilbertDailyStrip.MISSING_STRIP;
-    settings = new ApplicationSettings();
+    settings = SettingsService.getInstance().getSavedApplicationSettings();
     backgroundTaskExecutor = new Timer();
     periodicStripFetcher = new PeriodicStripFetcher();
     listenerList = new EventListenerList();
+    configureUnattendedDownloads();
   }
 
   private void configureUnattendedDownloads() {
@@ -154,32 +155,6 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
     return null;
   }
 
-  // Implement JDOMExternalizable
-
-  public void readExternal(final Element element) {
-    settings.readExternal(element);
-    configureUnattendedDownloads();
-  }
-
-  public void writeExternal(final Element element) {
-    settings.writeExternal(element);
-  }
-
-  // Implement NamedJDOMExternalizable
-
-  /**
-   * Return the root part of the name of the file to which the plugin will save
-   * its configuration data.  The value returned will have the suffix .xml
-   * appended to form the full filename, and the file will be created in the
-   * ${idea.config.path}/options/ directory.
-   *
-   * @return the root part of the configuration settings filename for the
-   * plugin.
-   */
-  public String getExternalFileName() {
-    return "dilbert.plugin"; // NON-NLS
-  }
-
   // Implement UnnamedConfigurable
 
   public JComponent createComponent() {
@@ -203,6 +178,7 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
       // Save the current settings for future use
       //
       settings = settingsPanel.getDisplayedSettings();
+      SettingsService.getInstance().setSavedApplicationSettings(settings);
 
       // Account for any changes made to the unattended download settings
       //
