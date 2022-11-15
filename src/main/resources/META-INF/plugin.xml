@@ -114,6 +114,12 @@ There are some non-visible changes:
             factoryClass="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripToolWindowFactory"
             icon="/dilbert13x13.png" />
     <applicationService
+            serviceInterface="org.codebrewer.intellijplatform.plugin.dilbert.settings.SettingsService"
+            serviceImplementation="org.codebrewer.intellijplatform.plugin.dilbert.settings.SettingsServiceImpl"/>
+    <applicationService
+            serviceInterface="org.codebrewer.intellijplatform.plugin.dilbert.settings.SettingsMediationService"
+            serviceImplementation="org.codebrewer.intellijplatform.plugin.dilbert.settings.SettingsMediationServiceImpl"/>
+    <applicationService
             serviceInterface="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService"
             serviceImplementation="org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginServiceImpl" />
   </extensions>

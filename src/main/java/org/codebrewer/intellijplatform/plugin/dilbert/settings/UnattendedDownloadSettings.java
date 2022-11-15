@@ -17,8 +17,6 @@
 package org.codebrewer.intellijplatform.plugin.dilbert.settings;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.JDOMExternalizable;
-import com.intellij.openapi.util.JDOMExternalizer;
 import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -27,29 +25,20 @@ import javax.swing.JComponent;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.ui.UnattendedDownloadSettingsPanel;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.TimeUtils;
-import org.jdom.Element;
 
 /**
  * <p>
  * Encapsulates the user-specified settings for unattended downloading of
- * strips and permits their persistence by implementing
- * {@link JDOMExternalizable}.  The settings are applied to all open projects.
+ * strips. The settings are applied to all open projects.
  * </p>
  *
  * @author Mark Scott
  */
-public final class UnattendedDownloadSettings implements JDOMExternalizable, Modifiable {
+public final class UnattendedDownloadSettings implements Modifiable {
   /**
    * For logging messages to IDEA's log.
    */
   private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPluginService.class.getName());
-
-  // Keys used when persisting download settings
-  //
-  private static final String FETCH_STRIP_AUTOMATICALLY_KEY = "fetchStripAutomatically";
-  private static final String LOCAL_DOWNLOAD_TIME_KEY = "localDownloadTime";
-  private static final String MAX_FETCH_ATTEMPTS_KEY = "maxFetchAttempts";
-  private static final String FETCH_INTERVAL_KEY = "fetchInterval";
 
   /**
    * The ID of the timezone in which the dilbert.com website seems to be hosted.
@@ -64,7 +53,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
   /**
    * Default value for fetching strips automatically.
    */
-  private static final boolean DEFAULT_FETCH_AUTOMATICALLY = false;
+  static final boolean DEFAULT_FETCH_AUTOMATICALLY = false;
 
   /**
    * The number of seconds between the IDEA instance hosting the plug-in and the
@@ -141,7 +130,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
    *
    * @return the number of minutes between IDEA and Dilbert.
    */
-  private static int getDefaultLocalDownloadTime() {
+  static int getDefaultLocalDownloadTime() {
     final Instant now = Instant.now();
     final ZoneOffset systemZoneOffset = ZoneId.systemDefault().getRules().getOffset(now);
     final ZoneOffset dilbertZoneOffset = DILBERT_TIME_ZONE_ID.getRules().getOffset(now);
@@ -186,7 +175,7 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
   /**
    * Constructs an instance using the given parameters.
    *
-   * @param fetchStripAutomatically whether or not the strip should be fetched
+   * @param fetchStripAutomatically whether the strip should be fetched
    * automatically.
    * @param localDownloadTime the number of minutes that IDEA's timezone
    * differs from Dilbert's.
@@ -244,16 +233,6 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     return result;
   }
 
-  public Object getCurrentSettings() {
-    UnattendedDownloadSettings modifiedSettings = null;
-
-    if (settingsPanel != null) {
-      modifiedSettings = settingsPanel.getDisplayedSettings();
-    }
-
-    return modifiedSettings;
-  }
-
   public int getFetchInterval() {
     return fetchInterval;
   }
@@ -303,27 +282,6 @@ public final class UnattendedDownloadSettings implements JDOMExternalizable, Mod
     result = 31 * result + maxFetchAttempts;
     result = 31 * result + fetchInterval;
     return result;
-  }
-
-  // Implement JDOMExternalizable
-
-  public void readExternal(final Element element) {
-    LOGGER.debug("reading download settings"); // NON-NLS
-    fetchStripAutomatically = JDOMExternalizer.readBoolean(element, FETCH_STRIP_AUTOMATICALLY_KEY);
-    localDownloadTime =
-        JDOMExternalizer.readInteger(element, LOCAL_DOWNLOAD_TIME_KEY, DEFAULT_LOCAL_DOWNLOAD_TIME);
-    maxFetchAttempts =
-        JDOMExternalizer.readInteger(element, MAX_FETCH_ATTEMPTS_KEY, DEFAULT_MAX_FETCH_ATTEMPTS);
-    fetchInterval =
-        JDOMExternalizer.readInteger(element, FETCH_INTERVAL_KEY, DEFAULT_FETCH_INTERVAL);
-  }
-
-  public void writeExternal(final Element element) {
-    LOGGER.debug("writing download settings"); // NON-NLS
-    JDOMExternalizer.write(element, FETCH_STRIP_AUTOMATICALLY_KEY, fetchStripAutomatically);
-    JDOMExternalizer.write(element, LOCAL_DOWNLOAD_TIME_KEY, localDownloadTime);
-    JDOMExternalizer.write(element, MAX_FETCH_ATTEMPTS_KEY, maxFetchAttempts);
-    JDOMExternalizer.write(element, FETCH_INTERVAL_KEY, fetchInterval);
   }
 
   // Implement Modifiable
