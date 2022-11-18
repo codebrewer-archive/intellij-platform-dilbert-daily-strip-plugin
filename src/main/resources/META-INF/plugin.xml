@@ -5,7 +5,16 @@
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.9.0</b>
+    <![CDATA[<b>Version 1.10.0</b>
+<ul>
+<li>Fix: An exception preventing the strip from being fetched in 2022.3 EAP versions of IntelliJ Platform products has been resolved.</li>
+<li>Fix: Plug-in tool window keyboard actions now work again.</li>
+</ul>
+There is additionally one non-visible change:
+<ul>
+<li>The plug-in no longer uses any deprecated IntelliJ Platform APIs (components, persistence <em>etc.</em>).</li>
+</ul>
+<b>Version 1.9.0</b>
 <ul>
 <li>Fix: An exception thrown when closing a project in versions of IntelliJ Platform products from around 2020.1 onwards has been resolved.</li>
 </ul>
@@ -100,7 +109,7 @@ There are some non-visible changes:
 <li>Initial release</li>
 </ul>]]>
   </change-notes>
-  <idea-version since-build="222.*" />
+  <idea-version since-build="223.*" />
   <depends>com.intellij.modules.platform</depends>
   <extensions defaultExtensionNs="com.intellij">
     <applicationConfigurable
