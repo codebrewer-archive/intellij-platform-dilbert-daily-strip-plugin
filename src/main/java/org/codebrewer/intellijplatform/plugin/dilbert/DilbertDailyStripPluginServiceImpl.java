@@ -17,10 +17,9 @@
 package org.codebrewer.intellijplatform.plugin.dilbert;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import java.io.IOException;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.JComponent;
 import javax.swing.event.EventListenerList;
 import org.codebrewer.intellijplatform.plugin.dilbert.http.DilbertDailyStripFetcher;
@@ -65,7 +64,6 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
 
   private DilbertDailyStrip dilbertDailyStrip;
 
-  private final Timer backgroundTaskExecutor;
   private final PeriodicStripFetcher periodicStripFetcher;
   private final EventListenerList listenerList;
 
@@ -79,7 +77,6 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
 
     dilbertDailyStrip = DilbertDailyStrip.MISSING_STRIP;
     settings = SettingsService.getInstance().getSavedApplicationSettings();
-    backgroundTaskExecutor = new Timer();
     periodicStripFetcher = new PeriodicStripFetcher();
     listenerList = new EventListenerList();
     configureUnattendedDownloads();
@@ -109,11 +106,11 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
     fetchDailyStrip(DilbertDailyStrip.MISSING_STRIP.getImageChecksum());
   }
 
-  public void fetchDailyStrip(final String md5Hash) {
+  public void fetchDailyStrip(final String homepageEtag) {
     if (isDisclaimerAcknowledged()) {
-      LOGGER.info("disclaimer acknowledged");
+      LOGGER.info("Disclaimer acknowledged, fetching Dilbert daily strip asynchronously");
 
-      backgroundTaskExecutor.schedule(new FetchDailyStripTask(md5Hash), 0);
+      AppExecutorUtil.getAppExecutorService().submit(new FetchDailyStripTask(homepageEtag));
     }
   }
 
@@ -138,8 +135,9 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
   // Implement Disposable
 
   public void dispose() {
+    LOGGER.info("Disposing Dilbert");
     periodicStripFetcher.stopPeriodicFetching();
-    backgroundTaskExecutor.cancel();
+    LOGGER.info("Dilbert disposed");
   }
 
   // Implement Configurable
@@ -195,11 +193,11 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
   public void disposeUIResources() {
   }
 
-  private class FetchDailyStripTask extends TimerTask {
-    private final String md5Hash;
+  private class FetchDailyStripTask implements Runnable {
+    private final String homepageEtag;
 
-    private FetchDailyStripTask(final String md5Hash) {
-      this.md5Hash = md5Hash;
+    private FetchDailyStripTask(final String homepageEtag) {
+      this.homepageEtag = homepageEtag;
     }
 
     private void fireDailyStripUpdated(final DilbertDailyStrip dailyStrip) {
@@ -221,7 +219,7 @@ public final class DilbertDailyStripPluginServiceImpl implements DilbertDailyStr
     public void run() {
       try {
         final DilbertDailyStrip dailyStrip =
-            new DilbertDailyStripFetcher().fetchDailyStrip(md5Hash);
+            new DilbertDailyStripFetcher().fetchDailyStrip(homepageEtag);
 
         if (dailyStrip != null) {
           fireDailyStripUpdated(dailyStrip);

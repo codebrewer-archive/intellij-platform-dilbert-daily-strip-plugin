@@ -59,9 +59,9 @@ public interface DilbertDailyStripPluginService extends Configurable, Disposable
    * strip from the dilbert.com website if it has a checksum value that differs
    * from that given.
    *
-   * @param md5Hash the 32-character MD5 checksum hash for the current strip.
+   * @param homepageEtag the current ETag of the dilbert.com homepage.
    */
-  void fetchDailyStrip(String md5Hash);
+  void fetchDailyStrip(String homepageEtag);
 
   /**
    * Gets the last downloaded strip, if any.  Implementations should return

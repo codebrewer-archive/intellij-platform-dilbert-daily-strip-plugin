@@ -18,6 +18,7 @@ package org.codebrewer.intellijplatform.plugin.dilbert;
 
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.util.ArrayUtil;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -70,26 +71,26 @@ public final class DilbertDailyStrip {
   private final long retrievalTime;
 
   /**
-   * The 32-character MD5 checksum hash for the image.
+   * The ETag of the dilbert.com homepage at the time this strip was fetched.
    */
-  private final String md5Hash;
+  private final String homepageEtag;
 
   /**
    * Constructs a daily strip object from a cartoon image, its URL and the time
    * at which the URL for the dilbert.com site was last modified.
    *
    * @param image a cartoon image.
-   * @param md5Hash a checksum hash that (somehow) identifies the cartoon image.
+   * @param homepageEtag the current ETag of the dilbert.com homepage.
    * @param uri the image's URI.
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
    */
   private DilbertDailyStrip(final Icon image,
-                            final String md5Hash,
+                            final String homepageEtag,
                             final String uri,
                             final long retrievalTime) {
     this.image = image;
-    this.md5Hash = md5Hash;
+    this.homepageEtag = homepageEtag;
     this.uri = uri;
     this.retrievalTime = retrievalTime;
   }
@@ -99,15 +100,16 @@ public final class DilbertDailyStrip {
    * at which the URL for the dilbert.com site was last modified.
    *
    * @param imageBytes the bytes comprising a cartoon image.
+   * @param homepageEtag the current ETag of the dilbert.com homepage.
    * @param uri the image's URI.
    * @param retrievalTime the time at which the dilbert.com site's homepage was
    * last modified.
    */
   public DilbertDailyStrip(final byte[] imageBytes,
-                           final String md5Hash,
+                           final String homepageEtag,
                            final String uri,
                            final long retrievalTime) {
-    this(new ImageIcon(imageBytes), md5Hash, uri, retrievalTime);
+    this(new ImageIcon(imageBytes), homepageEtag, uri, retrievalTime);
     this.imageBytes = new byte[imageBytes.length];
     System.arraycopy(imageBytes, 0, this.imageBytes, 0, imageBytes.length);
   }
@@ -134,7 +136,7 @@ public final class DilbertDailyStrip {
   }
 
   public String getImageChecksum() {
-    return md5Hash;
+    return homepageEtag;
   }
 
   /**
@@ -161,14 +163,12 @@ public final class DilbertDailyStrip {
       return true;
     }
 
-    if (!(obj instanceof DilbertDailyStrip)) {
+    if (!(obj instanceof final DilbertDailyStrip that)) {
       return false;
     }
 
-    final DilbertDailyStrip that = (DilbertDailyStrip) obj;
-
     //noinspection RedundantIfStatement
-    if (md5Hash != null ? !md5Hash.equals(that.md5Hash) : that.md5Hash != null) {
+    if (!Objects.equals(homepageEtag, that.homepageEtag)) {
       return false;
     }
 
@@ -177,6 +177,6 @@ public final class DilbertDailyStrip {
 
   @Override
   public int hashCode() {
-    return md5Hash == null ? 0 : md5Hash.hashCode();
+    return homepageEtag == null ? 0 : homepageEtag.hashCode();
   }
 }
