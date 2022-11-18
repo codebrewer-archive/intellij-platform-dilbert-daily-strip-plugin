@@ -13,7 +13,7 @@ data class PropertiesVersion(val properties: Properties) {
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.intellij") version "1.10.0"
 }
 
 group = "org.codebrewer"
@@ -28,7 +28,7 @@ dependencies {
 
 intellij {
     pluginName.set("DilbertDailyStrip")
-    version.set("2022.2.3")
+    version.set("223-EAP-SNAPSHOT")
     type.set("IC")
 }
 
@@ -47,13 +47,13 @@ tasks {
     findByName("patchPluginXml")?.dependsOn("updateBuildData")
 
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 
     patchPluginXml {
-        sinceBuild.set("222.2680.4")
-        untilBuild.set("222.*")
+        sinceBuild.set("223")
+        untilBuild.set("")
 
         val buildProperties = Properties()
         buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").inputStream())

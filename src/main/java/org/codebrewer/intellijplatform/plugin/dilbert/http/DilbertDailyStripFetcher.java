@@ -17,22 +17,23 @@
 package org.codebrewer.intellijplatform.plugin.dilbert.http;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.util.net.HttpConfigurable;
+import com.intellij.util.net.IdeHttpClientHelpers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.HttpURL;
-import org.apache.commons.httpclient.HttpsURL;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.SocketConfig;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStrip;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.util.ImageFileType;
@@ -55,6 +56,12 @@ public class DilbertDailyStripFetcher {
    * to the dilbert.com website.
    */
   private static final int CONNECTION_TIMEOUT = 20000;
+
+  /**
+   * A suffix seen on ETag headers set by dilbert.com <em>e.g.</em>:
+   * {@code W/"bcc73e86198ecb0bdeb16541af340c7f-gzip"}.
+   */
+  private static final String ETAG_GZIP_SUFFIX = "-gzip";
 
   /**
    * HTTP header used to return the type of content contained in a response.
@@ -80,58 +87,22 @@ public class DilbertDailyStripFetcher {
   private static final String HTTP_NOT_SC_OK_MESSAGE = "Got HTTP status code {0} when fetching {1}";
 
   /**
+   * The HTTP scheme.
+   */
+  private static final String HTTP_SCHEME = "http";
+
+  /**
+   * The HTTPS scheme.
+   */
+  private static final String HTTPS_SCHEME = "https";
+
+  /**
    * The number of milliseconds to block waiting for data when reading
    * from TCP sockets.
    */
   private static final int SO_TIMEOUT = 5000;
 
-  /**
-   * Configures an <code>HttpClient</code> with IDEA's HTTP proxy settings if
-   * the user has configured their use.
-   *
-   * @param client the non-<code>null</code> HTTP client connection being
-   * prepared.
-   *
-   * @throws IOException if use of a proxy has been configured but an error
-   * occurs if the user is asked for their proxy server credentials.
-   */
-  private static void adaptForHttpProxy(final HttpClient client) throws IOException {
-    assert client != null;
-
-    // Use IDEA's HTTP proxy settings, if configured
-    //
-    final HttpConfigurable httpConfigurable = HttpConfigurable.getInstance();
-
-    if (httpConfigurable != null && httpConfigurable.USE_HTTP_PROXY) {
-      if (httpConfigurable.PROXY_AUTHENTICATION) {
-        // Use IDEA's support for showing the proxy credentials dialog (if
-        // necessary), but note that <http://www.jetbrains.net/jira/browse/IDEABKL-1509>
-        // may bite on IDEA 5.x
-        //
-        httpConfigurable.prepareURL(DilbertDailyStrip.DILBERT_DOT_COM_URL);
-
-        // Copy the credentials into our HTTP client, ensuring they're applied
-        // to any authentication realm
-        //
-        final String proxyLogin = httpConfigurable.getProxyLogin();
-
-        if (proxyLogin == null) {
-          return;
-        }
-
-        final UsernamePasswordCredentials credentials =
-            new UsernamePasswordCredentials(proxyLogin, httpConfigurable.getPlainProxyPassword());
-        client.getState().setProxyCredentials(AuthScope.ANY, credentials);
-
-        // Handle proxy servers that don't send HTTP code 407 when
-        // authentication is required...
-        //
-        client.getParams().setAuthenticationPreemptive(true);
-      }
-
-      final HostConfiguration hostConfiguration = client.getHostConfiguration();
-      hostConfiguration.setProxy(httpConfigurable.PROXY_HOST, httpConfigurable.PROXY_PORT);
-    }
+  public DilbertDailyStripFetcher() {
   }
 
   /**
@@ -139,39 +110,37 @@ public class DilbertDailyStripFetcher {
    *
    * @param client a non-<code>null</code> HTTP client object that should be
    * used to fetch the daily strip.
-   * @param stripURL the non-<code>null</code> URL of the current daily strip.
+   * @param stripGet the non-<code>null</code> URL of the current daily strip.
+   * @param homepageEtag the current ETag of the dilbert.com homepage.
    *
    * @return the current daily strip.
    *
    * @throws IOException if there is a problem fetching the current daily strip.
    */
-  private static DilbertDailyStrip fetchDailyStrip(
-      final HttpClient client, final HttpURL stripURL, final String checksum) throws IOException {
+  private static DilbertDailyStrip fetchDailyStrip(final CloseableHttpClient client,
+                                                   final HttpGet stripGet,
+                                                   final String homepageEtag) throws IOException {
     assert client != null;
-    assert stripURL != null;
-
-    LOGGER.debug(stripURL.toString());
-
-    final GetMethod stripURLMethod = new GetMethod(stripURL.getURI());
+    assert stripGet != null;
 
     // Try to retrieve the daily strip image and use its bytes to create a daily
     // strip object
     //
-    try {
-      final int statusCode = client.executeMethod(stripURLMethod);
+    LOGGER.info("Executing " + stripGet);
+    try (final CloseableHttpResponse response = client.execute(stripGet)) {
+      LOGGER.info("Response status: " + response.getStatusLine());
 
-      if (statusCode == HttpStatus.SC_OK) {
-        final byte[] responseBody = getStripBytes(stripURLMethod);
+      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        final byte[] responseBody = getStripBytes(response);
         return new DilbertDailyStrip(
-            responseBody, checksum, stripURL.getURI(), System.currentTimeMillis());
+            responseBody, homepageEtag, stripGet.getRequestLine().getUri(), System.currentTimeMillis());
       } else {
         final String message =
-            MessageFormat.format(HTTP_NOT_SC_OK_MESSAGE, statusCode, stripURL.getURI());
+            MessageFormat.format(
+                HTTP_NOT_SC_OK_MESSAGE, response.getStatusLine().getStatusCode(), stripGet.getURI());
         LOGGER.info(message);
         throw new IOException(message);
       }
-    } finally {
-      stripURLMethod.releaseConnection();
     }
   }
 
@@ -180,7 +149,7 @@ public class DilbertDailyStripFetcher {
    * <code>HttpMethod</code> that has already fetched the current daily strip
    * URL.
    *
-   * @param stripURLMethod a non-<code>null</code> <code>HttpMethod</code> that
+   * @param stripResponse a non-<code>null</code> <code>HttpMethod</code> that
    * has already executed a request to fetch the current daily strip.
    *
    * @return a non-<code>null</code> array of bytes comprising the current daily
@@ -189,15 +158,15 @@ public class DilbertDailyStripFetcher {
    * @throws IOException if there is a problem retrieving the image bytes from
    * the response body or if the bytes do not represent a recognized image type.
    */
-  private static byte[] getStripBytes(final HttpMethod stripURLMethod) throws IOException {
-    assert stripURLMethod != null && stripURLMethod.hasBeenUsed();
+  private static byte[] getStripBytes(final CloseableHttpResponse stripResponse) throws IOException {
+    assert stripResponse != null;
 
     final byte[] result;
 
-    final Header contentTypeHeader = stripURLMethod.getResponseHeader(HTTP_HEADER_CONTENT_TYPE);
+    final Header contentTypeHeader = stripResponse.getFirstHeader(HTTP_HEADER_CONTENT_TYPE);
 
     if (isRecognizedImageContentType(contentTypeHeader)) {
-      final byte[] responseBody = stripURLMethod.getResponseBody();
+      final byte[] responseBody = EntityUtils.toByteArray(stripResponse.getEntity());
 
       if (ImageFileType.getImageFileType(responseBody) == null) {
         final String message = "Response body does not appear to be an image"; // NON-NLS
@@ -221,7 +190,7 @@ public class DilbertDailyStripFetcher {
    * Tries to find the URL of the current daily strip given an
    * <code>HttpMethod</code> that has already fetched the dilbert.com homepage.
    *
-   * @param homepageURLMethod a non-<code>null</code> <code>HttpMethod</code>
+   * @param homepageResponse a non-<code>null</code> <code>HttpMethod</code>
    * that has already executed a request to fetch the dilbert.com homepage.
    *
    * @return a non-<code>null</code> URL for the current daily strip.
@@ -229,17 +198,17 @@ public class DilbertDailyStripFetcher {
    * @throws IOException if there is a problem identifying the URL for the
    * current daily strip.
    */
-  private static HttpURL getStripURL(final HttpMethod homepageURLMethod) throws IOException {
-    assert homepageURLMethod != null && homepageURLMethod.hasBeenUsed();
+  private static HttpGet getStripURL(final CloseableHttpResponse homepageResponse) throws IOException {
+    assert homepageResponse != null;
 
-    HttpURL result = null;
+    HttpGet result = null;
 
     // Read the homepage body line by line, looking for the first match on the
     // regex that identifies the daily strip image
     //
     try (BufferedReader br =
              new BufferedReader(
-                 new InputStreamReader(homepageURLMethod.getResponseBodyAsStream()))) {
+                 new InputStreamReader(homepageResponse.getEntity().getContent()))) {
       String line;
 
       while ((line = br.readLine()) != null) {
@@ -249,12 +218,9 @@ public class DilbertDailyStripFetcher {
           final String spec = matcher.group(1);
 
           if (spec.startsWith("//")) {
-            result = new HttpsURL(new String(HttpsURL.DEFAULT_SCHEME) + ':' + spec);
-          }
-          else if (spec.startsWith(new String(HttpsURL.DEFAULT_SCHEME))) {
-            result = new HttpsURL(spec);
-          } else if (spec.startsWith(new String(HttpURL.DEFAULT_SCHEME))) {
-            result = new HttpURL(spec);
+            result = new HttpGet(String.format("%s:%s", HTTPS_SCHEME, spec));
+          } else if (spec.startsWith(HTTPS_SCHEME) || spec.startsWith(HTTP_SCHEME)) {
+            result = new HttpGet(spec);
           }
 
           break;
@@ -276,8 +242,8 @@ public class DilbertDailyStripFetcher {
   }
 
   /**
-   * Indicates whether or not the given HTTP content-type header identifies an
-   * image type supported by the plug-in.
+   * Indicates whether the given HTTP content-type header identifies an image
+   * type supported by the plug-in.
    *
    * @param contentTypeHeader a possibly-<code>null</code> HTTP header
    * indicating a content type.
@@ -302,91 +268,106 @@ public class DilbertDailyStripFetcher {
    * homepage has been modified since the state represented by a particular hash
    * value (the page's <em>ETag</em>).
    *
-   * @param md5Hash a 32-character MD5 checksum value.
+   * @param homepageEtag a 32-character MD5 checksum value.
    *
    * @return the current daily strip or <code>null</code> if the dilbert.com
    * homepage has not been modified since the state represented by
-   * <code>md5Hash</code>.
+   * <code>homepageEtag</code>.
    *
    * @throws IOException if an error occurs fetching the strip.
    */
-  public DilbertDailyStrip fetchDailyStrip(final String md5Hash) throws IOException {
+  public DilbertDailyStrip fetchDailyStrip(final String homepageEtag) throws IOException {
     LOGGER.info(
-        "Looking for strip from a homepage with an ETag different from " + md5Hash); // NON-NLS
-    final GetMethod homepageURLMethod = new GetMethod(DilbertDailyStrip.DILBERT_DOT_COM_URL);
-
-    if (md5Hash != null) {
-      homepageURLMethod
-          .setRequestHeader(HTTP_HEADER_IF_NONE_MATCH, String.format("\"%s\"", md5Hash));
-    }
+        "Looking for strip from a homepage with an ETag different from " + homepageEtag); // NON-NLS
 
     // Set a default return value
     //
     DilbertDailyStrip result = null;
 
-    try {
-      final HttpClient client = new HttpClient();
-      client.getHttpConnectionManager().getParams().setConnectionTimeout(CONNECTION_TIMEOUT);
-      client.getHttpConnectionManager().getParams().setSoTimeout(SO_TIMEOUT);
+    try (final CloseableHttpClient client = createHttpClient()) {
+      final HttpGet homepageGet = new HttpGet(DilbertDailyStrip.DILBERT_DOT_COM_URL);
 
-      // Adapt the client's settings to use IDEA's proxy settings, if they're
-      // active
-      //
-      adaptForHttpProxy(client);
+      if (homepageEtag != null) {
+        homepageGet
+            .addHeader(HTTP_HEADER_IF_NONE_MATCH, homepageEtag);
+      }
 
       // Fetch the dilbert.com homepage
       //
-      final int statusCode = client.executeMethod(homepageURLMethod);
+      LOGGER.info("Executing " + homepageGet);
+      try (final CloseableHttpResponse response = client.execute(homepageGet)) {
+        LOGGER.info("Response status: " + response.getStatusLine());
 
-      // If we got SC_NOT_MODIFIED (code 304) then the homepage hasn't been
-      // modified
-      //
-      if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
-        LOGGER.info("Homepage ETag still " + md5Hash); // NON-NLS
-        return null;
-      }
+        // If we got SC_NOT_MODIFIED (code 304) then the homepage hasn't been
+        // modified
+        //
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_MODIFIED) {
+          LOGGER.info("Homepage ETag still " + homepageEtag); // NON-NLS
+          return null;
+        }
 
-      // If we get SC_OK (code 200) then we found the homepage OK and can
-      // proceed
-      //
-      if (statusCode == HttpStatus.SC_OK) {
-        final HttpURL stripURL = getStripURL(homepageURLMethod);
+        // If we get SC_OK (code 200) then we found the homepage OK and can
+        // proceed
+        //
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          final HttpGet stripGet = getStripURL(response);
 
-        if (stripURL == null) {
-          final String message = "Couldn't determine URL for daily strip"; // NON-NLS
+          if (stripGet == null) {
+            final String message = "Couldn't determine URL for daily strip"; // NON-NLS
+            LOGGER.info(message);
+            throw new IOException(message);
+          }
+
+          final Header currentETagHeader = response.getFirstHeader(HTTP_HEADER_ETAG);
+          LOGGER.info("ETag header: " + (currentETagHeader == null ? null : currentETagHeader.getValue()));
+          String eTag = null;
+
+          if (currentETagHeader != null) {
+            final String quotedETag = currentETagHeader.getValue();
+
+            // The ETag header value is seen to contain "-gzip" when gzip
+            // encoding is accepted by the client (which appears to be default
+            // behaviour for Apache HttpComponents) but needs to be stripped out
+            // for sending in an "If-None-Match" header
+            //
+            if (quotedETag != null) {
+              eTag = quotedETag.replace(ETAG_GZIP_SUFFIX, "");
+            }
+          }
+
+          if (eTag == null || !eTag.equals(homepageEtag)) {
+            LOGGER.info("ETag not found or different to last known value");
+            result = fetchDailyStrip(client, stripGet, eTag);
+          }
+        } else {
+          final String message =
+              MessageFormat.format(
+                  HTTP_NOT_SC_OK_MESSAGE,
+                  response.getStatusLine().getStatusCode(),
+                  DilbertDailyStrip.DILBERT_DOT_COM_URL);
           LOGGER.info(message);
           throw new IOException(message);
         }
-
-        final Header currentETagHeader = homepageURLMethod.getResponseHeader(HTTP_HEADER_ETAG);
-        String eTag = null;
-
-        if (currentETagHeader != null) {
-          final String quotedETag = currentETagHeader.getValue();
-
-          if (quotedETag != null) {
-            if (quotedETag.matches("^\"\\p{Alnum}{32}?\"$")) { // "regular" ETag
-              eTag = quotedETag.substring(1, 33);
-            } else if (quotedETag.matches("^W/\"\\p{Alnum}{32}?\"$")) { // "weak" ETag
-              eTag = quotedETag.substring(3, 35);
-            }
-          }
-        }
-
-        if (eTag == null || !eTag.equals(md5Hash)) {
-          result = fetchDailyStrip(client, stripURL, eTag);
-        }
-      } else {
-        final String message =
-            MessageFormat
-                .format(HTTP_NOT_SC_OK_MESSAGE, statusCode, DilbertDailyStrip.DILBERT_DOT_COM_URL);
-        LOGGER.info(message);
-        throw new IOException(message);
       }
-    } finally {
-      homepageURLMethod.releaseConnection();
     }
 
     return result;
+  }
+
+  private CloseableHttpClient createHttpClient() {
+    final RequestConfig.Builder requestConfigBuilder =
+        RequestConfig.custom().setConnectTimeout(CONNECTION_TIMEOUT);
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+
+    IdeHttpClientHelpers.ApacheHttpClient4.setProxyForUrlIfEnabled(
+        requestConfigBuilder, DilbertDailyStrip.DILBERT_DOT_COM_URL);
+    IdeHttpClientHelpers.ApacheHttpClient4.setProxyCredentialsForUrlIfEnabled(
+        credentialsProvider, DilbertDailyStrip.DILBERT_DOT_COM_URL);
+
+    return HttpClients.custom()
+                      .setDefaultCredentialsProvider(credentialsProvider)
+                      .setDefaultRequestConfig(requestConfigBuilder.build())
+                      .setDefaultSocketConfig(SocketConfig.custom().setSoTimeout(SO_TIMEOUT).build())
+                      .build();
   }
 }
