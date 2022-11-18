@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2018 Mark Scott
+ *  Copyright 2007, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
   private static final String DATE_EDITOR_FORMAT_PATTERN = "HH:mm";
 
   /**
-   * Indicates whether or not strips should be fetched automatically.
+   * Indicates whether strips should be fetched automatically.
    */
   private JCheckBox fetchStripsAutomaticallyCheckbox;
 
@@ -84,10 +84,10 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
   private final List<JComponent> customFetchSettingsControls;
 
   /**
-   * Constructs a settings panel that has its UI intialized from the given
+   * Constructs a settings panel that has its UI initialized from the given
    * <code>ApplicationSettings</code> object.
    *
-   * @param settings the state from which to intialize the new panel.
+   * @param settings the state from which to initialize the new panel.
    *
    * @throws IllegalArgumentException if settings is <code>null</code>.
    */
@@ -165,10 +165,10 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
     // Spinner that limits the number of fetch attempts to be made
     //
     maxFetchAttemptsSpinner = new JSpinner(new SpinnerNumberModel(
-        new Integer(UnattendedDownloadSettings.DEFAULT_MAX_FETCH_ATTEMPTS),
-        new Integer(UnattendedDownloadSettings.MIN_MAX_FETCH_ATTEMPTS),
-        new Integer(UnattendedDownloadSettings.MAX_MAX_FETCH_ATTEMPTS),
-        new Integer(1)));
+        Integer.valueOf(UnattendedDownloadSettings.DEFAULT_MAX_FETCH_ATTEMPTS),
+        Integer.valueOf(UnattendedDownloadSettings.MIN_MAX_FETCH_ATTEMPTS),
+        Integer.valueOf(UnattendedDownloadSettings.MAX_MAX_FETCH_ATTEMPTS),
+        Integer.valueOf(1)));
     ((JSpinner.DefaultEditor) maxFetchAttemptsSpinner.getEditor()).getTextField().setColumns(5);
     maxFetchAttemptsSpinnerLabel.setLabelFor(maxFetchAttemptsSpinner);
     customFetchSettingsControls.add(maxFetchAttemptsSpinner);
@@ -193,10 +193,10 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
     // Spinner that limits the number of fetch attempts to be made
     //
     fetchIntervalSpinner = new JSpinner(new SpinnerNumberModel(
-        new Integer(UnattendedDownloadSettings.DEFAULT_FETCH_INTERVAL),
-        new Integer(UnattendedDownloadSettings.MIN_FETCH_INTERVAL),
-        new Integer(UnattendedDownloadSettings.MAX_FETCH_INTERVAL),
-        new Integer(1)));
+        Integer.valueOf(UnattendedDownloadSettings.DEFAULT_FETCH_INTERVAL),
+        Integer.valueOf(UnattendedDownloadSettings.MIN_FETCH_INTERVAL),
+        Integer.valueOf(UnattendedDownloadSettings.MAX_FETCH_INTERVAL),
+        Integer.valueOf(1)));
     ((JSpinner.DefaultEditor) fetchIntervalSpinner.getEditor()).getTextField().setColumns(5);
     fetchIntervalSpinnerLabel.setLabelFor(fetchIntervalSpinner);
     customFetchSettingsControls.add(fetchIntervalSpinner);
@@ -322,7 +322,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
   }
 
   /**
-   * Indicates whether or not the user's current settings differ from the given
+   * Indicates whether the user's current settings differ from the given
    * settings.  This method is called to see if the user has modified the saved
    * settings since the settings UI was displayed.
    *
@@ -340,7 +340,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
    * Reinitializes the settings panel's UI from the given
    * <code>ApplicationSettings</code> object.
    *
-   * @param settings the state from which to reintialize the new panel.
+   * @param settings the state from which to reinitialize the new panel.
    *
    * @throws IllegalArgumentException if settings is <code>null</code>.
    */
@@ -369,7 +369,7 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
   }
 
   private static class SpinnerHalfHourModel extends SpinnerDateModel {
-    private Calendar currentValue;
+    private final Calendar currentValue;
 
     SpinnerHalfHourModel() {
       this(new Date());
@@ -386,9 +386,9 @@ public final class UnattendedDownloadSettingsPanel extends BasicSettingsPanel {
     }
 
     private void roundMinutesDown() {
-      int mins = currentValue.get(Calendar.MINUTE);
-      mins = mins >= 30 ? 30 : 0;
-      currentValue.set(Calendar.MINUTE, mins);
+      int minutes = currentValue.get(Calendar.MINUTE);
+      minutes = minutes >= 30 ? 30 : 0;
+      currentValue.set(Calendar.MINUTE, minutes);
     }
 
     public Object getValue() {

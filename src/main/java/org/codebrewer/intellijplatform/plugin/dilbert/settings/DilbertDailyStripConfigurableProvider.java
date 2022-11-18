@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016, 2018 Mark Scott
+ *  Copyright 2016, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.codebrewer.intellijplatform.plugin.dilbert.settings;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.options.Configurable;
 import com.intellij.openapi.options.ConfigurableProvider;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -35,6 +35,6 @@ public class DilbertDailyStripConfigurableProvider extends ConfigurableProvider 
   @Nullable
   @Override
   public Configurable createConfigurable() {
-    return ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
+    return ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
   }
 }

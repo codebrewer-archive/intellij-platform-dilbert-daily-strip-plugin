@@ -13,7 +13,7 @@ data class PropertiesVersion(val properties: Properties) {
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.9.0"
+    id("org.jetbrains.intellij") version "1.10.0"
 }
 
 group = "org.codebrewer"
@@ -28,7 +28,7 @@ dependencies {
 
 intellij {
     pluginName.set("DilbertDailyStrip")
-    version.set("2022.2.3")
+    version.set("223-EAP-SNAPSHOT")
     type.set("IC")
 }
 
@@ -36,7 +36,6 @@ tasks {
     register("updateBuildData") {
         doFirst {
             ant.withGroovyBuilder {
-                "echo"("message" to "Hello from Ant in Gradle")
                 "propertyfile"("file" to "src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties") {
                     "entry"("key" to "build.number", "type" to "int", "default" to "1", "operation" to "+")
                     "entry"("key" to "build.date", "type" to "date", "value" to "now", "pattern" to "MMMM d, yyyy")
@@ -48,13 +47,13 @@ tasks {
     findByName("patchPluginXml")?.dependsOn("updateBuildData")
 
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 
     patchPluginXml {
-        sinceBuild.set("221.*")
-        untilBuild.set("222.*")
+        sinceBuild.set("223")
+        untilBuild.set("")
 
         val buildProperties = Properties()
         buildProperties.load(file("src/main/resources/org/codebrewer/intellijplatform/plugin/dilbert/build/build.properties").inputStream())

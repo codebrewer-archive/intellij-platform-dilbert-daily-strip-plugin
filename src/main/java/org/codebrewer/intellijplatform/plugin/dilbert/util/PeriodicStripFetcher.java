@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007, 2008, 2018 Mark Scott
+ *  Copyright 2007, 2008, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,15 +18,18 @@ package org.codebrewer.intellijplatform.plugin.dilbert.util;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripEvent;
 import org.codebrewer.intellijplatform.plugin.dilbert.DailyStripListener;
 import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStrip;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
+import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPluginService;
 import org.codebrewer.intellijplatform.plugin.dilbert.settings.UnattendedDownloadSettings;
 
 /**
@@ -38,7 +41,21 @@ public final class PeriodicStripFetcher {
   /**
    * For logging messages to IDEA's log.
    */
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
+  private static final Logger LOGGER =
+      Logger.getInstance(DilbertDailyStripPluginService.class.getName());
+
+  /**
+   * Interval - in minutes - at which the plug-in will check whether it's time
+   * to schedule the fetching of the daily strip.
+   */
+  private static final int STRIP_FETCH_DUE_CHECK_INTERVAL_MINUTES = 10;
+
+  /**
+   * Interval - in minutes - at which the plug-in will check whether it's time
+   * to schedule the fetching of the daily strip, as a {@code Duration}.
+   */
+  private static final Duration STRIP_FETCH_DUE_CHECK_INTERVAL =
+      Duration.of(STRIP_FETCH_DUE_CHECK_INTERVAL_MINUTES, ChronoUnit.MINUTES);
 
   /**
    * Gets the number of milliseconds to wait until the next strip download is
@@ -79,10 +96,22 @@ public final class PeriodicStripFetcher {
     return nextDownloadTime.getTimeInMillis() - now;
   }
 
-  /**
-   * Used to schedule daily fetching of the strip.
-   */
-  private Timer timer;
+  private ScheduledFuture<?> dailyCheckFuture;
+  private ScheduledFuture<?> dailyFetchFuture;
+
+  private void cancelPeriodicTasks() {
+    if (dailyCheckFuture == null) {
+      LOGGER.info("No need to cancel daily check task");
+    } else {
+      LOGGER.info("Canceled daily check task: " + dailyCheckFuture.cancel(true));
+    }
+
+    if (dailyFetchFuture == null) {
+      LOGGER.info("No need to cancel daily fetch task");
+    } else {
+      LOGGER.info("Canceled daily fetch task: " + dailyFetchFuture.cancel(true));
+    }
+  }
 
   /**
    * Starts fetching daily strips once per day at the given number of minutes
@@ -95,55 +124,56 @@ public final class PeriodicStripFetcher {
    */
   public void startPeriodicFetching(final UnattendedDownloadSettings settings) {
     Objects.requireNonNull(settings);
-
-    if (timer != null) {
-      timer.cancel();
-    }
+    cancelPeriodicTasks();
 
     if (settings.isFetchStripAutomatically()) {
-      final long delay = getDelayBeforeNextDownload(settings.getLocalDownloadTime());
-      final int fetchInterval = settings.getFetchInterval();
-      final int maxFetchAttempts = settings.getMaxFetchAttempts();
+      LOGGER.info("Automatic strip fetching is enabled");
 
-      timer = new Timer(true);
-      LOGGER.info(
-          MessageFormat.format("The next download is scheduled to occur in {0}ms", delay));
-      timer.scheduleAtFixedRate(new TimerTask() {
-        public void run() {
-          LOGGER.info("It's time to see if there's a new Dilbert strip available..."); // NON-NLS
-          timer.schedule(new SelfCancellingStripFetcherTask(maxFetchAttempts),
-              0,
-              new Integer(TimeUtils.MILLIS_PER_MINUTE * fetchInterval).longValue());
-        }
-      }, delay, TimeUtils.MILLIS_PER_DAY);
+      dailyCheckFuture =
+          AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(() -> {
+            final long initialDelay = getDelayBeforeNextDownload(settings.getLocalDownloadTime());
+
+            LOGGER.info(
+                MessageFormat.format(
+                    "The next download is scheduled to occur in {0}ms", initialDelay));
+
+            if (initialDelay < STRIP_FETCH_DUE_CHECK_INTERVAL.toMillis()) {
+              LOGGER.info("Scheduling download attempt...");
+              dailyFetchFuture =
+                  AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(
+                      new SelfCancellingStripFetcherTask(settings.getMaxFetchAttempts()),
+                      initialDelay,
+                      Duration.ofMinutes(settings.getFetchInterval()).toMillis(),
+                      TimeUnit.MILLISECONDS);
+            }
+          }, 0, STRIP_FETCH_DUE_CHECK_INTERVAL.toMinutes(), TimeUnit.MINUTES);
+    } else {
+      LOGGER.info("Automatic strip fetching is not enabled");
     }
   }
 
   public void stopPeriodicFetching() {
-    if (timer != null) {
-      timer.cancel();
-    }
+    cancelPeriodicTasks();
   }
 
   /**
-   * A {@link TimerTask TimerTask} that will request fetching of the current
-   * daily strip a limited number of times, cancelling itself if the strip is
-   * fetched before the limit is reached.
+   * A task that will request fetching of the current daily strip a limited
+   * number of times, cancelling itself if the strip is fetched before the
+   * limit is reached.
    */
-  private static class SelfCancellingStripFetcherTask extends TimerTask
-      implements DailyStripListener {
-    // The maximum number of times this TimerTask will permit its run() method
-    // to be invoked
+  private class SelfCancellingStripFetcherTask implements DailyStripListener, Runnable {
+    // The maximum number of times this task will permit its run() method to be
+    // invoked
     //
     private final int runLimit;
 
-    // The remaining number of times this timer will run
+    // The remaining number of times this task has run
     //
-    private int timeToLive;
+    private int runCount;
 
     // The object that can retrieve a daily strip
     //
-    private final DilbertDailyStripPlugin dilbertPlugin;
+    private final DilbertDailyStripPluginService dilbertPluginService;
 
     /**
      * Creates a task that will run at most <code>runLimit</code> times.
@@ -154,35 +184,33 @@ public final class PeriodicStripFetcher {
       assert runLimit > 0;
 
       this.runLimit = runLimit;
-      timeToLive = runLimit;
-      dilbertPlugin =
-          ApplicationManager.getApplication().getComponent(DilbertDailyStripPlugin.class);
-      dilbertPlugin.addDailyStripListener(this);
+      runCount = 0;
+      dilbertPluginService =
+          ApplicationManager.getApplication().getService(DilbertDailyStripPluginService.class);
     }
 
-    public boolean cancel() {
-      dilbertPlugin.removeDailyStripListener(this);
-
-      return super.cancel();
+    private void cancel() {
+      dilbertPluginService.removeDailyStripListener(this);
+      dailyFetchFuture.cancel(true);
     }
 
     public void run() {
-      --timeToLive;
+      dilbertPluginService.addDailyStripListener(this);
 
-      if (timeToLive >= 0) {
-        LOGGER.debug(
-            MessageFormat.format(
-                "Making fetch attempt number {0}", runLimit - timeToLive));
+      if (runCount < runLimit) {
+        runCount += 1;
+        LOGGER.info(
+            MessageFormat.format("Making fetch attempt number {0}", runCount));
 
-        final DilbertDailyStrip dilbertDailyStrip = dilbertPlugin.getCachedDailyStrip();
+        final DilbertDailyStrip dilbertDailyStrip = dilbertPluginService.getCachedDailyStrip();
 
         if (dilbertDailyStrip == null) {
-          dilbertPlugin.fetchDailyStrip();
+          dilbertPluginService.fetchDailyStrip();
         } else {
-          dilbertPlugin.fetchDailyStrip(dilbertDailyStrip.getImageChecksum());
+          dilbertPluginService.fetchDailyStrip(dilbertDailyStrip.getImageChecksum());
         }
       } else {
-        LOGGER.debug("Cancelling fetches because TTL reached zero"); // NON-NLS
+        LOGGER.info("Cancelling fetches because run limit reached");
         cancel();
       }
     }
@@ -191,7 +219,7 @@ public final class PeriodicStripFetcher {
 
     public void dailyStripUpdated(final DailyStripEvent e) {
       if (e == null) {
-        LOGGER.info("Listener received null DailyStripEvent!"); // NON-NLS
+        LOGGER.info("Listener received null DailyStripEvent!");
       } else {
         final DilbertDailyStrip newDailyStrip = e.getDilbertDailyStrip();
 
@@ -201,13 +229,14 @@ public final class PeriodicStripFetcher {
         //
         if (newDailyStrip != null && !newDailyStrip.equals(DilbertDailyStrip.MISSING_STRIP)) {
           cancel();
-          LOGGER.debug(
+          LOGGER.info(
               MessageFormat.format(
-                  "Got daily strip with last modified time of {0}",
-                  newDailyStrip.getRetrievalTime()));
-          LOGGER.debug(MessageFormat.format("Cancelled fetches with TTL = {0}", timeToLive));
+                  "Got daily strip with homepage ETag {0}",
+                  newDailyStrip.getImageChecksum()));
+          LOGGER.info(
+              MessageFormat.format("Cancelled fetches after successful fetch #", runCount));
         } else {
-          LOGGER.info("PeriodicStripFetcher got null daily strip"); // NON-NLS
+          LOGGER.info("PeriodicStripFetcher got null daily strip");
         }
       }
     }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2007, 2018 Mark Scott
+ *  Copyright 2005, 2007, 2018, 2022 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,40 +16,26 @@
 
 package org.codebrewer.intellijplatform.plugin.dilbert.settings;
 
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.JDOMExternalizable;
-import com.intellij.openapi.util.JDOMExternalizer;
-import org.codebrewer.intellijplatform.plugin.dilbert.DilbertDailyStripPlugin;
-import org.jdom.Element;
-
 /**
  * <p>
- * Encapsulates the user-specified settings for the plugin and permits their
- * persistence by implementing {@link JDOMExternalizable}.  The settings are
+ * Encapsulates the user-specified settings for the plugin. The settings are
  * applied to all open projects.
  * </p>
  *
  * @author Mark Scott
  */
-public final class ApplicationSettings implements JDOMExternalizable {
-  private static final Logger LOGGER = Logger.getInstance(DilbertDailyStripPlugin.class.getName());
-  private static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
-  private static final String DISCLAIMER_ACKNOWLEDGED_KEY = "disclaimerAcknowledged";
+public final class ApplicationSettings {
+  static final boolean DEFAULT_DISCLAIMER_ACKNOWLEDGED = false;
 
   /**
    * Has the plugin's disclaimer been acknowledged?
    */
-  private boolean disclaimerAcknowledged;
+  private final boolean disclaimerAcknowledged;
 
   /**
    * Settings to control unattended downloading of strips.
    */
-  private UnattendedDownloadSettings unattendedDownloadSettings;
-
-  /**
-   * The key used when persisting unattended download settings.
-   */
-  private static final String DOWNLOAD_SETTINGS_PROVIDER_KEY = "downloads";
+  private final UnattendedDownloadSettings unattendedDownloadSettings;
 
   /**
    * Default constructor that creates an instance having the disclaimer
@@ -86,7 +72,7 @@ public final class ApplicationSettings implements JDOMExternalizable {
   }
 
   /**
-   * Indicates whether or not the user has acknowledged the plugin's disclaimer.
+   * Indicates whether the user has acknowledged the plugin's disclaimer.
    *
    * @return <code>true</code> if the user has acknowledged the plugin's
    * disclaimer, <code>false</code> if not.
@@ -121,28 +107,5 @@ public final class ApplicationSettings implements JDOMExternalizable {
     result = 31 * result + unattendedDownloadSettings.hashCode();
 
     return result;
-  }
-
-  // Implement JDOMExternalizable
-
-  public void readExternal(final Element element) {
-    LOGGER.debug("reading application settings"); // NON-NLS
-    disclaimerAcknowledged = JDOMExternalizer.readBoolean(element, DISCLAIMER_ACKNOWLEDGED_KEY);
-
-    final Element downloadsElement = element.getChild(DOWNLOAD_SETTINGS_PROVIDER_KEY);
-
-    if (downloadsElement != null) {
-      unattendedDownloadSettings.readExternal(downloadsElement);
-    }
-  }
-
-  public void writeExternal(final Element element) {
-    LOGGER.debug("writing application settings"); // NON-NLS
-    JDOMExternalizer.write(element, DISCLAIMER_ACKNOWLEDGED_KEY, disclaimerAcknowledged);
-
-    final Element downloadsElement = new Element(DOWNLOAD_SETTINGS_PROVIDER_KEY);
-
-    unattendedDownloadSettings.writeExternal(downloadsElement);
-    element.addContent(downloadsElement);
   }
 }
