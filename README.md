@@ -5,7 +5,7 @@
 ## About
 
 Displays the cartoon strip of the day from the dilbert.com website in a
-toolwindow in products based on the IntelliJ Platform (such as IntelliJ IDEA,
+tool window in products based on the IntelliJ Platform (such as IntelliJ IDEA,
 AppCode and CLion).
 
 ## History
@@ -14,7 +14,7 @@ The plugin was first released in 2005 and has periodically been updated to keep
 pace with changes to the IntelliJ Platform. There was a time when there was
 thought of supporting other cartoon sources and being able to display more than
 just the current strip (_e.g._ the previous day's strip or a weekly digest
-or...). As a result, the source code is _way_ over engineered for what it
+or...). As a result, the source code is _way_ over-engineered for what it
 actually does - a good example of violating the
 [YAGNI](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it) principle.
 Updates often start with _"WTF was I **thinking**?!"_ as I try to get my head
@@ -31,9 +31,11 @@ GitHub are slim.
 
 ## Requirements
 
-The plugin's build script (see [build.gradle](build.gradle)) declares a
-requirement for IntelliJ IDEA 2016.3 (corresponding to build 163.7743) and the
-source uses `java.time` APIs introduced in Java 8.
+The plugin's build script (see [build.gradle.kts](build.gradle.kts)) declares a
+requirement for IntelliJ IDEA 2023-EAP-SNAPSHOT (corresponding approximately to
+build IC-223.7571.58 as of the plugin version 1.10 release) and the source code
+is compiled for Java 17, per JetBrains requirements for a plugin targeting
+2022.2 or later.
 
 ## Installation
 
