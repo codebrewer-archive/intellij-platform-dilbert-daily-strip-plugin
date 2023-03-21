@@ -13,7 +13,7 @@ data class PropertiesVersion(val properties: Properties) {
 
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.10.0"
+    id("org.jetbrains.intellij") version "1.13.2"
 }
 
 group = "org.codebrewer"
@@ -23,12 +23,12 @@ repositories {
 }
 
 dependencies {
-    implementation("org.codebrewer.intellij.platform:intellij-platform-plugin-utilities:1.0.2")
+    implementation("org.codebrewer.intellij.platform:intellij-platform-plugin-utilities:1.0.3")
 }
 
 intellij {
     pluginName.set("DilbertDailyStrip")
-    version.set("223-EAP-SNAPSHOT")
+    version.set("223.8836.41")
     type.set("IC")
 }
 

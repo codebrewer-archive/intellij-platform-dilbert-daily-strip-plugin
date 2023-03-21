@@ -2,15 +2,20 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+## Attention!
+
+**This plugin no longer works and is archived.**
+
 ## About
 
-Displays the cartoon strip of the day from the dilbert.com website in a
+_Used_ to display the cartoon strip of the day from the dilbert.com website in a
 tool window in products based on the IntelliJ Platform (such as IntelliJ IDEA,
-AppCode and CLion).
+AppCode and CLion). Stopped working in March 2023 when the cartoon strip's
+author changed how the strip is made available.
 
 ## History
 
-The plugin was first released in 2005 and has periodically been updated to keep
+The plugin was first released in 2005 and was periodically updated to keep
 pace with changes to the IntelliJ Platform. There was a time when there was
 thought of supporting other cartoon sources and being able to display more than
 just the current strip (_e.g._ the previous day's strip or a weekly digest
@@ -32,8 +37,8 @@ GitHub are slim.
 ## Requirements
 
 The plugin's build script (see [build.gradle.kts](build.gradle.kts)) declares a
-requirement for IntelliJ IDEA 2023-EAP-SNAPSHOT (corresponding approximately to
-build IC-223.7571.58 as of the plugin version 1.10 release) and the source code
+requirement for IntelliJ IDEA 223.8836.41 Community Edition (corresponding to
+build IC-223.8836.41 as of the plugin version 2.0.0 release) and the source code
 is compiled for Java 17, per JetBrains requirements for a plugin targeting
 2022.2 or later.
 
@@ -42,10 +47,15 @@ is compiled for Java 17, per JetBrains requirements for a plugin targeting
 Pre-built binary distributions of the plugin are hosted in the JetBrains
 [plugin repository](https://plugins.jetbrains.com/plugin/36-dilbert-daily-strip)
 and the latest version can be installed directly from within an IntelliJ
-Platform product. Alternatively, follow the instructions below to build from
+Platform product (but the plugin may have been removed by the time you are
+reading this). Alternatively, follow the instructions below to build from
 source.
 
 ## Building
+
+Note: you probably want to branch from the `1.10.1` tag since `master` now
+contains a stripped-down plugin that displays only a warning message that strips
+can no longer be fetched.
 
 The plugin can be built with Gradle and the JetBrains
 [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin):
