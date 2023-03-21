@@ -1,11 +1,17 @@
 <idea-plugin url="https://github.com/codebrewer/intellij-platform-dilbert-daily-strip-plugin">
   <name>Dilbert Daily Strip</name>
   <id>Dilbert</id>
-  <description>Displays the cartoon strip of the day from the dilbert.com website.</description>
+  <description><![CDATA[Used to display the cartoon strip of the day from the dilbert.com website
+  <b>but no longer works and will be removed from the marketplace soon</b>.<br><br>
+  Updated only to inform existing users that changes to the dilbert.com website in March 2023 will not be addressed.]]></description>
   <version>0</version>
   <vendor email="mark@codebrewer.org" url="https://github.com/codebrewer">Codebrewer</vendor>
   <change-notes>
-    <![CDATA[<b>Version 1.10.0</b>
+    <![CDATA[<b>Version 2.0.0</b>
+<ul>
+<li>Notice: The plug-in no longer works due to changes to how the Dilbert Daily Strip is published.</li>
+</ul>
+<b>Version 1.10.0</b>
 <ul>
 <li>Fix: An exception preventing the strip from being fetched in 2022.3 EAP versions of IntelliJ Platform products has been resolved.</li>
 <li>Fix: Plug-in tool window keyboard actions now work again.</li>
