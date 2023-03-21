@@ -1,5 +1,5 @@
 /*
- *  Copyright 2005, 2018 Mark Scott
+ *  Copyright 2005, 2018, 2023 Mark Scott
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -114,18 +114,6 @@ public final class VersionInfo {
     return (Integer) BUILD_PROPERTIES_MAP.get(BUILD_VERSION_REVISION_KEY);
   }
 
-  /**
-   * Gets the plugin's version information in an aggregate form by combining
-   * major, minor, revision and build numbers into a period-separated string.
-   *
-   * @return an aggregate form of the plugin's version information.
-   */
-  public static String getVersionString() {
-    return String.format(
-        "%d.%d.%d.%d", getVersionMajor(), getVersionMinor(), getVersionRevision(),
-        getBuildNumber());
-  }
-
   private static void loadBuildInfo() {
     final InputStream is = VersionInfo.class.getResourceAsStream(BUILD_PROPERTIES_FILE);
 
@@ -133,15 +121,15 @@ public final class VersionInfo {
       try {
         BUILD_PROPERTIES.load(is);
         final String defaultValue = "";
-        final Integer missingValue = 0;
+        final int missingValue = 0;
 
         // Iterate over the 4 integers that comprise the version number.
         //
         for (String key : BUILD_PROPERTIES_MAP.keySet()) {
           final Integer value =
               getIntegerOrDefaultValue(
-                  BUILD_PROPERTIES.getProperty(key, defaultValue),
-                  missingValue);
+                  BUILD_PROPERTIES.getProperty(key, defaultValue)
+              );
           BUILD_PROPERTIES_MAP.put(key, value);
         }
 
@@ -160,12 +148,12 @@ public final class VersionInfo {
     }
   }
 
-  private static int getIntegerOrDefaultValue(final String s, int defaultValue) {
+  private static int getIntegerOrDefaultValue(final String s) {
     try {
       return Integer.parseInt(s);
     } catch (NumberFormatException nfe) {
       LOGGER.error("Couldn't parse int from " + s);
-      return defaultValue;
+      return 0;
     }
   }
 
